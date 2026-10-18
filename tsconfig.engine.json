@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "lib": ["ES2022"],
+    "types": [],
+    "composite": false
+  },
+  "include": ["src/game/**/*.ts"],
+  "exclude": ["src/game/**/*.test.ts"]
+}
