@@ -28,6 +28,7 @@ import {
 } from "./presentation";
 import { Result } from "./Result";
 import { Setup } from "./Setup";
+import { ThemeToggle } from "./ThemeToggle";
 
 function initialDraft(session: GameSession): TurnDraft | null {
   return session.state.phase === "turn" ? beginTurn(session.state) : null;
@@ -88,11 +89,14 @@ export function App({ initialSession }: { initialSession?: GameSession }) {
           <span aria-hidden="true">♜</span> THE KING IS DEAD
         </a>
         <span className="edition">PROJECT RULESET · 2–3 PLAYERS</span>
-        {session && (
-          <button className="quiet" onClick={() => setConfirmNew(true)}>
-            New game
-          </button>
-        )}
+        <div className="header-actions">
+          <ThemeToggle />
+          {session && (
+            <button className="quiet" onClick={() => setConfirmNew(true)}>
+              New game
+            </button>
+          )}
+        </div>
       </header>
       {confirmNew && (
         <LeaveDialog

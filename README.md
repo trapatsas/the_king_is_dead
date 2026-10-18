@@ -39,6 +39,11 @@ planned UI test dependencies: jsdom, React Testing Library, and user-event.
 
 ## Play locally
 
+Use **Dark mode** in the header to switch from parchment to a dark green palette;
+**Light mode** switches back. On narrow screens, use the moon/sun button. Your
+appearance preference is remembered on this browser. You can switch at any point
+without resetting the game or your current draft. Light is the default.
+
 Choose Standard, two or three Human seats, and optionally a setup seed. Pass the
 device to the named player and reveal their hand. Choose a card, follow its
 legal effect choices, confirm the effect, and summon a follower. The board and

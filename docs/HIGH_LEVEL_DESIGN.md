@@ -5,6 +5,8 @@ The completed-game UI also offers a chronological log of accepted setup, turns,
 struggles, and scoring. Its dedicated projection is available only after final
 scoring and includes historical played actions while excluding setup hands,
 unplayed cards, and undealt Cunning cards.
+Light/dark appearance uses shared CSS tokens and a header toggle, with only the
+theme preference saved locally; committed games still await M6 persistence.
 **Authority:** `the_king_is_dead_2nd_edition_rulebook.md` (user-supplied Project Ruleset — 2–3 Players).
 
 **Stack:** React, TypeScript, Vite, Vitest; no backend for the first version.

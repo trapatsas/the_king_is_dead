@@ -471,3 +471,44 @@ refresh until the planned persistence work.
 
 **Next milestone remains:** Milestone 6 — controllers, observations, save/resume,
 and validated replay.
+
+## Light and dark appearance — Milestone 5 follow-up
+
+**Implemented 2026-10-18:** a persistent Light/Dark mode control in the header,
+available during setup, play, and after the final result. Narrow screens use an
+accessible moon/sun icon button. Light remains the default parchment style;
+dark uses deep green surfaces, warm gold accents, and brighter faction colors.
+Shared CSS variables cover the board/SVG, controls, cards, previews, courts,
+notices, dialogs, results, and completed-game log. Native controls follow the
+selected color scheme, and the browser theme-color metadata updates with it.
+
+`localStorage` remembers only the appearance preference, under
+`king-is-dead:theme`. Initialization applies it before React mounts. Missing or
+invalid preferences fall back to light; blocked/full storage does not prevent
+changing the current appearance or using the game. Switching palettes preserves
+the active player, private hand, and in-progress draft. Games still are not
+saved; game persistence remains Milestone 6.
+
+**Files:** added `src/ui/theme.ts`, `ThemeToggle.tsx`, `themes.css`, and
+`theme.test.tsx`; updated `main.tsx`, the App header, shared styles, README,
+design, and this report. No new dependencies, rules, engine/schema, or log
+changes.
+
+**Verification:** four new tests cover persisted selection/restoring light,
+invalid preference fallback, blocked storage reads/writes, and switching palettes
+without losing an active hand/draft or interrupting the next handoff. All
+**294 tests across 17 files pass**. Typecheck, lint, formatting, and production
+build pass.
+
+Real Chromium verified keyboard switching, both saved palettes on reload, a
+complete three-player game with a card action and subsequent passes, preserved
+drafts, private handoff, dialogs, final result, and expanded game log. Desktop,
+320px, and 390px layouts have no horizontal overflow. Setup, board, mobile,
+dialog, result, and log screenshots were inspected. Eight representative dark
+text/background combinations exceeded 4.5:1 contrast, including selected-card
+help (5.04:1), preview hints, primary controls, and all three faction counters.
+No uncaught browser errors occurred. Physical-device/host forwarding remains
+unverified; the selected palette was tested in headless Chromium.
+
+**Next milestone remains:** Milestone 6 — controllers, observations, save/resume,
+and validated replay.
