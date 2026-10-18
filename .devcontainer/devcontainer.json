@@ -1,92 +1,88 @@
 {
-    "name": "KingIsDead",
-    "image": "mcr.microsoft.com/devcontainers/typescript-node:5-24-bookworm",
-    "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
-    // Features add common tools (git, etc.) without cluttering the Dockerfile/image
-    "features": {},
-    // VS Code specific settings and extensions
-    "customizations": {
-        "vscode": {
-            "settings": {
-                "files.eol": "\n",
-                "files.insertFinalNewline": true,
-                "files.trimTrailingWhitespace": true,
-                "editor.formatOnSave": true,
-                "editor.defaultFormatter": "esbenp.prettier-vscode",
-                "editor.codeActionsOnSave": {
-                    "source.fixAll.oxc": "explicit"
-                },
-                "js/ts.tsdk.path": "node_modules/typescript/lib",
-                "editor.bracketPairColorization.enabled": true,
-                "editor.fontFamily": "Hack, Source Code Pro, Consolas, monospace", // https://github.com/source-foundry/Hack, https://github.com/adobe-fonts/source-code-pro
-                "editor.fontSize": 16,
-                "editor.minimap.enabled": false,
-                "editor.rulers": [
-                    120
-                ],
-                "editor.wordWrap": "on",
-                "editor.quickSuggestions": {
-                    "strings": true
-                },
-                "terminal.integrated.fontSize": 14,
-                "workbench.editorLargeFileConfirmation": 5,
-                "[markdown]": {
-                    "editor.wordWrap": "wordWrapColumn"
-                }
-            },
-            "extensions": [
-                // Formatting & linting (Oxc for lint, Prettier for format)
-                "oxc.oxc-vscode",
-                "esbenp.prettier-vscode",
-                "EditorConfig.EditorConfig",
-                // Testing (run engine tests from the sidebar)
-                "vitest.explorer",
-                // TS / React / CSS helpers
-                "bradlc.vscode-tailwindcss",
-                "usernamehw.errorlens",
-                "christian-kohler.path-intellisense",
-                "formulahendry.auto-rename-tag",
-                // Git
-                "eamodio.gitlens",
-                "mhutchie.git-graph",
-                // AI
-                "openai.chatgpt",
-                // Markdown
-                "yzhang.markdown-all-in-one",
-                "bierner.markdown-mermaid",
-                "inferrinizzard.prettier-sql-vscode" // Only if you format SQL
-            ]
+  "name": "KingIsDead",
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:5-24-bookworm",
+  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+  // Features add common tools (git, etc.) without cluttering the Dockerfile/image
+  "features": {},
+  // VS Code specific settings and extensions
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "files.eol": "\n",
+        "files.insertFinalNewline": true,
+        "files.trimTrailingWhitespace": true,
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.codeActionsOnSave": {
+          "source.fixAll.oxc": "explicit"
+        },
+        "js/ts.tsdk.path": "node_modules/typescript/lib",
+        "editor.bracketPairColorization.enabled": true,
+        "editor.fontFamily": "Hack, Source Code Pro, Consolas, monospace", // https://github.com/source-foundry/Hack, https://github.com/adobe-fonts/source-code-pro
+        "editor.fontSize": 16,
+        "editor.minimap.enabled": false,
+        "editor.rulers": [120],
+        "editor.wordWrap": "on",
+        "editor.quickSuggestions": {
+          "strings": true
+        },
+        "terminal.integrated.fontSize": 14,
+        "workbench.editorLargeFileConfirmation": 5,
+        "[markdown]": {
+          "editor.wordWrap": "wordWrapColumn"
         }
-    },
-    // Ports to forward from the container to the host machine
-    "forwardPorts": [
-        5173
-    ],
-    "portsAttributes": {
-        "5173": {
-            "label": "Vite board-game app",
-            "onAutoForward": "openBrowserOnce",
-            "requireLocalPort": true
-        }
-    },
-    // Optional: Set environment variables in the container.
-    "remoteEnv": {
-        "PATH": "/home/node/.local/bin:${containerEnv:PATH}"
-    },
-    // Commands to run after the container is created (runs once)
-    // Create a shell script for more complex setup
-    "postCreateCommand": "sudo mkdir -p node_modules && sudo chown node:node node_modules && if [ -f package-lock.json ]; then npm ci; elif [ -f package.json ]; then npm install; else echo 'No package.json found; skipping npm install'; fi",
-    // Set the user VS Code runs as inside the container
-    "remoteUser": "node",
-    "updateRemoteUserUID": true,
-    // Mount local files/folders into the container
-    "mounts": [
-        "source=${localWorkspaceFolderBasename}-node_modules,target=${containerWorkspaceFolder}/node_modules,type=volume"
-    ],
-    // Optional: Run commands when attaching to an already running container
-    // "postAttachCommand": {
-    //   "server": "echo 'Attached to container!'"
-    // },
-    // Optional: Shutdown action
-    "shutdownAction": "stopContainer"
+      },
+      "extensions": [
+        // Formatting & linting (Oxc for lint, Prettier for format)
+        "oxc.oxc-vscode",
+        "esbenp.prettier-vscode",
+        "EditorConfig.EditorConfig",
+        // Testing (run engine tests from the sidebar)
+        "vitest.explorer",
+        // TS / React / CSS helpers
+        "bradlc.vscode-tailwindcss",
+        "usernamehw.errorlens",
+        "christian-kohler.path-intellisense",
+        "formulahendry.auto-rename-tag",
+        // Git
+        "eamodio.gitlens",
+        "mhutchie.git-graph",
+        // AI
+        "openai.chatgpt",
+        // Markdown
+        "yzhang.markdown-all-in-one",
+        "bierner.markdown-mermaid",
+        "inferrinizzard.prettier-sql-vscode" // Only if you format SQL
+      ]
+    }
+  },
+  // Ports to forward from the container to the host machine
+  "forwardPorts": [5173],
+  "portsAttributes": {
+    "5173": {
+      "label": "Vite board-game app",
+      "onAutoForward": "openBrowserOnce",
+      "requireLocalPort": true
+    }
+  },
+  // Optional: Set environment variables in the container.
+  "remoteEnv": {
+    "PATH": "/home/node/.local/bin:${containerEnv:PATH}"
+  },
+  // Commands to run after the container is created (runs once)
+  // Create a shell script for more complex setup
+  "postCreateCommand": "sudo mkdir -p node_modules && sudo chown node:node node_modules && if [ -f package-lock.json ]; then npm ci; elif [ -f package.json ]; then npm install; else echo 'No package.json found; skipping npm install'; fi",
+  // Set the user VS Code runs as inside the container
+  "remoteUser": "node",
+  "updateRemoteUserUID": true,
+  // Mount local files/folders into the container
+  "mounts": [
+    "source=${localWorkspaceFolderBasename}-node_modules,target=${containerWorkspaceFolder}/node_modules,type=volume"
+  ],
+  // Optional: Run commands when attaching to an already running container
+  // "postAttachCommand": {
+  //   "server": "echo 'Attached to container!'"
+  // },
+  // Optional: Shutdown action
+  "shutdownAction": "stopContainer"
 }
