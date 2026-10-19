@@ -405,6 +405,10 @@ randomness, or an unapproved extra tiebreak.
   prohibited. Moving a previously moved follower again is allowed if the original
   swap is not completely reversed. Compare the swap's transfers independently of
   the subsequent summon. Spy copying Manoeuvre inherits this restriction.
+- **No-op swaps (user-confirmed project interpretation):** a swap that leaves
+  every region's faction counts unchanged, such as Scottish for Scottish, has
+  nothing to undo. It never restricts the next player, who may even repeat it.
+  It is still a card action, so it releases any earlier swap's restriction.
 
 ### Outmanoeuvre
 
@@ -426,6 +430,9 @@ randomness, or an unapproved extra tiebreak.
   full original swap is not reversed. This records the designer clarification
   supplied by the user, with their
   [BoardGameGeek discussion reference](https://boardgamegeek.com/thread/2664247/manoeuvre-and-outmanoeuvre-undo).
+- **No-op swaps:** as for Manoeuvre, a same-faction 1-for-1 Outmanoeuvre that
+  changes no counts imposes no anti-undo restriction. A 1-for-2 swap always
+  changes counts, so it is always protected.
 
 **Copied swaps:** Spy inherits the copied action's anti-undo restriction. Record
 the effective action as Manoeuvre or Outmanoeuvre even though the physical card

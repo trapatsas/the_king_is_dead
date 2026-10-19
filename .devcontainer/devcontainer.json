@@ -40,7 +40,6 @@
         // Testing (run engine tests from the sidebar)
         "vitest.explorer",
         // TS / React / CSS helpers
-        "bradlc.vscode-tailwindcss",
         "usernamehw.errorlens",
         "christian-kohler.path-intellisense",
         "formulahendry.auto-rename-tag",
@@ -51,8 +50,7 @@
         "openai.chatgpt",
         // Markdown
         "yzhang.markdown-all-in-one",
-        "bierner.markdown-mermaid",
-        "inferrinizzard.prettier-sql-vscode" // Only if you format SQL
+        "bierner.markdown-mermaid"
       ]
     }
   },

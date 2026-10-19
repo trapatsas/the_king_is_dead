@@ -28,7 +28,7 @@ import { assertGameInvariants } from "../invariants";
 import { createTurnEngine, turnEngine } from "../turns";
 import { applyEffectOperations } from "./execute";
 import { STANDARD_EFFECTS } from "./standard";
-import { swapTransfers, transferSignature } from "./swaps";
+import { isNoOpSwap, swapTransfers, transferSignature } from "./swaps";
 
 const movement = (
   from: RegionId,
@@ -380,7 +380,7 @@ describe("full-reversal anti-undo", () => {
     ).toBeDefined();
   });
 
-  it("treats same-faction transfers as a real swap when comparing complete reversals", () => {
+  it("lets the next player repeat a no-op same-faction swap, which undoes nothing", () => {
     const initial = withBoard(setupSession(), {
       moray: followers(2),
       strathclyde: followers(2),
@@ -396,14 +396,23 @@ describe("full-reversal anti-undo", () => {
       matching(signature),
       summonDevon,
     );
-    expect(plans(session.state, "manoeuvre")).toMatchObject([
-      { kind: "no-effect" },
-    ]);
-    const next = play(session, "manoeuvre");
-    expect(next.state.lastSwap).toBeNull();
-    expect(next.events.at(-1)).toMatchObject({
-      plan: { effect: { kind: "no-effect" }, summon: { kind: "follower" } },
-    });
+    expect(session.state.lastSwap?.transfers).toEqual(signature);
+    expect(isNoOpSwap(signature)).toBe(true);
+    const options = plans(session.state, "manoeuvre");
+    expect(options).toHaveLength(1);
+    expect(matching(signature)(options)).toBeDefined();
+    const next = play(session, "manoeuvre", matching(signature));
+    expect(next.state.lastSwap?.playerId).toBe(session.state.activePlayerId);
+  });
+
+  it("still forbids reversing a same-faction transfer inside a real 1-for-2 swap", () => {
+    expect(
+      isNoOpSwap([
+        movement("moray", "strathclyde", "scottish"),
+        movement("strathclyde", "moray", "scottish"),
+        movement("strathclyde", "moray", "welsh"),
+      ]),
+    ).toBe(false);
   });
 
   it("filters forbidden full Outmanoeuvre reversals before choosing the achievable partial tier", () => {

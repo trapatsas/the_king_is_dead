@@ -31,6 +31,19 @@ export function swapTransfers(effect: EffectPlan): SwapTransfer[] {
   );
 }
 
+/** True when every region ends with the same faction counts, e.g. a Scottish-
+ * for-Scottish Manoeuvre. Such a swap changed nothing, so nothing can undo it. */
+export function isNoOpSwap(transfers: readonly SwapTransfer[]): boolean {
+  const net = new Map<string, number>();
+  for (const transfer of transfers) {
+    const from = `${transfer.from}/${transfer.faction}`;
+    const to = `${transfer.to}/${transfer.faction}`;
+    net.set(from, (net.get(from) ?? 0) - transfer.count);
+    net.set(to, (net.get(to) ?? 0) + transfer.count);
+  }
+  return [...net.values()].every((difference) => difference === 0);
+}
+
 export function isForbiddenReverse(
   state: GameState,
   actorId: PlayerId,
@@ -40,7 +53,8 @@ export function isForbiddenReverse(
   if (
     last === null ||
     last.playerId === actorId ||
-    last.effectiveCard !== effect.effectiveCard
+    last.effectiveCard !== effect.effectiveCard ||
+    isNoOpSwap(last.transfers)
   )
     return false;
   return (

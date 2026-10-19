@@ -167,7 +167,10 @@ describe("hotseat game UI", () => {
     await user.click(screen.getByText("Reproducible setup"));
     await user.type(screen.getByLabelText("Setup seed"), "ui-seed");
     await user.click(screen.getByRole("button", { name: /Begin game/ }));
-    expect(screen.getByText(/Standard kingdom · seed ui-seed/)).toBeDefined();
+    // The seed could be used to recompute hidden deals, so it stays hidden
+    // until the game is finished.
+    expect(screen.getByText(/^Standard kingdom$/)).toBeDefined();
+    expect(screen.queryByText(/ui-seed/)).toBeNull();
     expect(screen.getAllByRole("button", { name: /^Slot / })).toHaveLength(8);
     expect(screen.queryByRole("button", { name: /^Play / })).toBeNull();
   });
@@ -299,6 +302,7 @@ describe("hotseat game UI", () => {
         await user.click(screen.getByRole("button", { name: "End Turn" }));
       }
       const result = screen.getByRole("region", { name: "Game result" });
+      expect(screen.getByText(/kingdom · seed turn-fixture/)).toBeDefined();
       expect(result.textContent).toContain("Invasion");
       expect(result.textContent).toContain("Draw between");
       expect(

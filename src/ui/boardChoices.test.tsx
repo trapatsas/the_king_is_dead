@@ -8,9 +8,12 @@ import { Game } from "./App";
 import { title } from "./presentation";
 
 afterEach(cleanup);
+// Enabled tokens say "Select …"; disabled ones only report the count.
 const token = (region: RegionId, faction: Faction) =>
   screen.getByRole("button", {
-    name: new RegExp(`^Select ${title(faction)} follower in ${title(region)} `),
+    name: new RegExp(
+      `^(?:Select ${title(faction)} follower in ${title(region)} |${title(faction)} followers in ${title(region)}:)`,
+    ),
   });
 const slot = (region: RegionId) =>
   screen.getByRole("button", {
@@ -114,9 +117,9 @@ describe("direct board choices", () => {
       ).toContain("Summon 1 English from Strathclyde");
       await user.click(screen.getByRole("button", { name: "End Turn" }));
       expect(screen.queryByRole("button", { name: /^Play / })).toBeNull();
-      expect(
-        token("strathclyde", "english").getAttribute("aria-label"),
-      ).toContain("0 available");
+      expect(token("strathclyde", "english").getAttribute("aria-label")).toBe(
+        "English followers in Strathclyde: 0",
+      );
       expect(initial.events).toHaveLength(1);
     },
   );

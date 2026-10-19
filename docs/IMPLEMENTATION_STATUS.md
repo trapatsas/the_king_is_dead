@@ -599,3 +599,66 @@ scrolling to the sidebar, no nested buttons/browser errors, and light/dark
 320px/390px/1280px layouts without horizontal overflow. Board/selection/mobile
 screenshots were inspected. Host port forwarding and physical devices remain
 unverified. The existing development server was reused.
+
+## Review follow-up — privacy, accessibility and robustness
+
+**Implemented 2026-10-19,** after a code review of Milestones 0–5.
+
+**Privacy.** Added `getObservation(state, viewer)` in `src/game/visibility.ts`
+as the single redacted per-seat view for the UI and future bots. It omits other
+hands, buried discards, undealt Cunning cards, and the seed and RNG cursors. The
+seed is disclosed once the game finishes, because in Advanced games it would let
+a viewer recompute the hidden deal. `projectTable` is built on it.
+`useHotseatTurn` is now the only UI code that holds the full session. The
+in-play heading no longer shows the seed. Error text is limited to
+`IllegalTurnError` messages, because invariant messages can name hidden cards.
+
+**Open for Milestones 6–7:** bots also need a redacted event-history view. When
+Advanced setup is enabled, a seed typed by one player would reveal everyone's
+Cunning cards to that player. Generate it privately or hide the field.
+
+**Rules.** A no-op swap (no faction counts change) no longer restricts the next
+player (user-confirmed; recorded in the rulebook and design). Struggles select
+the lowest face-up slot explicitly, not by array order.
+
+**UI.**
+
+- Focus is no longer dropped to `<body>` after a board pick disables the
+  control just used. It moves to the next legal board target without scrolling.
+- Faction counts and instability have accessible names (`role="img"` inside
+  labelled groups).
+- Hand cards expose their rule text as a description.
+- Disabled follower tokens no longer say "Select".
+- The wordmark is no longer a dead link.
+- Cancelling **New game** returns focus to its button.
+- An error boundary restarts the current turn from the latest committed session.
+- Every planner action reports errors through one path, and any successful
+  choice clears a stale error.
+- Games are keyed by a per-start ID, so repeating a seed always starts fresh.
+- The 580-line `Game` was split into `Game.tsx`, `TurnPanels.tsx`,
+  `TablePanels.tsx` and the `useHotseatTurn` hook, with shared pick helpers
+  and memoized projections.
+
+**Other.**
+
+- `endTurn` copies only the commit delta instead of re-serializing the whole
+  history on every turn.
+- Removed two unused Dev Container extension recommendations (Tailwind, SQL
+  formatter) and added `.editorconfig`.
+- Moved the engine/API reference from the README to
+  [ENGINE_API.md](ENGINE_API.md).
+
+**Verification:** typecheck, lint, formatting and production build pass, along
+with **317 tests across 20 files**. New tests cover:
+
+- observations (`visibility.test.ts`)
+- no-op swaps
+- board-pick focus, mutation-checked against the old behavior
+- accessible names
+- dialog focus
+- error-boundary recovery
+- repeated seeds
+
+A 1,500-game randomized engine run (2 and 3 players, about 30,000 card plays)
+finished every game with no errors. Real-browser keyboard and screen-reader
+checks were not repeated for this change (**NOT VERIFIED**).

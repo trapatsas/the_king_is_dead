@@ -155,7 +155,7 @@ probe is `node scripts/explore-bot-moves.mjs`; no playable bot is implemented ye
 **Tasks**
 
 - Implement a shared controller API returning typed legal plans. Start with a seeded legal-random bot; add an inexpensive heuristic bot evaluating court sets/faction support, pending struggles, remaining hand and tempo. Make no claim of expert strength.
-- Build one observation projector shared by human player UI and bots. Bots must not see opponents' hand cards, buried discards or unused Cunning cards.
+- Build one observation projector shared by human player UI and bots. Bots must not see opponents' hand cards, buried discards or unused Cunning cards. _(Done ahead of this milestone: `getObservation` in `src/game/visibility.ts`, already used by the UI. Bots still need a redacted event-history view.)_
 - Add typed committed event records containing selected card, effective action, copied source, ordered transfers, disc, summon/zero reason, power struggles, Plot choice, and resulting scoring outcome.
 - Implement versioned save/resume (`localStorage` plus optional Export/Import JSON) with canonical committed state, full event log and RNG state; validate schema and invariants on load.
 - Implement replay from original setup event and accepted moves, compare reconstructed state to saved state. Explicitly surface corruption or incompatible versions.

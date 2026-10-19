@@ -203,6 +203,7 @@ Concrete names can differ. Each legal effect plan should be a **canonical, struc
 - Summon exactly one follower from an _uncontrolled region_ after the effect, or record **zero with reason** if every unresolved region is empty. Never summon from supply.
 - Use faction-count transfers, not artificial identities for physically indistinguishable cubes. A full reverse swap is compared using transfer multisets, **separate from the later summon**.
 - Track last relevant swap's **effective** card (`Manoeuvre`/`Outmanoeuvre`) and actor. The prohibition persists over passes and summoning, and ends after any other committed card action. Spy copying a swap obeys the same restriction.
+- A **no-op swap** (every region's faction counts unchanged, e.g. Scottish for Scottish) has nothing to undo and imposes no restriction (user-confirmed). It still counts as a card action and replaces the swap memory.
 - Negotiate operates on eligible face-up unmarked _region cards_. The actor's disc is spent on first use (whether Spy or ordinary Negotiate). A later Negotiate effect swaps cards without producing a new disc.
 
 Keep generation manageable through counts, canonical sorting/deduplication of equivalent plans, staged choices in the UI, and memoized observations; don't enumerate individual indistinguishable cube identities. Verify any pruning preserves completeness of highest-tier legal options.
@@ -276,6 +277,7 @@ interface GameControllerAdapter {
 
 - The app orchestrator controls **when** each controller may move; the engine always checks the submitted plan.
 - Bot observations must include only publicly visible information and their **own** hand/discards. Other hands, buried discards and undealt Cunning cards are hidden. Likewise, the display must not leak them through tooltips or logs.
+- **Implemented:** `getObservation(state, viewer | null)` in `src/game/visibility.ts` is the single redaction point. It returns a frozen copy with public table data, hand/discard counts, public discard tops, the publicly witnessed last swap and, for the viewer only, their own hand and discard pile. It also withholds the setup seed and RNG cursors until the game is finished, because they would let a viewer recompute hidden deals. The UI's `projectTable` is built on it, and bots must use it too. Displayed error text is limited to player-facing `IllegalTurnError` messages, because invariant messages can name hidden cards.
 - Implement a deterministic baseline bot (seeded/random legal choices) and a heuristic bot (simple region-control, court influence, timing/hand-cost priorities). Strength is secondary to correctness.
 - LLM adapter: define a serializable observation/decision schema; implement a scripted/deterministic mock and clear `NotConfigured` state. **No API keys, provider SDK, or network calls in v1.** Never silently fall back to the heuristic bot if LLM is selected but unconfigured.
 - For multiple local human players, use a handoff privacy curtain that hides prior player's cards before revealing next player's hand. This is a UX/privacy choice, not a new game rule.

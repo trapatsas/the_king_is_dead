@@ -24,11 +24,12 @@ export function Followers({
   label: string;
 }) {
   return (
-    <span className="followers" aria-label={label}>
+    <span className="followers" role="group" aria-label={label}>
       {FACTIONS.map((faction) => (
         <span
           className={`follower ${faction}`}
           key={faction}
+          role="img"
           aria-label={`${title(faction)} ${counts[faction]}`}
         >
           <span aria-hidden="true">{FACTION_MARKS[faction]}</span>{" "}
@@ -139,6 +140,7 @@ export function Board({
               {region.control.kind === "unresolved" ? (
                 <span
                   className="followers region-followers"
+                  role="group"
                   aria-label={`${title(id)} followers`}
                 >
                   {FACTIONS.map((faction) => {
@@ -157,7 +159,11 @@ export function Board({
                         className={`follower follower-token ${faction} ${allowed ? "follower-eligible" : ""} ${selected ? "follower-selected" : ""}`}
                         disabled={onFollower === null || !allowed}
                         onClick={() => onFollower?.({ regionId: id, faction })}
-                        aria-label={`Select ${title(faction)} follower in ${title(id)} (${count} available${selected ? `, ${selected} selected` : ""})`}
+                        aria-label={
+                          allowed && onFollower !== null
+                            ? `Select ${title(faction)} follower in ${title(id)} (${count} available${selected ? `, ${selected} selected` : ""})`
+                            : `${title(faction)} followers in ${title(id)}: ${count}${selected ? `, ${selected} selected` : ""}`
+                        }
                         title={`${title(faction)} followers: ${count}. Select one per click.`}
                       >
                         <span className="pawn" aria-hidden="true">

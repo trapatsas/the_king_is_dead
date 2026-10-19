@@ -24,13 +24,18 @@ function assertSessionCursor(session: GameSession): void {
   }
 }
 
+/** Copy only the new delta; accepted history is already a frozen snapshot, so
+ * each commit costs O(delta) rather than re-serializing the whole game. */
 function appendCommit(session: GameSession, result: CommitResult): GameSession {
-  return freezeSnapshot(
-    copyChoice({
-      state: result.state,
-      events: [...session.events, ...result.events],
-    }),
+  const accepted = copyChoice(result);
+  // Frozen events are engine snapshots; copy anything else so callers stay unfrozen.
+  const history = session.events.map((event) =>
+    Object.isFrozen(event) ? event : copyChoice(event),
   );
+  return freezeSnapshot({
+    state: accepted.state,
+    events: [...history, ...accepted.events],
+  });
 }
 
 export function endTurn(

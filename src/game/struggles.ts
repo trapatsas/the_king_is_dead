@@ -1,5 +1,10 @@
 import { FACTIONS, emptyFactionCounts } from "./domain";
-import type { FactionCounts, GameState, RegionControl } from "./domain";
+import type {
+  FactionCounts,
+  GameState,
+  RegionCardSlot,
+  RegionControl,
+} from "./domain";
 import type {
   CommitResult,
   GameEndTriggeredEvent,
@@ -33,7 +38,12 @@ export function resolveNextStruggle(
       "A struggle requires all players to pass consecutively",
     );
   }
-  const card = state.regionCards.find((candidate) => candidate.faceUp);
+  // Lowest-numbered face-up slot, independent of the array's storage order.
+  let card: RegionCardSlot | undefined;
+  for (const candidate of state.regionCards) {
+    if (candidate.faceUp && (card === undefined || candidate.slot < card.slot))
+      card = candidate;
+  }
   if (card === undefined)
     throw new IllegalTurnError("No unresolved region remains");
   const region = state.regions[card.regionId];

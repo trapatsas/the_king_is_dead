@@ -2,6 +2,7 @@ import { FACTIONS } from "../game/domain";
 import type { CardType, GameState, PlayerId, RegionId } from "../game/domain";
 import type { AcceptedEvent } from "../game/events";
 import type { EffectOperation, EffectPlan } from "../game/turnTypes";
+import { getObservation } from "../game/visibility";
 
 export function title(value: string): string {
   return value
@@ -28,39 +29,26 @@ export const CARD_TEXT: Partial<Record<CardType, string>> = {
   plot: "Held until the game ends. Choose a faction for a virtual scoring follower.",
 };
 
-/** Deliberately copies only public information and the explicitly revealed hand.
- * Full engine state and accepted history must never be spread into view props. */
+/** Every rendered table view goes through the engine's redacted observation:
+ * public information plus, at most, the revealed viewer's own hand. Full engine
+ * state and accepted history must never be spread into view props. */
 export function projectTable(
   state: GameState,
   revealedPlayer: PlayerId | null,
 ) {
+  const observation = getObservation(state, revealedPlayer);
   return {
-    regions: state.regions,
-    regionCards: state.regionCards,
-    supply: state.supply,
-    controlDiscs: state.controlDiscsInSupply,
-    instability: 3 - state.instabilityDiscsInFrance,
-    players: state.playerOrder.map((id) => {
-      const player = state.players[id]!;
-      return {
-        id,
-        court: player.court,
-        handCount: player.hand.length,
-        discardTop: player.discards.at(-1) ?? null,
-        negotiationDiscLocation: player.negotiationDiscLocation,
-      };
-    }),
-    hand:
-      revealedPlayer === null
-        ? []
-        : [...(state.players[revealedPlayer]?.hand ?? [])],
-    activePlayerId: state.activePlayerId,
-    passes: state.consecutivePasses,
-    turn: state.turnSequence + 1,
-    seed: state.initialSeed,
-    phase: state.phase,
-    plot: state.plot,
-    result: state.result,
+    regions: observation.regions,
+    regionCards: observation.regionCards,
+    supply: observation.supply,
+    controlDiscs: observation.controlDiscsInSupply,
+    instability: 3 - observation.instabilityDiscsInFrance,
+    players: observation.players,
+    hand: observation.own?.hand ?? [],
+    passes: observation.consecutivePasses,
+    turn: observation.turnSequence + 1,
+    /** Null until the game is finished. */
+    seed: observation.seed,
   };
 }
 export type TableView = ReturnType<typeof projectTable>;
