@@ -19,6 +19,7 @@ import {
   setupSession,
   withBoard,
 } from "../test/turnFixtures";
+import type { Mutable } from "../test/turnFixtures";
 import type { GameSession } from "./events";
 import type { EffectPlan, TurnPlan } from "./turnTypes";
 import { totalFollowers } from "./domain";
@@ -395,6 +396,21 @@ describe("atomic card boundary", () => {
 });
 
 describe("draft reset and accepted history", () => {
+  it("copies shallow-frozen history before accepting it as an immutable snapshot", () => {
+    const session = copyChoice(setupSession()) as Mutable<GameSession>;
+    const created = session.events[0];
+    if (created?.type !== "GameCreated") throw new Error("fixture");
+    Object.freeze(created);
+    const next = pass(session);
+    const accepted = next.events[0];
+    if (accepted?.type !== "GameCreated") throw new Error("fixture");
+    expect(Object.isFrozen(accepted.state.regions.moray.followers)).toBe(true);
+    expect(Object.isFrozen(created.state.regions.moray.followers)).toBe(false);
+    const saved = JSON.stringify(next);
+    created.state.supply.scottish += 1;
+    expect(JSON.stringify(next)).toBe(saved);
+  });
+
   it("does not freeze a caller's mutable session or its existing history when appending", () => {
     const session = copyChoice(setupSession());
     const before = JSON.stringify(session);

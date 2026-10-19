@@ -662,3 +662,24 @@ with **317 tests across 20 files**. New tests cover:
 A 1,500-game randomized engine run (2 and 3 players, about 30,000 card plays)
 finished every game with no errors. Real-browser keyboard and screen-reader
 checks were not repeated for this change (**NOT VERIFIED**).
+
+### Merge review verification — 2026-10-19
+
+Reviewed `review-fixes-privacy-a11y` against `main` in an isolated worktree.
+Found and fixed one immutability regression in the event-history optimization:
+`Object.isFrozen(event)` only proves the outer object is frozen, so a caller's
+mutable nested data could remain aliased into accepted history. The new
+regression failed on the reviewed branch. Session commits now reuse only history
+arrays previously snapshotted by the application, cloning external history once.
+This preserves the optimization without trusting shallow-frozen caller data.
+
+After the fix, all five checks pass, with **318 tests across 20 files**. Chromium
+completed full two- and three-player Standard games and checked final logs,
+private handoffs, reset, keyboard progression, direct follower choices, both
+Negotiate endpoint orders, mixed/same-faction Outmanoeuvre pairs, and light/dark
+mobile/desktop layouts. A targeted real-browser check confirmed disabled board
+picks move focus to a legal follower, accessible faction/instability labels and
+card descriptions, seed redaction during play, and Escape focus restoration.
+No uncaught browser errors or external resource requests occurred in the full
+game smoke test. A physical screen reader was not tested. Existing uncommitted
+bot research notes in the main workspace were kept separate from this merge.

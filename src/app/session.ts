@@ -1,4 +1,4 @@
-import type { CommitResult, GameSession } from "../game/events";
+import type { AcceptedEvent, CommitResult, GameSession } from "../game/events";
 import { IllegalTurnError } from "../game/errors";
 import { freezeSnapshot } from "../game/immutable";
 import { copyChoice } from "../game/plans";
@@ -24,18 +24,23 @@ function assertSessionCursor(session: GameSession): void {
   }
 }
 
-/** Copy only the new delta; accepted history is already a frozen snapshot, so
- * each commit costs O(delta) rather than re-serializing the whole game. */
+/** Only history arrays produced here are known to contain deeply frozen data.
+ * Object.isFrozen alone cannot establish that a caller's nested data is frozen. */
+const acceptedHistories = new WeakSet<readonly AcceptedEvent[]>();
+
+/** Copy externally supplied history once, then reuse our immutable snapshots
+ * without re-serializing the whole game on every committed turn. */
 function appendCommit(session: GameSession, result: CommitResult): GameSession {
   const accepted = copyChoice(result);
-  // Frozen events are engine snapshots; copy anything else so callers stay unfrozen.
-  const history = session.events.map((event) =>
-    Object.isFrozen(event) ? event : copyChoice(event),
-  );
-  return freezeSnapshot({
+  const history = acceptedHistories.has(session.events)
+    ? session.events
+    : copyChoice(session.events);
+  const next = freezeSnapshot({
     state: accepted.state,
     events: [...history, ...accepted.events],
   });
+  acceptedHistories.add(next.events);
+  return next;
 }
 
 export function endTurn(
