@@ -48,9 +48,13 @@ function markOrigin<T extends Record<string, (...args: never[]) => void>>(
 export function Game({
   initialSession,
   onCommit,
+  gameId,
+  onOpenLog,
 }: {
   initialSession: GameSession;
   onCommit?: (session: GameSession) => void;
+  gameId?: string;
+  onOpenLog?: () => void;
 }) {
   const turn = useHotseatTurn(initialSession, onCommit);
   const { table, visible, step, phase, targetPlayer, decision } = turn;
@@ -131,6 +135,15 @@ export function Game({
                 ? "One final allegiance"
                 : `${targetPlayer}’s turn`}
           </h1>
+          {gameId && (
+            <button
+              className="game-id quiet"
+              onClick={onOpenLog}
+              aria-label={`Open log for game ${gameId}`}
+            >
+              Game ID: <span>{gameId}</span>
+            </button>
+          )}
         </div>
         <div className="turn-indicator">
           TURN {table.turn}
@@ -163,14 +176,43 @@ export function Game({
             instruction={boardInstruction}
           />
           <SupplyPanel table={table} />
-          <CourtsPanel table={table} activePlayer={targetPlayer} />
+          <CourtsPanel
+            table={table}
+            activePlayer={targetPlayer}
+            lastMoves={turn.lastMoves}
+          />
         </div>
         <aside
           ref={plannerRef}
           className="turn-panel"
           aria-label="Turn planner"
         >
-          {phase !== "finished" && !visible && (
+          {turn.bot.active && (
+            <section aria-label="Bot turn" aria-busy={!turn.bot.error}>
+              <span className="eyebrow">Algorithmic opponent</span>
+              <h2>
+                {turn.bot.error
+                  ? "Bot turn paused"
+                  : `${targetPlayer} is thinking`}
+              </h2>
+              {turn.bot.error ? (
+                <>
+                  <p role="alert" className="error">
+                    {turn.bot.error}
+                  </p>
+                  <button className="primary" onClick={turn.bot.retry}>
+                    Retry bot turn
+                  </button>
+                </>
+              ) : (
+                <p role="status">
+                  Considering the court, the next struggle, and possible
+                  replies…
+                </p>
+              )}
+            </section>
+          )}
+          {phase !== "finished" && !visible && !turn.bot.active && (
             <PrivacyCurtain player={targetPlayer} onReveal={actions.reveal} />
           )}
           {visible && phase === "plot-choice" && (

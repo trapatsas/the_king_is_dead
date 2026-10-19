@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import type { RefObject } from "react";
 import type { SetupConfig } from "../game/domain";
 import type { GameSession } from "../game/events";
+import { archiveSnapshot, newGameId, saveArchive } from "../app/gameArchive";
+import { GameHistory } from "./GameHistory";
 import { createGame } from "../game/setup";
 import { GameErrorBoundary } from "./ErrorBoundary";
 import { Game } from "./Game";
@@ -43,7 +45,10 @@ function LeaveDialog({
       }}
     >
       <h2>Leave this kingdom?</h2>
-      <p>Your current game will be lost. Games are not saved yet.</p>
+      <p>
+        This game cannot be resumed after leaving. Its saved public log remains
+        available in Game history.
+      </p>
       <button ref={keepRef} onClick={onKeep}>
         Keep playing
       </button>
@@ -54,17 +59,33 @@ function LeaveDialog({
 
 interface ActiveGame {
   /** Unique per started game, so a repeated seed never reuses old Game state. */
-  readonly id: number;
+  readonly id: string;
+  readonly createdAt: string;
   /** Bumped by error recovery to remount from the latest committed session. */
   readonly attempt: number;
   readonly session: GameSession;
 }
 
 export function App({ initialSession }: { initialSession?: GameSession }) {
-  const [game, setGame] = useState<ActiveGame | null>(
-    initialSession ? { id: 0, attempt: 0, session: initialSession } : null,
+  const [game, setGame] = useState<ActiveGame | null>(() =>
+    initialSession
+      ? {
+          id: newGameId(),
+          createdAt: new Date().toISOString(),
+          attempt: 0,
+          session: initialSession,
+        }
+      : null,
   );
-  const nextId = useRef(1);
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [historyGameId, setHistoryGameId] = useState<string | null>(null);
+  const [storageError, setStorageError] = useState(false);
+  useEffect(() => {
+    if (game)
+      setStorageError(
+        !saveArchive(archiveSnapshot(game.id, game.createdAt, game.session)),
+      );
+  }, [game]);
   // Latest committed session; read only for error recovery, so commits do not
   // re-render the App shell.
   const latest = useRef<GameSession | null>(initialSession ?? null);
@@ -75,7 +96,12 @@ export function App({ initialSession }: { initialSession?: GameSession }) {
     try {
       const session = createGame(config);
       latest.current = session;
-      setGame({ id: nextId.current++, attempt: 0, session });
+      setGame({
+        id: newGameId(),
+        createdAt: new Date().toISOString(),
+        attempt: 0,
+        session,
+      });
       setSetupError(null);
     } catch {
       setSetupError("This game could not be set up. Check the settings.");
@@ -95,6 +121,15 @@ export function App({ initialSession }: { initialSession?: GameSession }) {
         <span className="edition">PROJECT RULESET · 2–3 PLAYERS</span>
         <div className="header-actions">
           <ThemeToggle />
+          <button
+            className="quiet history-button"
+            onClick={() => {
+              setHistoryGameId(null);
+              setHistoryOpen(true);
+            }}
+          >
+            Game history
+          </button>
           {game && (
             <button
               ref={newGameRef}
@@ -106,6 +141,18 @@ export function App({ initialSession }: { initialSession?: GameSession }) {
           )}
         </div>
       </header>
+      {historyOpen && (
+        <GameHistory
+          initialGameId={historyGameId}
+          onClose={() => setHistoryOpen(false)}
+        />
+      )}
+      {storageError && (
+        <p role="status" className="notice archive-warning">
+          The latest game log could not be saved in this browser. Playing can
+          continue; check browser storage before leaving.
+        </p>
+      )}
       {confirmNew && (
         <LeaveDialog
           onKeep={() => setConfirmNew(false)}
@@ -127,8 +174,16 @@ export function App({ initialSession }: { initialSession?: GameSession }) {
         >
           <Game
             initialSession={game.session}
+            gameId={game.id}
+            onOpenLog={() => {
+              setHistoryGameId(game.id);
+              setHistoryOpen(true);
+            }}
             onCommit={(session) => {
               latest.current = session;
+              setStorageError(
+                !saveArchive(archiveSnapshot(game.id, game.createdAt, session)),
+              );
             }}
           />
         </GameErrorBoundary>

@@ -40,6 +40,16 @@ export function advanceEndgame(
   causedBy: PlayerId,
 ): CommitResult {
   assertGameInvariants(state);
+  const result = advanceEndgameTrusted(state, causedBy);
+  assertGameInvariants(result.state);
+  return freezeSnapshot(copyChoice(result));
+}
+
+/** Internal transition for already-valid engine/search positions. */
+export function advanceEndgameTrusted(
+  state: GameState,
+  causedBy: PlayerId,
+): CommitResult {
   if (
     state.phase !== "scoring" ||
     state.ending === null ||
@@ -71,8 +81,7 @@ export function advanceEndgame(
       events: [event],
     };
   }
-  assertGameInvariants(result.state);
-  return freezeSnapshot(copyChoice(result));
+  return result;
 }
 
 /** One explicit owner decision; physical followers, action time and RNG never change. */

@@ -1,12 +1,13 @@
 # Implementation status
 
-Milestones 0–5 implemented on 2026-10-18. Milestone 6 is next. The kickoff scopes
+Milestones 0–5 implemented on 2026-10-18. Milestone 6 is in progress. The kickoff scopes
 the initial task to Milestones 0–1; follow-on milestones are reported below.
 
 The browser supports complete Standard games for two or three local human
 players. Private handoffs, legal effect/summon choices, draft previews, struggles,
-and result explanations are implemented. Controllers, save/replay, and full
-Advanced gameplay remain pending. Earlier milestone sections record their state
+and result explanations are implemented. A Standard MCTS controller is playable
+in a development preview; its research strength gate remains closed. Save/replay
+and full Advanced gameplay remain pending. Earlier milestone sections record their state
 at completion; the latest milestone describes current behavior.
 
 ## Milestone 0 — Toolchain
@@ -683,3 +684,77 @@ card descriptions, seed redaction during play, and Escape focus restoration.
 No uncaught browser errors or external resource requests occurred in the full
 game smoke test. A physical screen reader was not tested. Existing uncommitted
 bot research notes in the main workspace were kept separate from this merge.
+
+## Milestone 6 — Standard bot prototype (2026-10-19)
+
+The user rewrote [BOT_RESEARCH.md](BOT_RESEARCH.md). Reviewed its primary-source
+support and qualified claims about universal search superiority, terminal reach,
+move equivalence and Advanced determinization. Preserved the proposed release
+criteria. The prior literature draft was superseded by that rewrite.
+
+Implemented the first Standard MCTS opponent with per-seat utility vectors,
+public-play memory, shared trusted transitions, hand-written evaluation,
+progressive widening, multi-turn lookahead, exact terminal results, tree reuse,
+Worker cancellation/retry and public-boundary validation. No dependency or game
+rule changes. The explicit development preview is `/?bots=experimental`.
+
+The one-ply baseline scored 84% against random over 200 games. MCTS v2 scored
+69.5% against one-ply over 200 two-player games and 46.1% against two one-ply
+opponents over 102 three-player games, at 128 fixed iterations. These sampled
+comparisons do not pass the research's 70% gate, so ordinary setup remains gated.
+Raw outcomes, uncertainty, commands and limitations are recorded in
+[BOT_IMPLEMENTATION.md](BOT_IMPLEMENTATION.md).
+
+Chromium completed 32-turn two-player and 48-turn three-player all-bot games,
+with maximum search times below 1.403 seconds. Mixed human/bot handoffs,
+private hands, final logs, mobile layout and leaving-game cancellation passed.
+No uncaught browser errors occurred. This does not establish latency on slower
+user devices or strength at the browser's larger adaptive budget.
+
+Persistence, production replay, LLM contracts and full Advanced effects/search
+remain unfinished. The implementation report lists the remaining performance,
+strength and tactical coverage gates; Milestone 6 is not marked complete.
+
+**Verification:** all five project checks pass (typecheck, lint, tests, formatting,
+production build), with **339 tests across 23 files**. The production build emits
+a separate Worker bundle. Sixteen differential full-game tests compare trusted
+simulation against public commits; tactical, privacy, determinism, cancellation,
+stale-result, retry and release-gate regressions are included.
+
+## Public move memory, names and game log archive (2026-10-19)
+
+Added per-court latest accepted moves (including passes), turn numbers and
+expandable effect/summon details. Setup accepts names for human and bot seats,
+with duplicate-name checks and controller-specific defaults. Each new game has
+a UUID independent of its setup seed. Public logs are saved under individual
+local-storage keys after setup and every commit, and can be searched by ID or
+name in Game history after a reload. Corrupt records are isolated; save failures
+are visible without blocking play. Public log storage excludes private setup
+state and live seeds. This is log review, not resumable game-state persistence.
+
+Six seeded opening audits confirmed one card per committed turn, but also the
+experimental bot's tendency to exhaust its cards before the first struggle.
+This is a strategy weakness; rules and bot evaluation were not changed in this
+UI/archive work. Detailed observations are in BOT_IMPLEMENTATION.md.
+
+**Verification:** all five project checks pass with **352 tests across 25 files**.
+Chromium checked named human/bot turns, cards and passes under each court,
+move details, lookup by ID after reload, same-seed game separation, direct
+current-game log opening, seed privacy and light/dark mobile/desktop layouts.
+The log archive also has corruption, quota/accessor-failure and UUID fallback
+coverage. No uncaught browser errors occurred.
+
+## Sharing a stored game for analysis (2026-10-19)
+
+Added Copy log and Download log to the selected game in Game history. A game ID
+identifies a browser-local record; it cannot retrieve that record from a
+separate workspace. Exports preserve the ID, participants, setup followers,
+accepted moves/struggles and available final result through an explicit public
+schema. Extra stored fields are omitted, live seeds remain withheld, and copy
+failure directs the player to the download option. No bot weights changed and
+no claim is made about a supplied game until its actual log is available.
+
+**Verification:** all five checks pass with **354 tests across 25 files**.
+Chromium verified that clipboard and downloaded JSON match, the filename uses
+the game ID, a recorded pass survives export, the live seed is absent, and the
+mobile layout fits, with no uncaught browser errors.

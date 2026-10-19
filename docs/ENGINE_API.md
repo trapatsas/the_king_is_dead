@@ -39,8 +39,11 @@ playing the game, see the [README](../README.md).
   last committed session after an unexpected render failure.
 - `src/ui/presentation.ts`: `projectTable`, built on `getObservation`, plus
   public struggle notices and effect descriptions.
-- `src/ui/finishedLog.ts` and `GameLogPanel.tsx`: end-of-game event projection
-  and an expandable chronological log with setup/struggle follower tables.
+- `src/ui/finishedLog.ts` and `GameLogPanel.tsx`: public/finished event projections,
+  per-seat latest accepted moves and chronological follower/action tables.
+- `src/app/gameArchive.ts` and `src/ui/GameHistory.tsx`: UUID game metadata,
+  versioned local storage of public logs, validation and lookup by ID/name.
+  These records are not resumable engine snapshots.
 
 For example, in a TypeScript consumer:
 
@@ -159,10 +162,18 @@ They remain internal engine data. `getObservation(state, viewer)` is the only
 view a seat may use. It returns public table data, hand and discard counts,
 public discard tops and, for the viewer only, their own hand and discard pile.
 The seed and RNG cursors are withheld until the game finishes, because they
-would let a viewer recompute hidden deals. In the UI only `useHotseatTurn` holds
-the session; rendered components receive observation-based projections.
-Bots in Milestone 6 must use the same function. They will also need a redacted
-event-history view, which is not built yet.
+would let a viewer recompute hidden deals. The session stays at the application/
+controller boundary; rendered table components receive observation projections.
+The Standard bot uses the same function plus witnessed public card memory from
+`src/app/botObservation.ts`; private setup records never enter its Worker.
+
+Latest-move panels and archived logs are separate public event projections.
+They record accepted face-up plays, passes, effects, summons, setup followers
+and struggles. They exclude setup hands, unused Cunning cards, private discard
+arrays and RNG cursors. Live archives also omit the seed; finished archives may
+disclose it. A versioned UUID identifies each game independently of its seed.
+Only these public log records go to local storage; loading one reviews the log
+without restoring engine state or starting controllers.
 
 There is no backend, so in-memory state is not a security boundary against
 someone with browser developer tools on the shared device.

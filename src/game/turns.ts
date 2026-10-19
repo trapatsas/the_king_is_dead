@@ -14,7 +14,7 @@ import { freezeSnapshot } from "./immutable";
 import { assertGameInvariants } from "./invariants";
 import { copyChoice, sameChoice } from "./plans";
 import { resolveNextStruggle } from "./struggles";
-import { advanceEndgame, resolvePlotChoice } from "./endgame";
+import { advanceEndgameTrusted, resolvePlotChoice } from "./endgame";
 import { applySummon, enumerateSummonChoices } from "./summons";
 import { assertTurnContext } from "./turnContext";
 import type {
@@ -202,61 +202,9 @@ export function createTurnEngine(definitions: CardEffectRegistry = {}) {
     // Reject malformed discriminants/additional fields; log the canonical choice.
     if (!sameChoice(plan, submitted))
       throw new IllegalTurnError("Invalid turn plan");
-    const seat = state.playerOrder.indexOf(plan.playerId);
-    const nextPlayer = state.playerOrder[(seat + 1) % state.playerOrder.length];
-    if (nextPlayer === undefined)
-      throw new IllegalTurnError("Missing next player");
-    const actionSequence =
-      state.actionSequence + (plan.kind === "card" ? 1 : 0);
-    let next: GameState = {
-      ...preview.state,
-      activePlayerId: nextPlayer,
-      turnSequence: state.turnSequence + 1,
-      actionSequence,
-      eventSequence: state.eventSequence + 1,
-      consecutivePasses: plan.kind === "pass" ? state.consecutivePasses + 1 : 0,
-    };
-    let card: CardInstance | null = null;
-    if (plan.kind === "card") {
-      card = heldCard(state, plan.playerId, plan.cardId);
-      const player = next.players[plan.playerId];
-      if (player === undefined) throw new IllegalTurnError("Unknown player");
-      next = {
-        ...next,
-        lastSwap: nextSwapMemory(plan.playerId, actionSequence, plan.effect),
-        players: {
-          ...next.players,
-          [player.id]: {
-            ...player,
-            hand: player.hand.filter((held) => held.id !== plan.cardId),
-            discards: [...player.discards, card],
-            lastActionSequence: actionSequence,
-          },
-        },
-      };
-    }
-    const committed: TurnCommittedEvent = {
-      type: "TurnCommitted",
-      playerId: plan.playerId,
-      eventSequence: next.eventSequence,
-      turnSequence: next.turnSequence,
-      actionSequence,
-      plan,
-      card,
-    };
-    let events: CommitResult["events"] = [committed];
-    if (next.consecutivePasses === next.playerOrder.length) {
-      const struggle = resolveNextStruggle(next, plan.playerId);
-      next = struggle.state;
-      events = [committed, ...struggle.events];
-      if (next.phase === "scoring") {
-        const ending = advanceEndgame(next, plan.playerId);
-        next = ending.state;
-        events = [...events, ...ending.events];
-      }
-    }
-    assertGameInvariants(next);
-    return freezeSnapshot(copyChoice({ state: next, events }));
+    const result = finishCommittedTurn(state, preview.state, plan);
+    assertGameInvariants(result.state);
+    return freezeSnapshot(copyChoice(result));
   }
 
   return Object.freeze({
@@ -271,3 +219,67 @@ export function createTurnEngine(definitions: CardEffectRegistry = {}) {
 /** Shared production rules for every Standard card; Cunning arrives later. */
 export const turnEngine = createTurnEngine(STANDARD_EFFECTS);
 export type TurnEngine = ReturnType<typeof createTurnEngine>;
+
+/** Internal trusted transition shared by validated commits and search.
+ * Callers must supply a legal complete plan and its post-summon position.
+ * Does not validate, clone or freeze; never expose this as a submission API.
+ */
+export function finishCommittedTurn(
+  state: GameState,
+  afterSummon: GameState,
+  plan: TurnPlan,
+): CommitResult {
+  const seat = state.playerOrder.indexOf(plan.playerId);
+  const nextPlayer = state.playerOrder[(seat + 1) % state.playerOrder.length];
+  if (nextPlayer === undefined)
+    throw new IllegalTurnError("Missing next player");
+  const actionSequence = state.actionSequence + (plan.kind === "card" ? 1 : 0);
+  let next: GameState = {
+    ...afterSummon,
+    activePlayerId: nextPlayer,
+    turnSequence: state.turnSequence + 1,
+    actionSequence,
+    eventSequence: state.eventSequence + 1,
+    consecutivePasses: plan.kind === "pass" ? state.consecutivePasses + 1 : 0,
+  };
+  let card: CardInstance | null = null;
+  if (plan.kind === "card") {
+    card = heldCard(state, plan.playerId, plan.cardId);
+    const player = next.players[plan.playerId];
+    if (player === undefined) throw new IllegalTurnError("Unknown player");
+    next = {
+      ...next,
+      lastSwap: nextSwapMemory(plan.playerId, actionSequence, plan.effect),
+      players: {
+        ...next.players,
+        [player.id]: {
+          ...player,
+          hand: player.hand.filter((held) => held.id !== plan.cardId),
+          discards: [...player.discards, card],
+          lastActionSequence: actionSequence,
+        },
+      },
+    };
+  }
+  const committed: TurnCommittedEvent = {
+    type: "TurnCommitted",
+    playerId: plan.playerId,
+    eventSequence: next.eventSequence,
+    turnSequence: next.turnSequence,
+    actionSequence,
+    plan,
+    card,
+  };
+  let events: CommitResult["events"] = [committed];
+  if (next.consecutivePasses === next.playerOrder.length) {
+    const struggle = resolveNextStruggle(next, plan.playerId);
+    next = struggle.state;
+    events = [committed, ...struggle.events];
+    if (next.phase === "scoring") {
+      const ending = advanceEndgameTrusted(next, plan.playerId);
+      next = ending.state;
+      events = [...events, ...ending.events];
+    }
+  }
+  return { state: next, events };
+}

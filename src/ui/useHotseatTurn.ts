@@ -1,3 +1,4 @@
+import { useBotTurn } from "./useBotTurn";
 import { useMemo, useState } from "react";
 import {
   beginTurn,
@@ -21,7 +22,7 @@ import {
   undoEffectPick,
 } from "./effectChoices";
 import type { EffectChoice, EffectOption, FollowerPick } from "./effectChoices";
-import { projectFinishedLog } from "./finishedLog";
+import { projectFinishedLog, projectLastMoves } from "./finishedLog";
 import { projectTable, publicNotices } from "./presentation";
 
 function initialDraft(session: GameSession): TurnDraft | null {
@@ -73,7 +74,9 @@ export function useHotseatTurn(
     state.phase === "plot-choice"
       ? (state.plot?.playerId ?? state.activePlayerId)
       : state.activePlayerId;
-  const visible = revealed === targetPlayer && state.phase !== "finished";
+  const isHuman = state.players[targetPlayer]?.controller === "human";
+  const visible =
+    isHuman && revealed === targetPlayer && state.phase !== "finished";
   const preview = useMemo(
     () => (draft ? turnEngine.previewTurn(state, draft) : null),
     [state, draft],
@@ -85,6 +88,7 @@ export function useHotseatTurn(
   );
   const committed = useMemo(() => projectTable(state, null), [state]);
   const notices = useMemo(() => publicNotices(session.events), [session]);
+  const lastMoves = useMemo(() => projectLastMoves(session.events), [session]);
   const log = useMemo(() => projectFinishedLog(session), [session]);
   const availableCardIds = useMemo(
     () =>
@@ -105,6 +109,7 @@ export function useHotseatTurn(
 
   function safely(action: () => void) {
     try {
+      if (!isHuman) return;
       action();
       setError(null);
     } catch (cause) {
@@ -118,6 +123,7 @@ export function useHotseatTurn(
     setRevealed(null);
     onCommit?.(next);
   }
+  const bot = useBotTurn(session, accept);
   function updateEffectChoice(nextDraft: TurnDraft, choice: EffectChoice) {
     const effect = completedEffect(choice);
     setDraft(effect ? draftEffect(nextDraft, effect) : nextDraft);
@@ -194,6 +200,8 @@ export function useHotseatTurn(
       : null;
   return {
     table,
+    bot,
+    lastMoves,
     committed: {
       turn: committed.turn,
       passes: committed.passes,

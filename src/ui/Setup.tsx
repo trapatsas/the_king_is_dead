@@ -10,12 +10,31 @@ export function Setup({ onStart }: { onStart: (config: SetupConfig) => void }) {
     "human",
   ]);
   const [seed, setSeed] = useState("");
-  const unavailable =
-    mode === "advanced"
+  const [names, setNames] = useState(["", "", ""]);
+  const playerNames = controllers
+    .slice(0, count)
+    .map(
+      (controller, index) =>
+        names[index]!.trim() ||
+        `${controller === "algorithmic" ? "Bot" : "Player"} ${index + 1}`,
+    );
+  const duplicateNames =
+    new Set(playerNames.map((name) => name.toLocaleLowerCase())).size !== count;
+  // Research release gate remains closed. An explicit development URL supports
+  // human play-testing without advertising the prototype as release-ready.
+  const experimentalBots =
+    import.meta.env.DEV &&
+    new URLSearchParams(window.location.search).get("bots") === "experimental";
+  const chosenControllers = controllers.slice(0, count);
+  const unavailable = duplicateNames
+    ? "Give each player and bot a different name."
+    : mode === "advanced"
       ? "Advanced cards are coming soon. Choose Standard to play."
-      : controllers.slice(0, count).some((controller) => controller !== "human")
-        ? "Automated opponents are unavailable. LLM seats are not configured. Choose Human for every seat to play."
-        : null;
+      : chosenControllers.includes("llm")
+        ? "LLM seats are not configured. Choose an available controller to play."
+        : chosenControllers.includes("algorithmic") && !experimentalBots
+          ? "Algorithmic opponents are in development. Choose Human for every seat to play."
+          : null;
   return (
     <main className="setup-layout">
       <section className="intro">
@@ -56,7 +75,7 @@ export function Setup({ onStart }: { onStart: (config: SetupConfig) => void }) {
             seed: freshSeed,
             mode,
             players: controllers.slice(0, count).map((controller, index) => ({
-              id: `Player ${index + 1}`,
+              id: playerNames[index]!,
               controller,
             })),
           });
@@ -84,29 +103,61 @@ export function Setup({ onStart }: { onStart: (config: SetupConfig) => void }) {
             <option value={3}>3 players</option>
           </select>
         </label>
+        {experimentalBots && (
+          <p className="notice">
+            Experimental Standard bot preview. Playing-strength validation is
+            still in progress.
+          </p>
+        )}
         <fieldset>
           <legend>Seats · clockwise order</legend>
           {controllers.slice(0, count).map((controller, index) => (
-            <label className="seat-row" key={index}>
-              Player {index + 1}
-              <select
-                aria-label={`Player ${index + 1} controller`}
-                value={controller}
-                onChange={(event) =>
-                  setControllers((previous) =>
-                    previous.map((entry, i) =>
-                      i === index
-                        ? (event.target.value as ControllerKind)
-                        : entry,
-                    ),
-                  )
-                }
-              >
-                <option value="human">Human · local</option>
-                <option value="algorithmic">Algorithmic · unavailable</option>
-                <option value="llm">LLM · not configured</option>
-              </select>
-            </label>
+            <div className="seat-row" key={index}>
+              <label>
+                Seat {index + 1} name
+                <input
+                  aria-label={`Player ${index + 1} name`}
+                  value={names[index]}
+                  maxLength={40}
+                  placeholder={
+                    controller === "algorithmic"
+                      ? `Bot ${index + 1}`
+                      : `Player ${index + 1}`
+                  }
+                  onChange={(event) =>
+                    setNames((previous) =>
+                      previous.map((name, i) =>
+                        i === index ? event.target.value : name,
+                      ),
+                    )
+                  }
+                />
+              </label>
+              <label>
+                Controller
+                <select
+                  aria-label={`Player ${index + 1} controller`}
+                  value={controller}
+                  onChange={(event) =>
+                    setControllers((previous) =>
+                      previous.map((entry, i) =>
+                        i === index
+                          ? (event.target.value as ControllerKind)
+                          : entry,
+                      ),
+                    )
+                  }
+                >
+                  <option value="human">Human · local</option>
+                  <option value="algorithmic">
+                    {experimentalBots
+                      ? "Algorithmic · experimental"
+                      : "Algorithmic · in development"}
+                  </option>
+                  <option value="llm">LLM · not configured</option>
+                </select>
+              </label>
+            </div>
           ))}
         </fieldset>
         <details>
@@ -136,7 +187,8 @@ export function Setup({ onStart }: { onStart: (config: SetupConfig) => void }) {
           Begin game <span aria-hidden="true">→</span>
         </button>
         <p className="hint">
-          Local hotseat · games are not saved yet. Reloading returns here.
+          Local play · public game logs are saved in this browser. Reloading
+          returns to setup.
         </p>
       </form>
     </main>

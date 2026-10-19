@@ -46,6 +46,16 @@ export function applySummon(
       "Choose exactly one available post-effect follower, or justified zero",
     );
   }
+  return applySummonTrusted(afterEffect, playerId, accepted);
+}
+
+/** Internal: choice must come from enumerateSummonChoices for this position. */
+export function applySummonTrusted(
+  afterEffect: GameState,
+  playerId: PlayerId,
+  accepted: SummonChoice,
+): GameState {
+  const player = afterEffect.players[playerId]!;
   if (accepted.kind === "zero") return afterEffect;
   const region = afterEffect.regions[accepted.regionId];
   return {

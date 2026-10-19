@@ -4,7 +4,7 @@ import { freezeSnapshot } from "../game/immutable";
 import { copyChoice } from "../game/plans";
 import { turnEngine } from "../game/turns";
 import type { TurnEngine } from "../game/turns";
-import type { PlotChoice, TurnDraft } from "../game/turnTypes";
+import type { PlotChoice, TurnDraft, TurnPlan } from "../game/turnTypes";
 
 /** Append accepted deltas atomically; no draft API writes accepted history. */
 function assertSessionCursor(session: GameSession): void {
@@ -63,4 +63,10 @@ export function choosePlot(
 ): GameSession {
   assertSessionCursor(session);
   return appendCommit(session, engine.resolvePlotChoice(session.state, choice));
+}
+
+/** Bot plans pass the same authoritative boundary as human drafts. */
+export function commitPlan(session: GameSession, plan: TurnPlan): GameSession {
+  assertSessionCursor(session);
+  return appendCommit(session, turnEngine.commitTurn(session.state, plan));
 }

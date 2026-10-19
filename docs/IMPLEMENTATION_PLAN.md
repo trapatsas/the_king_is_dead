@@ -147,15 +147,18 @@ fixtures while complete Advanced gameplay remains Milestone 7.
 
 ## Milestone 6 — Algorithmic controllers, audit log and persistence
 
-**Exploration:** [Algorithmic opponent design](BOT_DESIGN.md) records the current
-engine API audit, measured opening branching, an engine-validated heuristic-first
-approach, privacy/performance constraints, and evaluation steps. The reproducible
-probe is `node scripts/explore-bot-moves.mjs`; no playable bot is implemented yet.
+**In progress:** the rewritten [research design](BOT_RESEARCH.md) now drives a
+Standard MCTS development prototype with public memory, shared simulation,
+Worker orchestration and a headless evaluation harness. See
+[implementation and benchmark results](BOT_IMPLEMENTATION.md). The normal
+algorithmic-seat gate remains closed because the strength criterion has not
+passed. The original branching probe remains `node scripts/explore-bot-moves.mjs`.
+Persistence, replay and the unconnected LLM adapter remain separate pending work.
 
 **Tasks**
 
 - Implement a shared controller API returning typed legal plans. Start with a seeded legal-random bot; add an inexpensive heuristic bot evaluating court sets/faction support, pending struggles, remaining hand and tempo. Make no claim of expert strength.
-- Build one observation projector shared by human player UI and bots. Bots must not see opponents' hand cards, buried discards or unused Cunning cards. _(Done ahead of this milestone: `getObservation` in `src/game/visibility.ts`, already used by the UI. Bots still need a redacted event-history view.)_
+- Build one observation projector shared by human player UI and bots. Bots must not see opponents' hand cards, buried discards or unused Cunning cards. _(Done ahead of this milestone: `getObservation` in `src/game/visibility.ts`, already used by the UI. The Standard prototype now receives only witnessed public card plays from the app adapter.)_
 - Add typed committed event records containing selected card, effective action, copied source, ordered transfers, disc, summon/zero reason, power struggles, Plot choice, and resulting scoring outcome.
 - Implement versioned save/resume (`localStorage` plus optional Export/Import JSON) with canonical committed state, full event log and RNG state; validate schema and invariants on load.
 - Implement replay from original setup event and accepted moves, compare reconstructed state to saved state. Explicitly surface corruption or incompatible versions.

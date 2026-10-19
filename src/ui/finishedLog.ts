@@ -17,7 +17,7 @@ export interface GameLogEntry {
   };
 }
 
-function projectEvent(event: AcceptedEvent): GameLogEntry {
+function projectEvent(event: AcceptedEvent, revealSeed = true): GameLogEntry {
   const sequence = event.eventSequence;
   switch (event.type) {
     case "GameCreated": {
@@ -27,7 +27,7 @@ function projectEvent(event: AcceptedEvent): GameLogEntry {
         label: "Setup",
         heading: "The kingdom is prepared",
         details: [
-          `${title(state.mode)} · ${state.playerOrder.length} players · Seed: ${state.initialSeed}`,
+          `${title(state.mode)} · ${state.playerOrder.length} players${revealSeed ? ` · Seed: ${state.initialSeed}` : ""}`,
           `Clockwise seats: ${state.playerOrder.join(" → ")}.`,
           `Starting player: ${state.startingPlayerId}.`,
           `Initial struggle order: ${state.regionCards.map((card) => `${card.slot}. ${title(card.regionId)}`).join(" → ")}.`,
@@ -170,5 +170,40 @@ export function projectFinishedLog(
 ): readonly GameLogEntry[] {
   if (session.state.phase !== "finished" || session.state.result === null)
     return [];
-  return session.events.map(projectEvent);
+  return session.events.map((event) => projectEvent(event));
+}
+
+/** Publicly witnessed history, including setup followers, with setup secrets
+ * omitted. A finished game may also disclose its seed for reproducibility.
+ */
+export function projectPublicLog(
+  session: GameSession,
+): readonly GameLogEntry[] {
+  return session.events.map((event) =>
+    projectEvent(event, session.state.phase === "finished"),
+  );
+}
+
+export interface LastMove {
+  readonly turn: number;
+  readonly summary: string;
+  readonly details: readonly string[];
+}
+/** Accepted turns only; a pass replaces the previous card as the latest move. */
+export function projectLastMoves(
+  events: readonly AcceptedEvent[],
+): Readonly<Record<string, LastMove>> {
+  const moves: Record<string, LastMove> = Object.create(null);
+  for (const event of events) {
+    if (event.type !== "TurnCommitted") continue;
+    moves[event.playerId] = {
+      turn: event.turnSequence,
+      summary:
+        event.plan.kind === "pass"
+          ? "Passed"
+          : `Played ${title(event.card?.type ?? event.plan.effect.effectiveCard)}`,
+      details: projectEvent(event).details,
+    };
+  }
+  return moves;
 }

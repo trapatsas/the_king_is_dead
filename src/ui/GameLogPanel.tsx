@@ -5,10 +5,12 @@ import { title } from "./presentation";
 
 export function GameLogPanel({
   entries,
+  initiallyOpen = false,
 }: {
   entries: readonly GameLogEntry[];
+  initiallyOpen?: boolean;
 }) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(initiallyOpen);
   const contentId = useId();
   return (
     <section className="game-log" aria-label="Game log">

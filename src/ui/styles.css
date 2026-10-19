@@ -1197,3 +1197,146 @@ details p {
     scroll-behavior: auto !important;
   }
 }
+
+/* Public move memory and the local game chronicle. */
+.seat-row {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: end;
+}
+.seat-row label {
+  min-width: 0;
+  font-size: 0.7rem;
+}
+.seat-row input,
+.seat-row select {
+  margin: 0.4rem 0 0;
+  width: 100%;
+  min-width: 0;
+}
+.court-heading h3,
+.game-heading h1 {
+  overflow-wrap: anywhere;
+}
+.court-controller {
+  display: block;
+  color: var(--soft-text);
+  font-size: 0.65rem;
+  margin-bottom: 0.8rem;
+}
+.last-move {
+  border-top: 1px solid var(--line);
+  margin-top: 0.8rem;
+  padding-top: 0.2rem;
+  font-size: 0.75rem;
+}
+.last-move .last-move-label {
+  color: var(--soft-text);
+  margin-bottom: 0.35rem;
+}
+.last-move details {
+  margin-top: 0.5rem;
+  font-size: 0.7rem;
+}
+.last-move p {
+  line-height: 1.5;
+}
+.game-id {
+  display: block;
+  max-width: 100%;
+  text-align: left;
+  padding: 0;
+  font-size: 0.65rem;
+  overflow-wrap: anywhere;
+}
+.game-id span {
+  user-select: all;
+}
+.history-dialog {
+  width: min(1100px, 94vw);
+  max-height: 90dvh;
+  padding: 1.5rem;
+  color: var(--ink);
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: auto;
+}
+.history-dialog::backdrop {
+  background: #0008;
+}
+.history-dialog > label {
+  margin-top: 1rem;
+}
+.history-layout {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) minmax(0, 3fr);
+  gap: 1.25rem;
+  margin-top: 1rem;
+}
+.history-layout .game-log {
+  margin: 0;
+  padding: 1rem;
+}
+.saved-games {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 0.65rem;
+  max-height: 65dvh;
+  overflow: auto;
+}
+.saved-games button {
+  display: grid;
+  gap: 0.4rem;
+  width: 100%;
+  text-align: left;
+}
+.saved-games button[aria-pressed="true"] {
+  border-color: var(--ink);
+  background: var(--court-active);
+}
+.saved-games span,
+.saved-games time,
+.saved-game-id {
+  font-size: 0.65rem;
+  overflow-wrap: anywhere;
+}
+.archive-warning {
+  margin: 1rem 4%;
+}
+@media (max-width: 600px) {
+  .history-dialog {
+    padding: 1rem;
+  }
+  .history-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .saved-games {
+    max-height: 180px;
+  }
+  .app-header {
+    height: auto;
+    min-height: 65px;
+    flex-wrap: wrap;
+    padding-block: 0.6rem;
+  }
+  .header-actions {
+    flex-wrap: wrap;
+  }
+  .history-button {
+    font-size: 0.65rem;
+  }
+}
+.history-layout > * {
+  min-width: 0;
+}
+.saved-games strong,
+.game-log-entry {
+  overflow-wrap: anywhere;
+}
+.log-export-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}

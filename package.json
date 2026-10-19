@@ -12,7 +12,8 @@
     "test": "vitest",
     "test:run": "vitest run",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "bot:benchmark": "node scripts/benchmark-bot.mjs"
   },
   "dependencies": {
     "react": "^19.3.1",

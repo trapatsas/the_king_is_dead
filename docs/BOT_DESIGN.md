@@ -1,17 +1,28 @@
 # Algorithmic opponent exploration
 
-Explored 2026-10-19 against the committed Standard engine. This is a proposed
-implementation and a reproducible move-generation probe, not an implemented bot
-or a playing-strength claim. It refines the controller portion of Milestone 6;
+Historical exploration from 2026-10-19 against the committed Standard engine.
+This document preserves the original proposal and move-generation probe. The
+rewritten [research design](BOT_RESEARCH.md) supersedes its recommendations;
+[current implementation and measured results](BOT_IMPLEMENTATION.md) describe
+the subsequently built Standard MCTS prototype. It refines the controller portion of Milestone 6;
 persistence, production replay, and full Advanced play remain separate work.
+
+The follow-up [research review and annotated bibliography](BOT_RESEARCH.md)
+checks literature through 2026-10-19, distinguishes remembered Standard card
+information from genuinely unknown Advanced deals, and proposes search comparisons
+and evaluation budgets. Its public-memory clarification below refines the
+original observation-only exploration. The sections below record that proposal,
+not a current implementation checklist.
 
 ## Recommendation
 
 Start with an explainable Standard heuristic bot, alongside a seeded legal-random
 baseline. Both choose engine-generated turns and submit them through the existing
 commit boundary. Rank the card effect and its subsequent summon together. Preserve
-a small, diverse shortlist for exact successor evaluation; introduce sampled
-lookahead only after legality, privacy, speed, and baseline strength are measured.
+a small, diverse shortlist for exact successor evaluation. Use that heuristic as
+the baseline for multi-turn search once legality, privacy, and speed are measured.
+The intended strategic opponent should include lookahead through opponents'
+responses and its next two decision opportunities, subject to terminal endings.
 
 This game rewards choosing which factions win and when regions settle, while
 collecting court support. A bot must remain flexible about faction allegiance,
@@ -115,10 +126,14 @@ A worker is a responsiveness mechanism, not an information filter. Passing full
 state to the bot in a worker would still let it cheat. Candidate features and
 successor observations must be projected before the policy can inspect them.
 
-Do not generate opponent replies by reading the real opponent hands. If later
-search needs hidden hands, sample plausible hands from information legitimately
-available to that seat, using separate controller randomness. Public memory could
-be an explicit later capability; it must not silently come from the internal log.
+Do not generate opponent replies by reading the real opponent hands. The preferred
+Standard controller should explicitly remember face-up plays it observed from
+setup: subtracting these from the identical initial hands reveals remaining card
+types, including Assemble multiplicity. Store this memory from redacted action
+observations and restore it on resume; do not source it from buried discards or
+the private internal log. A controller missing that observed history cannot assume
+it knows the remaining hands. Advanced search needs plausible hidden deals
+consistent with permitted observations, using separate controller randomness.
 
 Advanced needs another safeguard: speculative terminal simulation using the real
 hidden hands can reveal an opponent's held Plot, or its scoring effect, before the
@@ -154,6 +169,70 @@ bot is among them. This convention ranks bot choices; it does not change results
 The policy should return a short explanation, such as “complete a court set while
 preserving Welsh control in the next struggle.” Log the actual accepted move as
 usual; keep forecasts and abandoned candidates out of accepted game history.
+
+## Long-term strategy and concrete search horizon
+
+The user requires a bot that considers several turns ahead. Treat strategic
+evaluation and forward simulation as complementary: search handles sequences and
+counter-moves, while a leaf evaluator estimates prospects beyond the searched
+horizon. This section is a proposed design, not implemented capability.
+
+Maintain forecasts for each route to victory: Coronation with each faction
+leading, and Invasion through complete court sets. Compare the bot's support with
+the relevant rivals, estimate how remaining regions could affect faction order,
+and include remaining cards, negotiation options, and pass timing. Use these
+forecasts to score future positions for every seat. Early in the game, preserving
+several viable routes can be valuable; near the end, actual outcomes and exact
+tiebreaks dominate. Any phase weighting or forecast probabilities need tuning and
+validation; do not label a heuristic score a calibrated win probability.
+
+Strategic hypotheses can guide candidate diversity: strengthen a court lead for
+a plausible winning faction, improve Invasion sets, or preserve a flexible card
+while accepting the next struggle. Evaluate candidate continuations under several
+opponent replies, and revisit these hypotheses after every committed move. Do not
+lock the bot permanently to one faction or give it a bonus merely for following
+an earlier plan. A displayed plan should be a conditional explanation of the
+preferred continuation, with expected replies and alternatives clearly identified
+as predictions. Only the next action is committed.
+
+Count depth in complete player turns, including passes. Card selection, effect
+steps, and summon are internal parts of one turn, never opponents' opportunities
+to respond. Looking through the bot's next two decisions after its current move
+requires the following horizons when the game does not end sooner:
+
+| Players | Example seat sequence     | Complete turns including the current move |
+| ------- | ------------------------- | ----------------------------------------- |
+| 2       | A → B → A → B → A         | 5                                         |
+| 3       | A → B → C → A → B → C → A | 7                                         |
+
+These are initial horizon targets for strategically distinct candidate lines,
+not an exhaustive enumeration or a guarantee that seven turns alone are enough.
+Opponent choices remain unknown even when their remaining card types are known.
+In three-player search, each opponent pursues its own utility. Include credible
+counter-moves to a plan as well as likely heuristic replies; weak rollout policies
+must not make a fragile plan look secure.
+
+Use selective multiplayer MCTS or shortlist rollouts to reach those horizons
+without expanding the full branching factor at every level. Preserve pass and
+several distinct cards/strategic routes at the root. Some simulations should
+continue through a nearby struggle, and terminal positions use exact scoring.
+Compare longer sampled continuations to game end where affordable. Extending
+search around an imminent struggle or third instability can reduce a cutoff's
+tactical blind spots; it cannot eliminate every horizon effect.
+
+Measure achieved complete-turn depth, the number of future decisions by the root
+player, root-candidate coverage, and simulations per candidate alongside latency.
+A single deep path is insufficient evidence of useful lookahead. Set the final
+budget after benchmarking the shared fast simulation path on target browsers;
+the existing public API timings do not establish that these horizons and adequate
+coverage fit a few hundred milliseconds. Replan from each real observed state and
+discard any cached plan after mismatched state or memory.
+
+Add regressions where a greedy summon loses after a later reply, saving a card
+enables a later winning intervention, and a plan fails because a third player
+benefits from a different faction. Compare search against the immediate heuristic
+on held-out games and report depth/coverage. Correctness of a sampled continuation
+does not certify the root action against unsearched legal replies.
 
 ## Baseline, responsiveness, and search
 
