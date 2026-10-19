@@ -5,7 +5,9 @@ const args = Object.fromEntries(
 );
 const count = Number(args.seats ?? 2),
   seeds = Number(args.seeds ?? 4),
-  iterations = Number(args.iterations ?? 64);
+  iterations = Number(args.iterations ?? 64),
+  // Optional separate budget for opponents (equal wall-clock comparisons).
+  opponentIterations = Number(args.opponentIterations ?? iterations);
 const policy = args.bot ?? "mcts",
   opponent = args.opponent ?? "one-ply",
   prefix = args.prefix ?? "heldout-bot-v1";
@@ -14,8 +16,12 @@ if (
   !Number.isSafeInteger(seeds) ||
   seeds < 1 ||
   seeds > 10000 ||
-  !["mcts", "reference", "patient", "one-ply", "random"].includes(policy) ||
-  !["mcts", "reference", "patient", "random", "one-ply"].includes(opponent)
+  !["mcts", "reference", "patient", "informed", "one-ply", "random"].includes(
+    policy,
+  ) ||
+  !["mcts", "reference", "patient", "informed", "random", "one-ply"].includes(
+    opponent,
+  )
 )
   throw new Error("Invalid benchmark options");
 const server = await createServer({
@@ -26,23 +32,44 @@ const server = await createServer({
   server: { middlewareMode: true, hmr: false, watch: null, ws: false },
 });
 try {
-  const [setup, turns, visibility, memory, search, simulation, patient] =
-    await Promise.all(
-      [
-        "/src/game/setup.ts",
-        "/src/game/turns.ts",
-        "/src/game/visibility.ts",
-        "/src/app/botObservation.ts",
-        "/src/bot/search.ts",
-        "/src/bot/simulation.ts",
-        "/src/bot/patient.ts",
-      ].map((path) => server.ssrLoadModule(path)),
-    );
+  const [
+    setup,
+    turns,
+    visibility,
+    memory,
+    search,
+    simulation,
+    patient,
+    informed,
+  ] = await Promise.all(
+    [
+      "/src/game/setup.ts",
+      "/src/game/turns.ts",
+      "/src/game/visibility.ts",
+      "/src/app/botObservation.ts",
+      "/src/bot/search.ts",
+      "/src/bot/simulation.ts",
+      "/src/bot/patient.ts",
+      "/src/bot/informed.ts",
+    ].map((path) => server.ssrLoadModule(path)),
+  );
+  const BOTS = ["mcts", "reference", "patient", "informed"];
   const games = [];
   for (let seed = 0; seed < seeds; seed++) {
     for (let seat = 0; seat < count; seat++) {
       const bot = new search.StandardBot(),
         patientBot = new patient.PatientBot(),
+        informedBot = new informed.InformedBot(
+          process.env.INFORMED_PARAMS
+            ? JSON.parse(process.env.INFORMED_PARAMS)
+            : {},
+        ),
+        bots = {
+          mcts: bot,
+          reference: bot,
+          patient: patientBot,
+          informed: informedBot,
+        },
         random = simulation.seededRandom(seed * 100 + seat + 1);
       let session = setup.createGame({
         seed: `${prefix}-${seed}`,
@@ -51,13 +78,9 @@ try {
           const strategy = i === seat ? policy : opponent;
           return {
             id: `p${i}`,
-            controller: ["mcts", "reference", "patient"].includes(strategy)
-              ? "algorithmic"
-              : "human",
-            ...(["mcts", "reference", "patient"].includes(strategy)
-              ? {
-                  botStrategy: strategy === "patient" ? "patient" : "reference",
-                }
+            controller: BOTS.includes(strategy) ? "algorithmic" : "human",
+            ...(BOTS.includes(strategy)
+              ? { botStrategy: strategy === "mcts" ? "reference" : strategy }
               : {}),
           };
         }),
@@ -73,11 +96,14 @@ try {
           strategy = isBot ? policy : opponent;
         let plan;
         const start = performance.now();
-        if (["mcts", "reference", "patient"].includes(strategy)) {
-          const result = (strategy === "patient" ? patientBot : bot).search({
+        if (BOTS.includes(strategy)) {
+          const result = bots[strategy].search({
             observation: visibility.getObservation(state, state.activePlayerId),
             memory: memory.witnessedCards(session),
-            budget: { iterations, seed: Math.floor(random() * 2 ** 32) },
+            budget: {
+              iterations: isBot ? iterations : opponentIterations,
+              seed: Math.floor(random() * 2 ** 32),
+            },
           });
           plan = result.plan;
           if (isBot) stats.push(result.stats);
@@ -157,17 +183,24 @@ try {
         version:
           policy === "patient"
             ? patient.PATIENT_BOT_VERSION
-            : search.BOT_VERSION,
+            : policy === "informed"
+              ? informed.INFORMED_BOT_VERSION
+              : search.BOT_VERSION,
         policyVersions: {
           reference: search.BOT_VERSION,
           patient: patient.PATIENT_BOT_VERSION,
+          informed: informed.INFORMED_BOT_VERSION,
         },
         policy,
         opponent,
         count,
         seeds,
         iterations,
+        opponentIterations,
         prefix,
+        informedParams: process.env.INFORMED_PARAMS
+          ? JSON.parse(process.env.INFORMED_PARAMS)
+          : null,
         note: "Node timings, fixed iterations. Draws share one point. CI resamples paired setup seeds; tiny samples are exploratory, not a release gate.",
         score: mean,
         seedBootstrap95: [boot[125], boot[4874]],

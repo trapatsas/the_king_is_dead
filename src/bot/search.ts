@@ -49,20 +49,27 @@ export interface RootChoice {
   readonly mean: readonly number[];
   readonly prior: readonly number[];
 }
+export interface Candidate {
+  plan: TurnPlan;
+  state: GameState;
+  value: number[];
+  key: string;
+}
 export interface SearchPolicy {
   readonly evaluate: (state: GameState) => number[];
   readonly evaluateLeaf?: (state: GameState) => number[];
+  /** Ordered expansion proposals for a node. The search consumes them best
+   * first (with some exploration) and falls back to sampling once exhausted. */
+  readonly propose?: (
+    state: GameState,
+    random: Random,
+    stage: "root" | "inner",
+  ) => Candidate[];
   readonly chooseRoot?: (
     state: GameState,
     choices: readonly RootChoice[],
   ) => TurnPlan | undefined;
   readonly explain?: (plan: TurnPlan) => string;
-}
-interface Candidate {
-  plan: TurnPlan;
-  state: GameState;
-  value: number[];
-  key: string;
 }
 interface Node {
   state: GameState;
@@ -72,6 +79,7 @@ interface Node {
   children: { plan: TurnPlan; node: Node }[];
   choices?: CardChoices[];
   seen: Set<string>;
+  queue?: Candidate[];
 }
 function node(state: GameState, prior = evaluate(state)): Node {
   return {
@@ -133,7 +141,34 @@ function expand(
   parent: Node,
   random: Random,
   evaluator: SearchPolicy["evaluate"],
+  propose?: SearchPolicy["propose"],
+  stage: "root" | "inner" = "inner",
 ): { plan: TurnPlan; node: Node } | undefined {
+  if (propose) {
+    parent.queue ??= propose(parent.state, random, stage).filter(
+      (option) => !parent.seen.has(option.key),
+    );
+    if (parent.queue.length) {
+      // Pass first, so timing is never hidden behind card proposals; then the
+      // best remaining proposal, with occasional exploration of the tail.
+      let index =
+        parent.children.length === 0
+          ? parent.queue.findIndex((option) => option.plan.kind === "pass")
+          : random() < 0.15
+            ? Math.floor(random() * parent.queue.length)
+            : 0;
+      if (index < 0) index = 0;
+      const [selected] = parent.queue.splice(index, 1);
+      if (!selected) return undefined;
+      parent.seen.add(selected.key);
+      const child = {
+        plan: selected.plan,
+        node: node(selected.state, selected.value),
+      };
+      parent.children.push(child);
+      return child;
+    }
+  }
   const options = candidates(
     parent,
     random,
@@ -285,7 +320,13 @@ export class StandardBot {
         );
         let child: ReturnType<typeof expand>;
         if (current.children.length < width)
-          child = expand(current, random, this.policy.evaluate);
+          child = expand(
+            current,
+            random,
+            this.policy.evaluate,
+            this.policy.propose,
+            current === root ? "root" : "inner",
+          );
         if (!child && current.children.length) child = select(current);
         if (!child) break;
         const fresh = child.node.visits === 0;
@@ -336,19 +377,20 @@ export class StandardBot {
           prior: child.node.prior,
         })),
       );
-    const best =
-      winning ??
-      root.children.find((child) => child.plan === preferred) ??
-      [...root.children].sort(
-        (a, b) =>
-          b.node.visits - a.node.visits ||
-          b.node.total[actor]! / Math.max(1, b.node.visits) -
-            a.node.total[actor]! / Math.max(1, a.node.visits),
-      )[0];
-    if (!best) throw new Error("Search produced no legal turn");
+    const fallback = [...root.children].sort(
+      (a, b) =>
+        b.node.visits - a.node.visits ||
+        b.node.total[actor]! / Math.max(1, b.node.visits) -
+          a.node.total[actor]! / Math.max(1, a.node.visits),
+    )[0];
+    // A policy may prefer a legal plan it computed outside the tree (for
+    // example an exact endgame line); the public commit still validates it.
+    const plan = winning?.plan ?? preferred ?? fallback?.plan;
+    if (!plan) throw new Error("Search produced no legal turn");
     stats.rootChoices = root.children.length;
     stats.elapsedMs = performance.now() - start;
     this.roots.set(state.activePlayerId, root);
+    const best = { plan };
     return {
       plan: best.plan,
       stats,

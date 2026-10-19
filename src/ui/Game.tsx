@@ -4,7 +4,7 @@ import type { GameSession } from "../game/events";
 import { Board, RegionTrack } from "./Board";
 import type { FollowerPick } from "./effectChoices";
 import { GameLogPanel } from "./GameLogPanel";
-import { title } from "./presentation";
+import { BOT_STRATEGY_LABELS, title } from "./presentation";
 import { Result } from "./Result";
 import {
   CourtsPanel,
@@ -190,8 +190,7 @@ export function Game({
           {turn.bot.active && (
             <section aria-label="Bot turn" aria-busy={!turn.bot.error}>
               <span className="eyebrow">
-                {turn.bot.strategy === "patient" ? "Patient" : "Reference"}{" "}
-                opponent
+                {BOT_STRATEGY_LABELS[turn.bot.strategy]} opponent
               </span>
               <h2>
                 {turn.bot.error

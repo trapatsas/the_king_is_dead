@@ -30,11 +30,13 @@ With the development server running, open
 `http://localhost:5173/?bots=experimental` and select **Algorithmic · experimental**
 for one or more seats. Each bot has a **Bot strategy** selector: **Reference**
 keeps the original aggressive policy; **Patient** reserves cards for later
-responses and can wait for others to commit. Both can play with humans and each
-other. Bots run in a Worker and play automatically. The preview
+responses and can wait for others to commit; **Informed** ranks its options
+against what every seat can still do with the cards they hold and keeps card
+parity so it has the last word. All three can play with humans and each other. Bots run in a Worker and play automatically. The preview
 supports two or three players; ordinary setup and production builds remain gated
 because the research strength criterion has not passed. See the
-[implementation and measured results](docs/BOT_IMPLEMENTATION.md).
+[implementation and measured results](docs/BOT_IMPLEMENTATION.md) and the
+[Informed strategy's review, design and benchmarks](docs/BOT_INFORMED.md).
 
 ## Verify
 
@@ -110,4 +112,5 @@ browser developer tools.
 - [Bot research and annotated bibliography](docs/BOT_RESEARCH.md)
 - [Bot implementation, preview and benchmarks](docs/BOT_IMPLEMENTATION.md)
 - [Patient strategy and reference comparison](docs/PATIENT_BOT.md)
+- [Informed strategy: review, design and benchmarks](docs/BOT_INFORMED.md)
 - [Agent kickoff and first-task scope](docs/AGENT_KICKOFF_PROMPT.md)

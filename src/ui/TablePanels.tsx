@@ -1,7 +1,7 @@
 import type { LastMove } from "./finishedLog";
 import type { PlayerId } from "../game/domain";
 import { Followers } from "./Board";
-import { title } from "./presentation";
+import { BOT_STRATEGY_LABELS, title } from "./presentation";
 import type { TableView } from "./presentation";
 
 export function HowToPlay() {
@@ -111,7 +111,7 @@ export function CourtsPanel({
           </div>
           <span className="court-controller">
             {player.controller === "algorithmic"
-              ? `Bot · ${player.botStrategy === "patient" ? "Patient" : "Reference"}`
+              ? `Bot · ${BOT_STRATEGY_LABELS[player.botStrategy ?? "reference"]}`
               : "Human"}
           </span>
           <Followers counts={player.court} label={`${player.id} court`} />

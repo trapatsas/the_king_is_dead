@@ -1,3 +1,4 @@
+import { InformedBot } from "./informed";
 import { PatientBot } from "./patient";
 import { StandardBot } from "./search";
 import type { SearchRequest, SearchResult } from "./search";
@@ -11,6 +12,7 @@ export type WorkerReply =
   | { readonly id: number; readonly error: string };
 const reference = new StandardBot();
 const patient = new PatientBot();
+const informed = new InformedBot();
 self.onmessage = (event: MessageEvent<WorkerRequest>) => {
   const { id, search } = event.data;
   let reply: WorkerReply;
@@ -18,7 +20,12 @@ self.onmessage = (event: MessageEvent<WorkerRequest>) => {
     const seat = search.observation.players.find(
       (player) => player.id === search.observation.viewer,
     );
-    const bot = seat?.botStrategy === "patient" ? patient : reference;
+    const bot =
+      seat?.botStrategy === "informed"
+        ? informed
+        : seat?.botStrategy === "patient"
+          ? patient
+          : reference;
     reply = { id, result: bot.search(search) };
   } catch {
     reply = { id, error: "The bot could not complete this turn. Try again." };

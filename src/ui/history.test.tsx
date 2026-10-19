@@ -97,6 +97,27 @@ describe("seat names", () => {
       { id: "Bot 3", controller: "algorithmic", botStrategy: "patient" },
     ]);
   });
+  it("offers the informed strategy with its own hint", async () => {
+    window.history.replaceState(null, "", "/?bots=experimental");
+    const user = userEvent.setup(),
+      start = vi.fn();
+    render(<Setup onStart={start} />);
+    await user.selectOptions(
+      screen.getByLabelText("Player 3 controller"),
+      "algorithmic",
+    );
+    await user.selectOptions(
+      screen.getByLabelText("Player 3 strategy"),
+      "informed",
+    );
+    expect(screen.getByText(/what every seat can still do/)).toBeDefined();
+    await user.click(screen.getByRole("button", { name: /Begin game/ }));
+    expect(start.mock.calls[0]![0].players[2]).toEqual({
+      id: "Bot 3",
+      controller: "algorithmic",
+      botStrategy: "informed",
+    });
+  });
   it("uses custom human and bot names and rejects ambiguous duplicates", async () => {
     window.history.replaceState(null, "", "/?bots=experimental");
     const user = userEvent.setup(),

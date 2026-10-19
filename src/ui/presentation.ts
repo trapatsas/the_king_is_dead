@@ -86,6 +86,12 @@ export function describeEffect(plan: EffectPlan): string {
     : plan.operations.map(describeOperation).join(" ");
 }
 
+export const BOT_STRATEGY_LABELS = {
+  reference: "Reference",
+  patient: "Patient",
+  informed: "Informed",
+} as const;
+
 export const FACTION_MARKS = Object.fromEntries(
   FACTIONS.map((faction) => [faction, title(faction).charAt(0)]),
 ) as Record<(typeof FACTIONS)[number], string>;

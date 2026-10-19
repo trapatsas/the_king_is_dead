@@ -192,11 +192,16 @@ export function Setup({ onStart }: { onStart: (config: SetupConfig) => void }) {
                     <option value="patient">
                       Patient · reserve and respond
                     </option>
+                    <option value="informed">
+                      Informed · card-aware forecast
+                    </option>
                   </select>
                   <span className="hint">
-                    {strategies[index] === "patient"
-                      ? "Keeps cards for later struggles and can wait for others to commit."
-                      : "The original bot, kept as a comparison."}
+                    {strategies[index] === "informed"
+                      ? "Ranks its options against what every seat can still do with the cards they hold."
+                      : strategies[index] === "patient"
+                        ? "Keeps cards for later struggles and can wait for others to commit."
+                        : "The original bot, kept as a comparison."}
                   </span>
                 </label>
               )}

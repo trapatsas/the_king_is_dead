@@ -788,3 +788,51 @@ human/Reference/Patient game, with maximum searches under 1.402 seconds. Bot
 hands remained hidden; profile routing, archived identity and the dark mobile
 strategy selector passed. Six additional Patient-only three-player smoke games
 terminated within the turn bound.
+
+## Informed bot — third Standard strategy
+
+**Implemented 2026-10-19.** Reviewed the Reference and Patient bots, designed
+`informed-mcts-v1`, and confirmed it by simulation. Full write-up:
+[BOT_INFORMED.md](BOT_INFORMED.md).
+
+**Review findings.** Both bots sample random effects and a random summon at
+every expansion, so they rarely see the best complete turn. Reference's forecast
+ignores which cards opponents still hold, although Standard hands are public.
+Patient wins by conserving cards but over-passes (two Patients resolve the setup
+board almost untouched) and solves spent-opponent endings only one ply deep.
+
+**Design.** Ordered candidate proposals (score a sample of effects, rank
+summons, fully value the best), a card-aware region forecast using each seat's
+real swing capacity, an exact all-pass forecast blended with parity-aware
+confidence, a tempo term for card parity, a pass-when-already-winning root rule,
+and a beam-search endgame solver once opponents are spent. The shared search
+gained an optional `propose` hook; Reference and Patient are byte-for-byte
+unchanged in behaviour (snapshot test).
+
+**What the simulations taught.** The first build lost 19/20 to Patient despite
+better candidates: it acted while already winning the all-pass line and handed
+Patient the last word. Modelling card parity turned that into 16/20; the root
+margin was then the dominant parameter (55% at 0 → 95% at 0.12 on a 40-game
+tuning set).
+
+**Held-out results** (prefix `informed-heldout-v1`, 128 iterations per side,
+seat-rotated, draws share a point; neutral is 50% / 33.3%):
+
+| Matchup                    | Games | Informed score | 95% interval |
+| -------------------------- | ----- | -------------- | ------------ |
+| vs Patient, 2 seats        | 100   | 87.0%          | 81.0–93.0%   |
+| vs Reference, 2 seats      | 60    | 86.7%          | 76.7–95.0%   |
+| vs two Patients, 3 seats   | 60    | 83.3%          | 75.0–91.7%   |
+| vs two References, 3 seats | 45    | 86.7%          | 77.8–93.3%   |
+
+Under roughly equal CPU (Patient at 320 iterations), Informed still scored
+65–77.5% in 40-game tuning runs. Informed costs about 2–2.5× Patient's CPU per
+iteration, so within the browser's fixed time cap it completes fewer
+iterations than Patient.
+
+**Not done:** human play-testing, browser-device latency, Advanced mode. The
+research release gate is unchanged.
+
+**Verification:** typecheck, lint, formatting and production build pass with
+**374 tests across 28 files**, including the frozen Reference snapshot. The
+held-out benchmark records are in `docs/benchmarks/informed-*.json`.

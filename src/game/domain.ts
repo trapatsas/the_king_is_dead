@@ -64,7 +64,11 @@ export interface CardInstance {
   readonly type: CardType;
 }
 
-export const BOT_STRATEGIES = Object.freeze(["reference", "patient"] as const);
+export const BOT_STRATEGIES = Object.freeze([
+  "reference",
+  "patient",
+  "informed",
+] as const);
 export type BotStrategy = (typeof BOT_STRATEGIES)[number];
 
 export interface PlayerConfig {

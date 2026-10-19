@@ -62,6 +62,23 @@ describe("bot orchestration", () => {
     ).toContain("Patient opponent");
     expect(screen.queryByRole("button", { name: /^Play / })).toBeNull();
   });
+  it("routes the informed profile to the worker and labels the thinking panel", () => {
+    mocks.search.mockImplementation(() => new Promise(() => {}));
+    const session = editFixture(botSession(), (state) => {
+      state.players[state.activePlayerId]!.botStrategy = "informed";
+    });
+    render(<Game initialSession={session} />);
+    const [req] = mocks.search.mock.calls[0]! as [SearchRequest, AbortSignal];
+    expect(
+      req.observation.players.find(
+        (player) => player.id === session.state.activePlayerId,
+      )?.botStrategy,
+    ).toBe("informed");
+    expect(
+      screen.getByRole("region", { name: "Bot turn" }).textContent,
+    ).toContain("Informed opponent");
+    expect(screen.queryByRole("button", { name: /^Play / })).toBeNull();
+  });
   it("shows thinking with no hand or human controls, then validates and hands over", async () => {
     let resolve!: (result: SearchResult) => void;
     mocks.search.mockImplementation(
