@@ -139,6 +139,28 @@ describe("Manoeuvre", () => {
 });
 
 describe("Outmanoeuvre", () => {
+  it("offers a mixed pair even when two of the same faction can be returned instead", () => {
+    const { state } = withBoard(setupSession(), {
+      moray: followers(0, 0, 1),
+      strathclyde: followers(2, 1),
+    });
+    const options = plans(state, "outmanoeuvre");
+    expect(options).toHaveLength(2);
+    expect(options.every((plan) => plan.tier === 2)).toBe(true);
+    expect(
+      matching([
+        movement("moray", "strathclyde", "english"),
+        movement("strathclyde", "moray", "scottish", 2),
+      ])(options),
+    ).toBeDefined();
+    expect(
+      matching([
+        movement("moray", "strathclyde", "english"),
+        movement("strathclyde", "moray", "scottish"),
+        movement("strathclyde", "moray", "welsh"),
+      ])(options),
+    ).toBeDefined();
+  });
   it("swaps one for two, retaining the mixed pair as ordered count transfers", () => {
     const { state } = withBoard(setupSession(), {
       moray: followers(0, 1),

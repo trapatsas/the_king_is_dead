@@ -284,6 +284,15 @@ interface GameControllerAdapter {
 
 **Desktop-first responsive browser UI.** Show an original simplified SVG/CSS map (not a copy of publisher art) with eight clickable regions and 13 verified adjacency links. A schematic can be geographically approximate; adjacency and rule validation come from `board.ts`, not pixel position.
 
+Presentation paths interpret legal effect operations independently of their
+canonical serialization order: Negotiate and 1-for-1 swaps allow either endpoint
+first; mixed Outmanoeuvre pairs can be selected in either faction order. Map
+pawn/count tokens select one follower per click for swaps and summons. Placements
+use region-title targets. A complete effect advances straight to summon; only
+End Turn commits. Sidebar alternatives, partial-choice Undo/Restart, and privacy
+handoff remain available. Candidate paths always retain the engine's original
+canonical plan, rather than constructing an alternative effect from UI clicks.
+
 Main layout:
 
 1. Top bar: mode, active player, remaining region struggles, victory status, save/new game.

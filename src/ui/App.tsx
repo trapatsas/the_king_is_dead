@@ -13,15 +13,21 @@ import type { RegionId, SetupConfig } from "../game/domain";
 import type { GameSession } from "../game/events";
 import { createGame } from "../game/setup";
 import { turnEngine } from "../game/turns";
-import type { EffectPlan, TurnDraft } from "../game/turnTypes";
+import type { TurnDraft } from "../game/turnTypes";
 import { Board, Followers, RegionTrack } from "./Board";
 import { GameLogPanel } from "./GameLogPanel";
 import { projectFinishedLog } from "./finishedLog";
 import {
+  beginEffectChoice,
+  completedEffect,
+  effectDecision,
+  pickEffectOption,
+  undoEffectPick,
+} from "./effectChoices";
+import type { EffectChoice, FollowerPick } from "./effectChoices";
+import {
   CARD_TEXT,
   describeEffect,
-  narrowPlans,
-  nextDecision,
   projectTable,
   publicNotices,
   title,
@@ -128,11 +134,10 @@ export function Game({ initialSession }: { initialSession: GameSession }) {
     initialDraft(initialSession),
   );
   const [revealed, setRevealed] = useState<string | null>(null);
-  const [candidates, setCandidates] = useState<readonly EffectPlan[] | null>(
-    null,
-  );
+  const [effectChoice, setEffectChoice] = useState<EffectChoice | null>(null);
   const [error, setError] = useState<string | null>(null);
   const plannerRef = useRef<HTMLElement>(null);
+  const choiceOrigin = useRef<"board" | "panel">("panel");
   const { state } = session;
   const targetPlayer =
     state.phase === "plot-choice"
@@ -148,16 +153,21 @@ export function Game({ initialSession }: { initialSession: GameSession }) {
     visible && preview ? preview.state : state,
     visible ? targetPlayer : null,
   );
-  const decision = candidates ? nextDecision(candidates) : null;
+  const decision = effectChoice ? effectDecision(effectChoice) : null;
   const decisionKey = decision?.key;
   const step = preview?.step;
   useEffect(() => {
     if (!visible) return;
+    if (
+      choiceOrigin.current === "board" &&
+      (step === "choose-effect" || step === "choose-summon")
+    )
+      return;
     const selector =
       state.phase === "plot-choice"
         ? ".plot-choice-button"
         : step === "choose-effect"
-          ? ".choices button, .effect-confirm"
+          ? ".choices button"
           : step === "choose-summon"
             ? ".summon-choices button"
             : step === "ready"
@@ -168,17 +178,67 @@ export function Game({ initialSession }: { initialSession: GameSession }) {
   const regionOptions =
     visible && decision
       ? decision.options
-          .filter((option) => option.region)
-          .map((option) => option.value as RegionId)
+          .filter((option) => option.kind === "region")
+          .map((option) => option.regionId)
       : [];
-  function selectValue(value: string) {
-    if (candidates && decision)
-      setCandidates(narrowPlans(candidates, decision.key, value));
+  const followerOptions: readonly FollowerPick[] = !visible
+    ? []
+    : preview?.step === "choose-summon"
+      ? preview.summonChoices.flatMap((summon) =>
+          summon.kind === "follower"
+            ? [{ regionId: summon.regionId, faction: summon.faction }]
+            : [],
+        )
+      : (decision?.options.flatMap((option) =>
+          option.kind === "follower"
+            ? [{ regionId: option.regionId, faction: option.faction }]
+            : [],
+        ) ?? []);
+  const selectedFollowers =
+    (visible ? effectChoice?.picks : undefined)?.flatMap((pick) =>
+      pick.kind === "follower"
+        ? [{ regionId: pick.regionId, faction: pick.faction }]
+        : [],
+    ) ?? [];
+  function updateEffectChoice(nextDraft: TurnDraft, choice: EffectChoice) {
+    const effect = completedEffect(choice);
+    setDraft(effect ? draftEffect(nextDraft, effect) : nextDraft);
+    setEffectChoice(effect ? null : choice);
+  }
+  function startCard(cardId: string) {
+    if (!draft) return;
+    choiceOrigin.current = "panel";
+    const next = draftCard(draft, cardId);
+    updateEffectChoice(
+      next,
+      beginEffectChoice(turnEngine.previewTurn(state, next).effectPlans),
+    );
+  }
+  function selectValue(key: string, origin: "board" | "panel" = "panel") {
+    if (!effectChoice || !draft) return;
+    choiceOrigin.current = origin;
+    updateEffectChoice(draft, pickEffectOption(effectChoice, key));
+  }
+  function selectRegion(region: RegionId) {
+    selectValue(`region:${region}`, "board");
+  }
+  function selectFollower(pick: FollowerPick) {
+    choiceOrigin.current = "board";
+    if (preview?.step === "choose-summon" && draft) {
+      const summon = preview.summonChoices.find(
+        (option) =>
+          option.kind === "follower" &&
+          option.regionId === pick.regionId &&
+          option.faction === pick.faction,
+      );
+      if (summon) setDraft(draftSummon(draft, summon));
+    } else selectValue(`follower:${pick.regionId}:${pick.faction}`, "board");
   }
   function accept(next: GameSession) {
     setSession(next);
     setDraft(initialDraft(next));
-    setCandidates(null);
+    setEffectChoice(null);
+    choiceOrigin.current = "panel";
     setRevealed(null);
     setError(null);
   }
@@ -272,14 +332,31 @@ export function Game({ initialSession }: { initialSession: GameSession }) {
       <RegionTrack
         table={table}
         choices={regionOptions}
-        onRegion={regionOptions.length ? selectValue : null}
+        onRegion={regionOptions.length ? selectRegion : null}
+        selectedRegions={
+          (visible ? effectChoice?.picks : undefined)
+            ?.filter((pick) => pick.kind === "region")
+            .map((pick) => pick.regionId) ?? []
+        }
       />
       <div className="table-layout">
         <div>
           <Board
             table={table}
             choices={regionOptions}
-            onRegion={regionOptions.length ? selectValue : null}
+            onRegion={regionOptions.length ? selectRegion : null}
+            followerChoices={followerOptions}
+            onFollower={followerOptions.length ? selectFollower : null}
+            selectedFollowers={selectedFollowers}
+            instruction={
+              visible
+                ? preview?.step === "choose-summon"
+                  ? followerOptions.length
+                    ? "Preview · Summon one follower into your court"
+                    : "Preview · No followers remain; confirm zero summon in the turn panel"
+                  : (decision?.label ?? null)
+                : null
+            }
           />
           <section className="supply-panel" aria-label="Shared supply">
             <div>
@@ -414,15 +491,7 @@ export function Game({ initialSession }: { initialSession: GameSession }) {
                     }
                     aria-pressed={selectedCard?.id === card.id}
                     aria-label={`Play ${title(card.type)}${card.type === "assemble" ? ` ${table.hand.slice(0, index + 1).filter((item) => item.type === "assemble").length}` : ""}`}
-                    onClick={() =>
-                      safely(() => {
-                        const next = draftCard(draft, card.id);
-                        setDraft(next);
-                        setCandidates(
-                          turnEngine.previewTurn(state, next).effectPlans,
-                        );
-                      })
-                    }
+                    onClick={() => safely(() => startCard(card.id))}
                   >
                     <span>{title(card.type)}</span>
                     <small>{CARD_TEXT[card.type]}</small>
@@ -434,7 +503,8 @@ export function Game({ initialSession }: { initialSession: GameSession }) {
                 aria-pressed={selection?.kind === "pass"}
                 onClick={() => {
                   setDraft(draftPass(draft));
-                  setCandidates(null);
+                  setEffectChoice(null);
+                  choiceOrigin.current = "panel";
                 }}
               >
                 Pass
@@ -446,60 +516,62 @@ export function Game({ initialSession }: { initialSession: GameSession }) {
                   </span>
                   {selection?.kind === "card" &&
                     selection.effect === null &&
-                    candidates && (
+                    effectChoice &&
+                    decision && (
                       <>
-                        {decision ? (
-                          <>
-                            <h3>{decision.label}</h3>
-                            <p className="hint">
-                              Choose below
-                              {regionOptions.length
-                                ? " or select a highlighted region"
-                                : ""}
-                              .
-                            </p>
-                            <div className="choices" key={decision.key}>
-                              {decision.options.map((option) => (
-                                <button
-                                  key={option.value}
-                                  onClick={() => selectValue(option.value)}
-                                >
-                                  {title(option.value)}
-                                </button>
-                              ))}
-                            </div>
-                          </>
-                        ) : (
-                          <>
-                            <p>
-                              {candidates[0]
-                                ? describeEffect(candidates[0])
-                                : "No effect available."}
-                            </p>
-                            <button
-                              className="primary effect-confirm"
-                              disabled={!candidates[0]}
-                              onClick={() => {
-                                const effect = candidates[0];
-                                if (effect)
-                                  setDraft(draftEffect(draft, effect));
-                              }}
-                            >
-                              Use this effect
-                            </button>
-                          </>
+                        <h3>{decision.label}</h3>
+                        <p className="hint">
+                          {decision.options[0]?.kind === "follower"
+                            ? "Click a highlighted follower on the board, or choose below. Click the same faction again to select a second follower."
+                            : "Click a highlighted region/card, or choose below."}
+                        </p>
+                        {effectChoice.picks.length > 0 && (
+                          <p className="picked-targets">
+                            Selected:{" "}
+                            {effectChoice.picks
+                              .map((pick) => pick.label)
+                              .join(" → ")}
+                          </p>
                         )}
-                        <button
-                          className="quiet"
-                          onClick={() => setCandidates(preview.effectPlans)}
-                        >
-                          Restart effect choices
-                        </button>
+                        <div className="choices" key={decision.key}>
+                          {decision.options.map((option) => (
+                            <button
+                              key={option.key}
+                              onClick={() => selectValue(option.key)}
+                            >
+                              {option.label}
+                            </button>
+                          ))}
+                        </div>
+                        {effectChoice.picks.length > 0 && (
+                          <button
+                            className="quiet"
+                            onClick={() => {
+                              choiceOrigin.current = "panel";
+                              setEffectChoice(undoEffectPick(effectChoice));
+                            }}
+                          >
+                            Undo last selection
+                          </button>
+                        )}
                       </>
                     )}
                   {selection?.kind === "card" && selection.effect && (
                     <p>{describeEffect(selection.effect)}</p>
                   )}
+                  {selectedCard.type === "outmanoeuvre" && (
+                    <p className="hint">
+                      The two return followers can be the same or different
+                      factions. A legal 1-for-2 swap is required whenever
+                      possible anywhere; otherwise the engine offers 1-for-1.
+                    </p>
+                  )}
+                  <button
+                    className="quiet"
+                    onClick={() => startCard(selectedCard.id)}
+                  >
+                    Restart effect choices
+                  </button>
                 </section>
               )}
               {preview.step === "choose-summon" && (
@@ -510,13 +582,17 @@ export function Game({ initialSession }: { initialSession: GameSession }) {
                   <span className="eyebrow">2 · Grow your court</span>
                   <h3>Summon one follower</h3>
                   <p className="hint">
-                    Choose from the board after your card’s effect.
+                    Click a highlighted follower on the board, or choose below.
+                    The board shows your card’s effect.
                   </p>
                   <div className="summon-choices">
                     {preview.summonChoices.map((summon, index) => (
                       <button
                         key={index}
-                        onClick={() => setDraft(draftSummon(draft, summon))}
+                        onClick={() => {
+                          choiceOrigin.current = "panel";
+                          setDraft(draftSummon(draft, summon));
+                        }}
                       >
                         {summon.kind === "zero" ? (
                           "Confirm zero summon — no eligible followers"
@@ -576,7 +652,8 @@ export function Game({ initialSession }: { initialSession: GameSession }) {
                 <button
                   onClick={() => {
                     setDraft(resetTurn(state, draft));
-                    setCandidates(null);
+                    setEffectChoice(null);
+                    choiceOrigin.current = "panel";
                     setError(null);
                   }}
                 >

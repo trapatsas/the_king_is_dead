@@ -147,6 +147,11 @@ fixtures while complete Advanced gameplay remains Milestone 7.
 
 ## Milestone 6 — Algorithmic controllers, audit log and persistence
 
+**Exploration:** [Algorithmic opponent design](BOT_DESIGN.md) records the current
+engine API audit, measured opening branching, an engine-validated heuristic-first
+approach, privacy/performance constraints, and evaluation steps. The reproducible
+probe is `node scripts/explore-bot-moves.mjs`; no playable bot is implemented yet.
+
 **Tasks**
 
 - Implement a shared controller API returning typed legal plans. Start with a seeded legal-random bot; add an inexpensive heuristic bot evaluating court sets/faction support, pending struggles, remaining hand and tempo. Make no claim of expert strength.

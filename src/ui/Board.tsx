@@ -3,6 +3,7 @@ import { FACTIONS, REGION_IDS } from "../game/domain";
 import type { FactionCounts, RegionId } from "../game/domain";
 import { FACTION_MARKS, title } from "./presentation";
 import type { TableView } from "./presentation";
+import type { FollowerPick } from "./effectChoices";
 
 const POSITIONS: Record<RegionId, readonly [number, number]> = {
   moray: [49, 9],
@@ -42,10 +43,18 @@ export function Board({
   table,
   choices,
   onRegion,
+  followerChoices,
+  onFollower,
+  selectedFollowers,
+  instruction,
 }: {
   table: TableView;
   choices: readonly RegionId[];
   onRegion: ((region: RegionId) => void) | null;
+  followerChoices: readonly FollowerPick[];
+  onFollower: ((pick: FollowerPick) => void) | null;
+  selectedFollowers: readonly FollowerPick[];
+  instruction: string | null;
 }) {
   const pending = table.regionCards.find((card) => card.faceUp)?.regionId;
   return (
@@ -57,6 +66,16 @@ export function Board({
         </div>
         <span className="map-key">Lines show the 13 borders</span>
       </div>
+      {instruction && (
+        <p className="board-instruction" role="status">
+          {instruction}.
+          {followerChoices.length
+            ? " Click the highlighted followers."
+            : choices.length
+              ? " Click the highlighted regions."
+              : ""}
+        </p>
+      )}
       <div className="map">
         <svg
           className="borders"
@@ -89,6 +108,9 @@ export function Board({
         {REGION_IDS.map((id) => {
           const region = table.regions[id];
           const eligible = choices.includes(id);
+          const followerEligible = followerChoices.some(
+            (pick) => pick.regionId === id,
+          );
           const control =
             region.control.kind === "faction"
               ? `${title(region.control.faction)} control`
@@ -96,23 +118,66 @@ export function Board({
                 ? "Unstable"
                 : "Uncontrolled";
           return (
-            <button
+            <div
               key={id}
-              className={`region ${eligible ? "eligible" : ""} ${pending === id ? "pending" : ""}`}
+              className={`region ${eligible || followerEligible ? "eligible" : ""} ${pending === id ? "pending" : ""}`}
               style={{
                 left: `${POSITIONS[id][0]}%`,
                 top: `${POSITIONS[id][1]}%`,
               }}
-              disabled={onRegion === null || !eligible}
-              onClick={() => onRegion?.(id)}
-              aria-label={`${title(id)}: ${control}; ${FACTIONS.map((faction) => `${title(faction)} ${region.followers[faction]}`).join(", ")}${eligible ? ", legal choice" : ""}`}
+              role="group"
+              aria-label={`${title(id)} region`}
             >
-              <strong>{title(id)}</strong>
+              <button
+                className="region-target"
+                disabled={onRegion === null || !eligible}
+                onClick={() => onRegion?.(id)}
+                aria-label={`${title(id)}: ${control}; ${FACTIONS.map((faction) => `${title(faction)} ${region.followers[faction]}`).join(", ")}${eligible ? ", legal choice" : ""}`}
+              >
+                <strong>{title(id)}</strong>
+              </button>
               {region.control.kind === "unresolved" ? (
-                <Followers
-                  counts={region.followers}
-                  label={`${title(id)} followers`}
-                />
+                <span
+                  className="followers region-followers"
+                  aria-label={`${title(id)} followers`}
+                >
+                  {FACTIONS.map((faction) => {
+                    const count = region.followers[faction];
+                    const allowed = followerChoices.some(
+                      (pick) =>
+                        pick.regionId === id && pick.faction === faction,
+                    );
+                    const selected = selectedFollowers.filter(
+                      (pick) =>
+                        pick.regionId === id && pick.faction === faction,
+                    ).length;
+                    return (
+                      <button
+                        key={faction}
+                        className={`follower follower-token ${faction} ${allowed ? "follower-eligible" : ""} ${selected ? "follower-selected" : ""}`}
+                        disabled={onFollower === null || !allowed}
+                        onClick={() => onFollower?.({ regionId: id, faction })}
+                        aria-label={`Select ${title(faction)} follower in ${title(id)} (${count} available${selected ? `, ${selected} selected` : ""})`}
+                        title={`${title(faction)} followers: ${count}. Select one per click.`}
+                      >
+                        <span className="pawn" aria-hidden="true">
+                          ♟
+                        </span>
+                        <span className="follower-amount" aria-hidden="true">
+                          {count}
+                        </span>
+                        {selected > 0 && (
+                          <span
+                            className="follower-selection-count"
+                            aria-hidden="true"
+                          >
+                            {selected}
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </span>
               ) : (
                 <span
                   className={`region-control ${region.control.kind === "faction" ? region.control.faction : ""}`}
@@ -120,7 +185,7 @@ export function Board({
                   {control}
                 </span>
               )}
-            </button>
+            </div>
           );
         })}
         <span className="compass" aria-hidden="true">
@@ -130,8 +195,8 @@ export function Board({
       <div className="map-caption">
         <span className="pending-dot" /> Next struggle:{" "}
         {pending ? title(pending) : "all regions resolved"}.{" "}
-        {choices.length > 0
-          ? "Highlighted regions are legal choices."
+        {choices.length > 0 || followerChoices.length > 0
+          ? "Highlighted targets are legal choices."
           : "Choose an action to see legal targets."}
       </div>
     </section>
@@ -142,10 +207,12 @@ export function RegionTrack({
   table,
   choices,
   onRegion,
+  selectedRegions,
 }: {
   table: TableView;
   choices: readonly RegionId[];
   onRegion: ((region: RegionId) => void) | null;
+  selectedRegions: readonly RegionId[];
 }) {
   return (
     <section className="track-panel" aria-label="Power struggle order">
@@ -157,7 +224,7 @@ export function RegionTrack({
         {table.regionCards.map((card) => (
           <li key={card.slot}>
             <button
-              className={`track-card ${!card.faceUp ? "resolved" : ""} ${choices.includes(card.regionId) ? "eligible" : ""}`}
+              className={`track-card ${!card.faceUp ? "resolved" : ""} ${choices.includes(card.regionId) ? "eligible" : ""} ${selectedRegions.includes(card.regionId) ? "chosen-region" : ""}`}
               disabled={onRegion === null || !choices.includes(card.regionId)}
               onClick={() => onRegion?.(card.regionId)}
               aria-label={`Slot ${card.slot}: ${title(card.regionId)}${!card.faceUp ? ", resolved" : ""}${card.negotiationDiscOwner ? `, marked by ${card.negotiationDiscOwner}` : ""}`}

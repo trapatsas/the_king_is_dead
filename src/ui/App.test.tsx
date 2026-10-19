@@ -9,13 +9,14 @@ import { turnEngine } from "../game/turns";
 import type { EffectPlan } from "../game/turnTypes";
 import { pass, setupSession, withBoard } from "../test/turnFixtures";
 import { App, Game } from "./App";
+import { describeEffect, projectTable, title } from "./presentation";
 import {
-  describeEffect,
-  narrowPlans,
-  nextDecision,
-  projectTable,
-  title,
-} from "./presentation";
+  beginEffectChoice,
+  completedEffect,
+  effectDecision,
+  pickEffectOption,
+} from "./effectChoices";
+import type { EffectChoice } from "./effectChoices";
 
 afterEach(cleanup);
 
@@ -25,11 +26,7 @@ async function reveal(user: ReturnType<typeof userEvent.setup>) {
 
 async function completeEffect(user: ReturnType<typeof userEvent.setup>) {
   for (let guard = 0; guard < 20; guard += 1) {
-    const confirm = screen.queryByRole("button", { name: "Use this effect" });
-    if (confirm) {
-      await user.click(confirm);
-      return;
-    }
+    if (screen.queryByRole("region", { name: "Summon a follower" })) return;
     const panel = screen.getByRole("region", { name: "Card effect" });
     const button = within(panel)
       .getAllByRole("button")
@@ -53,7 +50,7 @@ describe("hotseat game UI", () => {
     );
     await user.keyboard("{Enter}");
     expect(document.activeElement).toBe(
-      screen.getByRole("button", { name: "Use this effect" }),
+      screen.getByRole("button", { name: "Strathclyde" }),
     );
     await user.keyboard("{Enter}");
     const summons = within(
@@ -87,7 +84,7 @@ describe("hotseat game UI", () => {
     const committedCourt = screen.getByLabelText(courtName).textContent;
     const committedRegions = screen
       .getAllByRole("button", { name: /: Uncontrolled/ })
-      .map((button) => button.textContent);
+      .map((button) => button.getAttribute("aria-label"));
     await user.click(screen.getByRole("button", { name: "Play Assemble 1" }));
     await completeEffect(user);
     await user.click(
@@ -103,7 +100,7 @@ describe("hotseat game UI", () => {
     expect(
       screen
         .getAllByRole("button", { name: /: Uncontrolled/ })
-        .map((button) => button.textContent),
+        .map((button) => button.getAttribute("aria-label")),
     ).toEqual(committedRegions);
     expect(screen.queryByText(/Preview shown/)).toBeNull();
     expect(screen.getAllByRole("button", { name: /^Play / })).toHaveLength(8);
@@ -244,7 +241,11 @@ describe("hotseat game UI", () => {
     expect(
       screen.getByRole("region", { name: "Final turn summary" }).textContent,
     ).toContain("Summon 1");
-    expect(screen.getByRole("status").textContent).toContain("not committed");
+    expect(
+      screen
+        .getAllByRole("status")
+        .some((status) => status.textContent?.includes("not committed")),
+    ).toBe(true);
     expect(JSON.stringify(session)).toBe(before);
     await user.click(screen.getByRole("button", { name: "End Turn" }));
     const court = screen
@@ -266,6 +267,15 @@ describe("hotseat game UI", () => {
     await reveal(user);
     await user.click(screen.getByRole("button", { name: "Play Manoeuvre" }));
     await completeEffect(user);
+    expect(
+      screen
+        .getAllByRole("status")
+        .some((status) =>
+          status.textContent?.includes(
+            "No followers remain; confirm zero summon",
+          ),
+        ),
+    ).toBe(true);
     await user.click(
       screen.getByRole("button", {
         name: "Confirm zero summon — no eligible followers",
@@ -426,25 +436,22 @@ describe("presentation privacy and legal plan wizard", () => {
         card.id,
       );
       const leaves: EffectPlan[] = [];
-      function visit(candidates: readonly EffectPlan[], depth: number) {
+      function visit(choice: EffectChoice, depth: number) {
         expect(depth).toBeLessThan(20);
-        const decision = nextDecision(candidates);
-        if (!decision) {
-          expect(candidates).toHaveLength(1);
-          const leaf = candidates[0]!;
+        const leaf = completedEffect(choice);
+        if (leaf) {
           expect(describeEffect(leaf).length).toBeGreaterThan(0);
           leaves.push(leaf);
           return;
         }
+        const decision = effectDecision(choice);
+        if (!decision) throw new Error("Unreachable legal effect");
         for (const option of decision.options) {
-          const branch = narrowPlans(candidates, decision.key, option.value);
-          expect(branch.length).toBeGreaterThan(0);
-          expect(branch.length).toBeLessThan(candidates.length);
-          visit(branch, depth + 1);
+          visit(pickEffectOption(choice, option.key), depth + 1);
         }
       }
-      visit(all, 0);
-      expect(leaves).toHaveLength(all.length);
+      visit(beginEffectChoice(all), 0);
+      expect(leaves.length).toBeGreaterThanOrEqual(all.length);
       expect(new Set(leaves.map((plan) => JSON.stringify(plan)))).toEqual(
         new Set(all.map((plan) => JSON.stringify(plan))),
       );

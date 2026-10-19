@@ -417,6 +417,9 @@ details p {
   stroke-width: 0.5;
 }
 .region {
+  border: 1px solid var(--region-line);
+  border-radius: 5px;
+  color: var(--ink);
   position: absolute;
   transform: translate(-50%, -50%);
   display: flex;
@@ -437,6 +440,81 @@ details p {
     0.95rem Georgia,
     serif;
   margin-bottom: 0.3rem;
+}
+.region-target {
+  padding: 0;
+  margin: 0 0 0.2rem;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.region-target:disabled {
+  opacity: 1;
+}
+.region-target strong {
+  display: block;
+  margin: 0;
+}
+.region-target:hover:enabled {
+  background: transparent;
+  text-decoration: underline;
+}
+.region-followers {
+  gap: 0.3rem;
+}
+.region .follower-token {
+  position: relative;
+  min-width: 27px;
+  min-height: 29px;
+  padding: 0.15rem 0.25rem;
+  justify-content: center;
+  gap: 0.15rem;
+  font-size: 0.7rem;
+}
+.region .follower-token:disabled {
+  opacity: 1;
+}
+.region .follower-token .follower-amount {
+  font-size: 0.75rem;
+}
+.region .follower-token .pawn {
+  font-size: 0.9rem;
+  line-height: 1;
+}
+.follower-token.follower-eligible {
+  border-color: currentColor;
+  box-shadow: 0 0 0 1px currentColor;
+}
+.follower-token.follower-selected {
+  outline: 2px solid var(--gold);
+  outline-offset: 1px;
+}
+.region .follower-selection-count {
+  position: absolute;
+  top: -0.5rem;
+  right: -0.3rem;
+  border-radius: 100%;
+  padding: 0.04rem 0.18rem;
+  background: var(--gold);
+  color: var(--badge-text);
+  font-size: 0.6rem;
+  line-height: 1.1;
+}
+.board-instruction {
+  padding: 0.65rem 1rem;
+  margin: 0.7rem 1rem 0;
+  border: 1px solid var(--eligible-line);
+  border-radius: 4px;
+  background: var(--eligible-bg);
+  font-size: 0.78rem;
+}
+.picked-targets {
+  font-size: 0.72rem;
+  color: var(--eyebrow);
+}
+.track-card.chosen-region {
+  border-color: var(--gold);
+  box-shadow: inset 0 3px var(--gold);
 }
 .region.pending {
   border-top: 3px solid var(--gold);
@@ -1009,6 +1087,18 @@ details p {
   }
 }
 @media (max-width: 450px) {
+  .region .follower-token .follower-amount {
+    font-size: 0.66rem;
+  }
+  .region .follower-token {
+    min-width: 22px;
+    min-height: 28px;
+    padding: 0.1rem;
+    font-size: 0.65rem;
+  }
+  .region .follower-token .pawn {
+    font-size: 0.8rem;
+  }
   .app-header {
     gap: 0.6rem;
   }

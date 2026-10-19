@@ -411,7 +411,13 @@ randomness, or an unapproved extra tiebreak.
 > _Swap a follower in any region with two followers in a bordering region._
 
 - You may swap followers of the same faction.
+- The two followers returned from the bordering region may be of the same or
+  different factions. Having two followers of one faction available does not
+  prevent choosing a mixed pair.
 - If a 1-for-2 swap can be made in full, you **must** do so. If not, you must swap 1 follower with 1 single follower in a bordering region.
+- This fallback is global: a 1-for-1 swap is unavailable while any legal full
+  1-for-2 swap exists. These readings agree with the publisher's
+  [Second Edition rulebook, page 9](https://www.ospreypublishing.com/media/3yxddtqg/tkid2_rulebook.pdf#page=9).
 - **Anti-Undo Rule:** You cannot use Outmanoeuvre to directly undo another player's
   preceding Outmanoeuvre unless at least one other card action has taken place
   since it. Intervening passes and mandatory summoning do not break the restriction.

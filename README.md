@@ -46,13 +46,22 @@ without resetting the game or your current draft. Light is the default.
 
 Choose Standard, two or three Human seats, and optionally a setup seed. Pass the
 device to the named player and reveal their hand. Choose a card, follow its
-legal effect choices, confirm the effect, and summon a follower. The board and
+legal effect choices, and summon a follower. The last effect choice advances
+directly to summoning, with no extra confirmation. The board and
 court then show a labeled preview. Review the final summary and select **End
 Turn** to commit; **Reset Turn** restores the committed position. Passing also
 requires End Turn. Everyone passing consecutively resolves the next struggle.
 
 Keyboard focus follows each choice through effect, summon, summary, and private
 handoff. Region buttons offer the same eligible targets as the choice panel.
+Click the pawn/count tokens on the map to select followers for Manoeuvre,
+Outmanoeuvre, and summoning. Each click selects one follower; click a faction
+twice to choose two of that faction. Outmanoeuvre allows mixed pairs and requires
+a full 1-for-2 swap whenever one is legal. Placement cards use region titles, and
+Negotiate accepts either region card first. Highlighted tokens/regions show legal
+choices; the side panel offers the same choices for keyboard use, with Undo and
+Restart controls before commitment.
+
 The board is an original schematic of the approved graph; numbered cards show
 struggle order separately and are click-only. Courts, supply, control discs,
 instability, and visible discard tops are public. Hidden hands are absent from
@@ -223,4 +232,5 @@ is connected.
 - [Authoritative rules](the_king_is_dead_2nd_edition_rulebook.md)
 - [Architecture and contracts](docs/HIGH_LEVEL_DESIGN.md)
 - [Ordered milestones](docs/IMPLEMENTATION_PLAN.md)
+- [Algorithmic opponent exploration](docs/BOT_DESIGN.md)
 - [Agent kickoff and first-task scope](docs/AGENT_KICKOFF_PROMPT.md)

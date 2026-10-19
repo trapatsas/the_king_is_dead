@@ -512,3 +512,90 @@ unverified; the selected palette was tested in headless Chromium.
 
 **Next milestone remains:** Milestone 6 — controllers, observations, save/resume,
 and validated replay.
+
+## Algorithmic opponent exploration
+
+**Explored 2026-10-19:** committed the completed light/dark appearance feature as
+`152cf93`, then audited the Standard engine and controller design. Added
+`docs/BOT_DESIGN.md` and the reproducible, read-only
+`scripts/explore-bot-moves.mjs` probe; linked the design from README and the M6
+plan. No bot is enabled, no production engine/UI behavior changes, and no
+playing-strength or win-rate claim is made.
+
+Eight deterministic opening positions at two/three players expose 23,947–30,061
+complete legal turns, including pass, summons, and both physical Assemble cards.
+In one container run the effect/summon count took about 12–17 ms per position;
+32 sampled Assemble public-API previews/commits averaged about 4.2 ms each.
+These are Node timings and partial profiles, not browser-performance guarantees
+or measurements of evaluating every move.
+
+The proposed first opponent is an engine-validated public-state heuristic with a
+seeded legal-random baseline. The design covers batching existing engine
+operations, jointly ranking effect/summon choices, diverse shortlisting, exact
+successor simulation including terminal passes, card economy, both victory
+conditions, hidden-hand/Plot side channels, cancellation, multi-player objectives,
+and seat-balanced evaluation. Later information-set search is a research-backed
+option to test, not a promised strength improvement.
+
+**Verification:** the probe executes against the real engine and validates 32
+sampled complete turns without modifying a session. Lint, formatting, and Git
+whitespace checks pass. No runtime source or dependencies changed after the theme
+commit; its previously passing 294-test suite is unchanged. The exploration is
+not completion of Milestone 6, persistence/replay, or a playable opponent.
+
+## Board selection fixes — Milestone 5 follow-up
+
+**Implemented 2026-10-19:** fixed Negotiate endpoint selection and follower-swap
+selection by replacing field-by-field canonical-operation filtering with
+presentation paths derived from the engine's existing legal plans. Negotiate
+accepts either region card first. Manoeuvre can start at either endpoint.
+Outmanoeuvre starts with the single follower, then selects the two return
+followers in either faction order; mixed pairs remain available even when a
+same-faction pair exists. The original canonical engine plan is submitted
+unchanged after the choices are complete.
+
+Removed **Use this effect**. The last required target/follower choice immediately
+applies a draft preview and advances to summon. No-effect cards also advance
+directly; explicit zero summon remains available when required. Reset Turn and
+End Turn preserve their original discard/commit boundary. Partial choices offer
+Undo and Restart, and the privacy curtain hides partial selection markers.
+
+Map pawn/count tokens are now clickable for Manoeuvre, Outmanoeuvre, and summons:
+one follower per click, with a selected-count marker while composing a swap.
+Click twice to choose two of the same faction. Region titles remain targets for
+placements/Negotiate, and the sidebar offers the same choices. The board displays
+the current instruction; pointer selection stays on the board instead of moving
+focus/scroll to the sidebar after every pick. Keyboard sidebar focus, final
+summary review, and private handoff remain supported. Region/follower controls
+are sibling buttons rather than invalid nested buttons.
+
+**Official rules checked:** publisher's Second Edition rulebook, printed page 9,
+[Outmanoeuvre](https://www.ospreypublishing.com/media/3yxddtqg/tkid2_rulebook.pdf#page=9).
+The full 1-for-2 priority agrees with the project rules: 1-for-1 is only available
+when no legal full swap exists. The pair is not restricted to one faction. Added
+those explanations to the project rulebook and UI; the engine already generated
+the correct mixed/full-tier plans, so its rule implementation is unchanged.
+
+**Files:** added `src/ui/effectChoices.ts` and `boardChoices.test.tsx`; updated
+App/Board, presentation helpers, light/dark styles, existing UI/engine tests,
+rulebook, README, design, and this report. Bot exploration files remain separate
+pending work. No new dependencies or state-schema changes.
+
+**Verification:** ten additional regressions, for **304 passing tests across
+18 files**. Coverage includes reversed Negotiate selection, both mixed-pair
+orders with duplicate same-faction followers present, same-faction double
+selection, global full-tier/fallback behavior, reversed Manoeuvre selection,
+board summoning, partial Undo, privacy, and absence of extra effect confirmation.
+The existing exhaustive chooser test now verifies every legal Standard effect
+remains reachable through the new presentation paths. All five required checks
+(typecheck, lint, tests, formatting, production build) pass.
+
+Real Chromium completed both full Standard games again (16 actions/30 turns at
+two players; 24 actions/33 turns at three), with keyboard operation and final
+logs. A separate test used a real seeded starting position to select mixed pairs
+in both orders, a same-faction pair, reversed Negotiate endpoints, and a direct
+board summon followed by commit. It verified board selection does not force
+scrolling to the sidebar, no nested buttons/browser errors, and light/dark
+320px/390px/1280px layouts without horizontal overflow. Board/selection/mobile
+screenshots were inspected. Host port forwarding and physical devices remain
+unverified. The existing development server was reused.
