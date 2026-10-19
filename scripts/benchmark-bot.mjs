@@ -14,8 +14,8 @@ if (
   !Number.isSafeInteger(seeds) ||
   seeds < 1 ||
   seeds > 10000 ||
-  !["mcts", "one-ply", "random"].includes(policy) ||
-  !["random", "one-ply"].includes(opponent)
+  !["mcts", "reference", "patient", "one-ply", "random"].includes(policy) ||
+  !["mcts", "reference", "patient", "random", "one-ply"].includes(opponent)
 )
   throw new Error("Invalid benchmark options");
 const server = await createServer({
@@ -26,7 +26,7 @@ const server = await createServer({
   server: { middlewareMode: true, hmr: false, watch: null, ws: false },
 });
 try {
-  const [setup, turns, visibility, memory, search, simulation] =
+  const [setup, turns, visibility, memory, search, simulation, patient] =
     await Promise.all(
       [
         "/src/game/setup.ts",
@@ -35,23 +35,36 @@ try {
         "/src/app/botObservation.ts",
         "/src/bot/search.ts",
         "/src/bot/simulation.ts",
+        "/src/bot/patient.ts",
       ].map((path) => server.ssrLoadModule(path)),
     );
   const games = [];
   for (let seed = 0; seed < seeds; seed++) {
     for (let seat = 0; seat < count; seat++) {
       const bot = new search.StandardBot(),
+        patientBot = new patient.PatientBot(),
         random = simulation.seededRandom(seed * 100 + seat + 1);
       let session = setup.createGame({
         seed: `${prefix}-${seed}`,
         mode: "standard",
-        players: Array.from({ length: count }, (_, i) => ({
-          id: `p${i}`,
-          controller: "human",
-        })),
+        players: Array.from({ length: count }, (_, i) => {
+          const strategy = i === seat ? policy : opponent;
+          return {
+            id: `p${i}`,
+            controller: ["mcts", "reference", "patient"].includes(strategy)
+              ? "algorithmic"
+              : "human",
+            ...(["mcts", "reference", "patient"].includes(strategy)
+              ? {
+                  botStrategy: strategy === "patient" ? "patient" : "reference",
+                }
+              : {}),
+          };
+        }),
       });
       const stats = [];
       let policyMs = 0;
+      let opening = null;
       while (session.state.phase === "turn") {
         if (session.state.turnSequence > count * (8 * count + 8))
           throw new Error("Game exceeded finite turn bound");
@@ -60,19 +73,33 @@ try {
           strategy = isBot ? policy : opponent;
         let plan;
         const start = performance.now();
-        if (strategy === "mcts") {
-          const result = bot.search({
+        if (["mcts", "reference", "patient"].includes(strategy)) {
+          const result = (strategy === "patient" ? patientBot : bot).search({
             observation: visibility.getObservation(state, state.activePlayerId),
             memory: memory.witnessedCards(session),
             budget: { iterations, seed: Math.floor(random() * 2 ** 32) },
           });
           plan = result.plan;
-          stats.push(result.stats);
+          if (isBot) stats.push(result.stats);
         } else if (strategy === "one-ply") plan = search.onePly(state, random);
         else plan = simulation.randomPlan(state, random);
         if (isBot) policyMs += performance.now() - start;
         // Every submitted move independently checked by the public engine.
         const commit = turns.turnEngine.commitTurn(state, plan);
+        if (
+          opening === null &&
+          commit.events.some((event) => event.type === "PowerStruggleResolved")
+        ) {
+          opening = {
+            firstStruggleTurn: commit.state.turnSequence,
+            hands: Object.fromEntries(
+              Object.values(commit.state.players).map((player) => [
+                player.id,
+                player.hand.length,
+              ]),
+            ),
+          };
+        }
         session = {
           state: commit.state,
           events: [...session.events, ...commit.events],
@@ -89,6 +116,7 @@ try {
         seed,
         seat,
         score,
+        opening,
         outcome: result.kind,
         winner: result.kind === "win" ? result.winner : null,
         contenders:
@@ -126,7 +154,14 @@ try {
   console.log(
     JSON.stringify(
       {
-        version: search.BOT_VERSION,
+        version:
+          policy === "patient"
+            ? patient.PATIENT_BOT_VERSION
+            : search.BOT_VERSION,
+        policyVersions: {
+          reference: search.BOT_VERSION,
+          patient: patient.PATIENT_BOT_VERSION,
+        },
         policy,
         opponent,
         count,

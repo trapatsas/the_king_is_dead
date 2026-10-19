@@ -1,6 +1,7 @@
 import { cunningDeck, standardCards } from "./cards";
 import {
   CONTROLLER_KINDS,
+  BOT_STRATEGIES,
   CUNNING_CARD_TYPES,
   FACTIONS,
   REGION_IDS,
@@ -131,6 +132,12 @@ export function assertGameInvariants(state: GameState): void {
     requireInvariant(
       CONTROLLER_KINDS.includes(player.controller),
       "Controller",
+    );
+    requireInvariant(
+      player.botStrategy === undefined ||
+        (player.controller === "algorithmic" &&
+          BOT_STRATEGIES.includes(player.botStrategy)),
+      "Bot strategy",
     );
     assertCounts(player.court, `Court ${id}`);
     const inventory = [...player.hand, ...player.discards];

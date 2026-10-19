@@ -1,5 +1,10 @@
 import { useState } from "react";
-import type { ControllerKind, GameMode, SetupConfig } from "../game/domain";
+import type {
+  BotStrategy,
+  ControllerKind,
+  GameMode,
+  SetupConfig,
+} from "../game/domain";
 
 export function Setup({ onStart }: { onStart: (config: SetupConfig) => void }) {
   const [count, setCount] = useState(3);
@@ -8,6 +13,11 @@ export function Setup({ onStart }: { onStart: (config: SetupConfig) => void }) {
     "human",
     "human",
     "human",
+  ]);
+  const [strategies, setStrategies] = useState<BotStrategy[]>([
+    "reference",
+    "reference",
+    "reference",
   ]);
   const [seed, setSeed] = useState("");
   const [names, setNames] = useState(["", "", ""]);
@@ -77,6 +87,9 @@ export function Setup({ onStart }: { onStart: (config: SetupConfig) => void }) {
             players: controllers.slice(0, count).map((controller, index) => ({
               id: playerNames[index]!,
               controller,
+              ...(controller === "algorithmic"
+                ? { botStrategy: strategies[index]! }
+                : {}),
             })),
           });
         }}
@@ -157,6 +170,36 @@ export function Setup({ onStart }: { onStart: (config: SetupConfig) => void }) {
                   <option value="llm">LLM · not configured</option>
                 </select>
               </label>
+              {controller === "algorithmic" && (
+                <label className="seat-strategy">
+                  Bot strategy
+                  <select
+                    aria-label={`Player ${index + 1} strategy`}
+                    value={strategies[index]}
+                    onChange={(event) =>
+                      setStrategies((previous) =>
+                        previous.map((value, i) =>
+                          i === index
+                            ? (event.target.value as BotStrategy)
+                            : value,
+                        ),
+                      )
+                    }
+                  >
+                    <option value="reference">
+                      Reference · original aggressive bot
+                    </option>
+                    <option value="patient">
+                      Patient · reserve and respond
+                    </option>
+                  </select>
+                  <span className="hint">
+                    {strategies[index] === "patient"
+                      ? "Keeps cards for later struggles and can wait for others to commit."
+                      : "The original bot, kept as a comparison."}
+                  </span>
+                </label>
+              )}
             </div>
           ))}
         </fieldset>

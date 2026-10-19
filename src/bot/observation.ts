@@ -54,6 +54,7 @@ export function reconstructStandard(
         {
           id: p.id,
           controller: p.controller,
+          ...(p.botStrategy ? { botStrategy: p.botStrategy } : {}),
           court: p.court,
           hand,
           discards,

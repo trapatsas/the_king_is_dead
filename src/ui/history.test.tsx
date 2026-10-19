@@ -70,6 +70,33 @@ describe("visible last moves", () => {
   });
 });
 describe("seat names", () => {
+  it("configures humans, the reference bot and the patient bot in the same game", async () => {
+    window.history.replaceState(null, "", "/?bots=experimental");
+    const user = userEvent.setup(),
+      start = vi.fn();
+    render(<Setup onStart={start} />);
+    await user.selectOptions(
+      screen.getByLabelText("Player 2 controller"),
+      "algorithmic",
+    );
+    await user.selectOptions(
+      screen.getByLabelText("Player 3 controller"),
+      "algorithmic",
+    );
+    expect(
+      (screen.getByLabelText("Player 2 strategy") as HTMLSelectElement).value,
+    ).toBe("reference");
+    await user.selectOptions(
+      screen.getByLabelText("Player 3 strategy"),
+      "patient",
+    );
+    await user.click(screen.getByRole("button", { name: /Begin game/ }));
+    expect(start.mock.calls[0]![0].players).toEqual([
+      { id: "Player 1", controller: "human" },
+      { id: "Bot 2", controller: "algorithmic", botStrategy: "reference" },
+      { id: "Bot 3", controller: "algorithmic", botStrategy: "patient" },
+    ]);
+  });
   it("uses custom human and bot names and rejects ambiguous duplicates", async () => {
     window.history.replaceState(null, "", "/?bots=experimental");
     const user = userEvent.setup(),
@@ -94,7 +121,7 @@ describe("seat names", () => {
     await user.click(screen.getByRole("button", { name: /Begin game/ }));
     expect(start.mock.calls[0]![0].players).toEqual([
       { id: "Alice", controller: "human" },
-      { id: "Merlin", controller: "algorithmic" },
+      { id: "Merlin", controller: "algorithmic", botStrategy: "reference" },
     ]);
   });
 });

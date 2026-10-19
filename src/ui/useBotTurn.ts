@@ -65,5 +65,10 @@ export function useBotTurn(
     void choose();
     return () => abort.abort();
   }, [session, state, active, retry]);
-  return { active, error, retry: () => setRetry((n) => n + 1) };
+  return {
+    active,
+    strategy: state.players[state.activePlayerId]?.botStrategy ?? "reference",
+    error,
+    retry: () => setRetry((n) => n + 1),
+  };
 }

@@ -1,0 +1,405 @@
+{
+  "observation": {
+    "viewer": "Bot 2",
+    "mode": "standard",
+    "phase": "turn",
+    "ending": null,
+    "playerOrder": ["Panos", "Bot 2", "Bot 3"],
+    "startingPlayerId": "Bot 3",
+    "activePlayerId": "Bot 2",
+    "turnSequence": 23,
+    "actionSequence": 17,
+    "consecutivePasses": 0,
+    "regions": {
+      "moray": {
+        "id": "moray",
+        "followers": {
+          "scottish": 1,
+          "welsh": 1,
+          "english": 0
+        },
+        "control": {
+          "kind": "unresolved"
+        }
+      },
+      "strathclyde": {
+        "id": "strathclyde",
+        "followers": {
+          "scottish": 4,
+          "welsh": 2,
+          "english": 1
+        },
+        "control": {
+          "kind": "unresolved"
+        }
+      },
+      "lancaster": {
+        "id": "lancaster",
+        "followers": {
+          "scottish": 0,
+          "welsh": 0,
+          "english": 3
+        },
+        "control": {
+          "kind": "unresolved"
+        }
+      },
+      "northumbria": {
+        "id": "northumbria",
+        "followers": {
+          "scottish": 5,
+          "welsh": 0,
+          "english": 1
+        },
+        "control": {
+          "kind": "unresolved"
+        }
+      },
+      "gwynedd": {
+        "id": "gwynedd",
+        "followers": {
+          "scottish": 0,
+          "welsh": 2,
+          "english": 1
+        },
+        "control": {
+          "kind": "unresolved"
+        }
+      },
+      "warwick": {
+        "id": "warwick",
+        "followers": {
+          "scottish": 0,
+          "welsh": 2,
+          "english": 2
+        },
+        "control": {
+          "kind": "unresolved"
+        }
+      },
+      "essex": {
+        "id": "essex",
+        "followers": {
+          "scottish": 0,
+          "welsh": 3,
+          "english": 0
+        },
+        "control": {
+          "kind": "unresolved"
+        }
+      },
+      "devon": {
+        "id": "devon",
+        "followers": {
+          "scottish": 0,
+          "welsh": 0,
+          "english": 3
+        },
+        "control": {
+          "kind": "unresolved"
+        }
+      }
+    },
+    "regionCards": [
+      {
+        "slot": 1,
+        "regionId": "northumbria",
+        "faceUp": true,
+        "negotiationDiscOwner": "Bot 2"
+      },
+      {
+        "slot": 2,
+        "regionId": "strathclyde",
+        "faceUp": true,
+        "negotiationDiscOwner": null
+      },
+      {
+        "slot": 3,
+        "regionId": "devon",
+        "faceUp": true,
+        "negotiationDiscOwner": null
+      },
+      {
+        "slot": 4,
+        "regionId": "lancaster",
+        "faceUp": true,
+        "negotiationDiscOwner": null
+      },
+      {
+        "slot": 5,
+        "regionId": "essex",
+        "faceUp": true,
+        "negotiationDiscOwner": "Bot 3"
+      },
+      {
+        "slot": 6,
+        "regionId": "gwynedd",
+        "faceUp": true,
+        "negotiationDiscOwner": null
+      },
+      {
+        "slot": 7,
+        "regionId": "moray",
+        "faceUp": true,
+        "negotiationDiscOwner": null
+      },
+      {
+        "slot": 8,
+        "regionId": "warwick",
+        "faceUp": true,
+        "negotiationDiscOwner": null
+      }
+    ],
+    "supply": {
+      "scottish": 0,
+      "welsh": 0,
+      "english": 0
+    },
+    "controlDiscsInSupply": {
+      "scottish": 8,
+      "welsh": 8,
+      "english": 8
+    },
+    "instabilityDiscsInFrance": 3,
+    "players": [
+      {
+        "id": "Panos",
+        "controller": "human",
+        "court": {
+          "scottish": 0,
+          "welsh": 4,
+          "english": 1
+        },
+        "handCount": 5,
+        "discardCount": 3,
+        "discardTop": {
+          "id": "standard:Panos:outmanoeuvre:1",
+          "type": "outmanoeuvre"
+        },
+        "negotiationDiscLocation": null,
+        "lastActionSequence": 17
+      },
+      {
+        "id": "Bot 2",
+        "controller": "algorithmic",
+        "botStrategy": "patient",
+        "court": {
+          "scottish": 4,
+          "welsh": 2,
+          "english": 3
+        },
+        "handCount": 1,
+        "discardCount": 7,
+        "discardTop": {
+          "id": "standard:Bot%202:outmanoeuvre:1",
+          "type": "outmanoeuvre"
+        },
+        "negotiationDiscLocation": "northumbria",
+        "lastActionSequence": 16
+      },
+      {
+        "id": "Bot 3",
+        "controller": "algorithmic",
+        "botStrategy": "reference",
+        "court": {
+          "scottish": 4,
+          "welsh": 2,
+          "english": 3
+        },
+        "handCount": 1,
+        "discardCount": 7,
+        "discardTop": {
+          "id": "standard:Bot%203:welsh-support:1",
+          "type": "welsh-support"
+        },
+        "negotiationDiscLocation": "essex",
+        "lastActionSequence": 15
+      }
+    ],
+    "lastSwap": {
+      "playerId": "Panos",
+      "actionSequence": 17,
+      "effectiveCard": "outmanoeuvre",
+      "transfers": [
+        {
+          "from": "northumbria",
+          "to": "essex",
+          "faction": "welsh",
+          "count": 2
+        },
+        {
+          "from": "essex",
+          "to": "northumbria",
+          "faction": "scottish",
+          "count": 1
+        }
+      ]
+    },
+    "plot": null,
+    "result": null,
+    "seed": null,
+    "own": {
+      "playerId": "Bot 2",
+      "hand": [
+        {
+          "id": "standard:Bot%202:assemble:2",
+          "type": "assemble"
+        }
+      ],
+      "discards": [
+        {
+          "id": "standard:Bot%202:negotiate:1",
+          "type": "negotiate"
+        },
+        {
+          "id": "standard:Bot%202:assemble:1",
+          "type": "assemble"
+        },
+        {
+          "id": "standard:Bot%202:english-support:1",
+          "type": "english-support"
+        },
+        {
+          "id": "standard:Bot%202:scottish-support:1",
+          "type": "scottish-support"
+        },
+        {
+          "id": "standard:Bot%202:manoeuvre:1",
+          "type": "manoeuvre"
+        },
+        {
+          "id": "standard:Bot%202:welsh-support:1",
+          "type": "welsh-support"
+        },
+        {
+          "id": "standard:Bot%202:outmanoeuvre:1",
+          "type": "outmanoeuvre"
+        }
+      ]
+    }
+  },
+  "memory": {
+    "eventSequence": 23,
+    "plays": [
+      {
+        "playerId": "Bot 3",
+        "card": {
+          "id": "standard:Bot%203:assemble:1",
+          "type": "assemble"
+        }
+      },
+      {
+        "playerId": "Panos",
+        "card": {
+          "id": "standard:Panos:assemble:1",
+          "type": "assemble"
+        }
+      },
+      {
+        "playerId": "Bot 2",
+        "card": {
+          "id": "standard:Bot%202:negotiate:1",
+          "type": "negotiate"
+        }
+      },
+      {
+        "playerId": "Bot 3",
+        "card": {
+          "id": "standard:Bot%203:scottish-support:1",
+          "type": "scottish-support"
+        }
+      },
+      {
+        "playerId": "Panos",
+        "card": {
+          "id": "standard:Panos:scottish-support:1",
+          "type": "scottish-support"
+        }
+      },
+      {
+        "playerId": "Bot 2",
+        "card": {
+          "id": "standard:Bot%202:assemble:1",
+          "type": "assemble"
+        }
+      },
+      {
+        "playerId": "Bot 3",
+        "card": {
+          "id": "standard:Bot%203:manoeuvre:1",
+          "type": "manoeuvre"
+        }
+      },
+      {
+        "playerId": "Bot 2",
+        "card": {
+          "id": "standard:Bot%202:english-support:1",
+          "type": "english-support"
+        }
+      },
+      {
+        "playerId": "Bot 3",
+        "card": {
+          "id": "standard:Bot%203:assemble:2",
+          "type": "assemble"
+        }
+      },
+      {
+        "playerId": "Bot 2",
+        "card": {
+          "id": "standard:Bot%202:scottish-support:1",
+          "type": "scottish-support"
+        }
+      },
+      {
+        "playerId": "Bot 3",
+        "card": {
+          "id": "standard:Bot%203:outmanoeuvre:1",
+          "type": "outmanoeuvre"
+        }
+      },
+      {
+        "playerId": "Bot 2",
+        "card": {
+          "id": "standard:Bot%202:manoeuvre:1",
+          "type": "manoeuvre"
+        }
+      },
+      {
+        "playerId": "Bot 3",
+        "card": {
+          "id": "standard:Bot%203:negotiate:1",
+          "type": "negotiate"
+        }
+      },
+      {
+        "playerId": "Bot 2",
+        "card": {
+          "id": "standard:Bot%202:welsh-support:1",
+          "type": "welsh-support"
+        }
+      },
+      {
+        "playerId": "Bot 3",
+        "card": {
+          "id": "standard:Bot%203:welsh-support:1",
+          "type": "welsh-support"
+        }
+      },
+      {
+        "playerId": "Bot 2",
+        "card": {
+          "id": "standard:Bot%202:outmanoeuvre:1",
+          "type": "outmanoeuvre"
+        }
+      },
+      {
+        "playerId": "Panos",
+        "card": {
+          "id": "standard:Panos:outmanoeuvre:1",
+          "type": "outmanoeuvre"
+        }
+      }
+    ]
+  }
+}

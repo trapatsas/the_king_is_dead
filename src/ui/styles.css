@@ -1340,3 +1340,10 @@ details p {
   gap: 0.5rem;
   margin-bottom: 1rem;
 }
+.seat-strategy {
+  grid-column: 1 / -1;
+}
+.seat-strategy .hint {
+  display: block;
+  margin: 0.4rem 0 0.7rem;
+}

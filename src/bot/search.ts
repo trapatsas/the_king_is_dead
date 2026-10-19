@@ -42,6 +42,22 @@ export interface SearchResult {
   readonly stats: SearchStats;
   readonly explanation: string;
 }
+export interface RootChoice {
+  readonly plan: TurnPlan;
+  readonly state: GameState;
+  readonly visits: number;
+  readonly mean: readonly number[];
+  readonly prior: readonly number[];
+}
+export interface SearchPolicy {
+  readonly evaluate: (state: GameState) => number[];
+  readonly evaluateLeaf?: (state: GameState) => number[];
+  readonly chooseRoot?: (
+    state: GameState,
+    choices: readonly RootChoice[],
+  ) => TurnPlan | undefined;
+  readonly explain?: (plan: TurnPlan) => string;
+}
 interface Candidate {
   plan: TurnPlan;
   state: GameState;
@@ -67,12 +83,16 @@ function node(state: GameState, prior = evaluate(state)): Node {
     seen: new Set(),
   };
 }
-function candidate(state: GameState, plan: TurnPlan): Candidate {
+function candidate(
+  state: GameState,
+  plan: TurnPlan,
+  evaluator: SearchPolicy["evaluate"] = evaluate,
+): Candidate {
   const next = simulate(state, plan);
   return {
     plan,
     state: next,
-    value: evaluate(next),
+    value: evaluator(next),
     key: JSON.stringify(plan),
   };
 }
@@ -80,18 +100,20 @@ function candidates(
   parent: Node,
   random: Random,
   samplesPerCard: number,
+  evaluator: SearchPolicy["evaluate"] = evaluate,
 ): Candidate[] {
   const state = parent.state;
   parent.choices ??= cardChoices(state);
   const options: Candidate[] = [];
   const pass = passPlan(state);
   if (!parent.seen.has(JSON.stringify(pass)))
-    options.push(candidate(state, pass));
+    options.push(candidate(state, pass, evaluator));
   for (const choices of parent.choices) {
     for (let i = 0; i < samplesPerCard; i++) {
       const plan = sampleCardPlan(state, choices, random);
       const key = JSON.stringify(plan);
-      if (!parent.seen.has(key)) options.push(candidate(state, plan));
+      if (!parent.seen.has(key))
+        options.push(candidate(state, plan, evaluator));
     }
   }
   return options;
@@ -110,11 +132,13 @@ export function onePly(
 function expand(
   parent: Node,
   random: Random,
+  evaluator: SearchPolicy["evaluate"],
 ): { plan: TurnPlan; node: Node } | undefined {
   const options = candidates(
     parent,
     random,
     parent.children.length === 0 ? 4 : 2,
+    evaluator,
   );
   const actor = parent.state.playerOrder.indexOf(parent.state.activePlayerId);
   options.sort((a, b) => b.value[actor]! - a.value[actor]!);
@@ -153,11 +177,20 @@ function select(parent: Node): { plan: TurnPlan; node: Node } {
   }
   return best;
 }
-function rollout(state: GameState, random: Random): GameState {
+function rollout(
+  state: GameState,
+  random: Random,
+  evaluator: SearchPolicy["evaluate"],
+): GameState {
   if (state.phase !== "turn") return state;
   // Small, epsilon-greedy candidate batch. Unlike the baseline this is deliberately
   // cheap; tree selection does the sustained lookahead.
-  const options = candidates(node(state), random, 1);
+  const options = candidates(
+    node(state, evaluator(state)),
+    random,
+    1,
+    evaluator,
+  );
   const actor = state.playerOrder.indexOf(state.activePlayerId);
   const choice =
     random() < 0.12
@@ -186,12 +219,14 @@ function stateKey(state: GameState): string {
         p.court,
         p.negotiationDiscLocation,
         p.lastActionSequence,
+        ...(p.botStrategy ? [p.botStrategy] : []),
       ];
     }),
   ]);
 }
 export class StandardBot {
   private roots = new Map<string, Node>();
+  constructor(private readonly policy: SearchPolicy = { evaluate }) {}
   search(request: SearchRequest): SearchResult {
     const { budget } = request;
     if (
@@ -224,7 +259,7 @@ export class StandardBot {
           pending.push(...n.children.map((c) => c.node));
       }
     }
-    root ??= node(state);
+    root ??= node(state, this.policy.evaluate(state));
     const random = seededRandom(budget.seed);
     const stats: SearchStats = {
       iterations: 0,
@@ -249,7 +284,8 @@ export class StandardBot {
           Math.floor(1.6 * Math.sqrt(current.visits + 1)),
         );
         let child: ReturnType<typeof expand>;
-        if (current.children.length < width) child = expand(current, random);
+        if (current.children.length < width)
+          child = expand(current, random, this.policy.evaluate);
         if (!child && current.children.length) child = select(current);
         if (!child) break;
         const fresh = child.node.visits === 0;
@@ -266,10 +302,10 @@ export class StandardBot {
       }
       let leaf = current.state;
       for (let j = 0; j < 2 && leaf.phase === "turn"; j++) {
-        leaf = rollout(leaf, random);
+        leaf = rollout(leaf, random, this.policy.evaluate);
         depth++;
       }
-      const value = evaluate(leaf);
+      const value = (this.policy.evaluateLeaf ?? this.policy.evaluate)(leaf);
       for (const n of path) {
         n.visits++;
         value.forEach((v, seat) => {
@@ -286,8 +322,23 @@ export class StandardBot {
     const winning = root.children.find(
       (c) => c.node.state.result && c.node.prior[actor] === 1,
     );
+    const preferred =
+      !winning &&
+      this.policy.chooseRoot?.(
+        state,
+        root.children.map((child) => ({
+          plan: child.plan,
+          state: child.node.state,
+          visits: child.node.visits,
+          mean: child.node.visits
+            ? child.node.total.map((v) => v / child.node.visits)
+            : child.node.prior,
+          prior: child.node.prior,
+        })),
+      );
     const best =
       winning ??
+      root.children.find((child) => child.plan === preferred) ??
       [...root.children].sort(
         (a, b) =>
           b.node.visits - a.node.visits ||
@@ -302,9 +353,10 @@ export class StandardBot {
       plan: best.plan,
       stats,
       explanation:
-        best.plan.kind === "pass"
+        this.policy.explain?.(best.plan) ??
+        (best.plan.kind === "pass"
           ? "Pass to preserve cards and advance the current struggle when others also pass."
-          : "Improve the court and regional balance while considering opponents’ replies.",
+          : "Improve the court and regional balance while considering opponents’ replies."),
     };
   }
 }

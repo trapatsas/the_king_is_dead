@@ -1,4 +1,5 @@
-import type { ControllerKind, GameMode } from "../game/domain";
+import { BOT_STRATEGIES } from "../game/domain";
+import type { BotStrategy, ControllerKind, GameMode } from "../game/domain";
 import type { GameSession } from "../game/events";
 import { projectPublicLog } from "../ui/finishedLog";
 import type { GameLogEntry } from "../ui/finishedLog";
@@ -13,6 +14,7 @@ export interface ArchivedGame {
   readonly players: readonly {
     readonly name: string;
     readonly controller: ControllerKind;
+    readonly botStrategy?: BotStrategy;
   }[];
   readonly status: "partial" | "finished";
   readonly turns: number;
@@ -45,6 +47,9 @@ export function archiveSnapshot(
     players: session.state.playerOrder.map((id) => ({
       name: id,
       controller: session.state.players[id]!.controller,
+      ...(session.state.players[id]!.botStrategy
+        ? { botStrategy: session.state.players[id]!.botStrategy }
+        : {}),
     })),
     status: session.state.phase === "finished" ? "finished" : "partial",
     turns: session.state.turnSequence,
@@ -77,6 +82,7 @@ export function serializeArchive(game: ArchivedGame): string {
     players: game.players.map((player) => ({
       name: player.name,
       controller: player.controller,
+      ...(player.botStrategy ? { botStrategy: player.botStrategy } : {}),
     })),
     status: game.status,
     turns: game.turns,
@@ -162,7 +168,10 @@ function validArchive(value: unknown): value is ArchivedGame {
       (player) =>
         object(player) &&
         text(player.name) &&
-        ["human", "algorithmic", "llm"].includes(player.controller as string),
+        ["human", "algorithmic", "llm"].includes(player.controller as string) &&
+        (player.botStrategy === undefined ||
+          (player.controller === "algorithmic" &&
+            BOT_STRATEGIES.includes(player.botStrategy as BotStrategy))),
     ) &&
     Array.isArray(value.entries) &&
     value.entries.length > 0 &&

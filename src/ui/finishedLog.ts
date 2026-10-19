@@ -30,6 +30,21 @@ function projectEvent(event: AcceptedEvent, revealSeed = true): GameLogEntry {
           `${title(state.mode)} · ${state.playerOrder.length} players${revealSeed ? ` · Seed: ${state.initialSeed}` : ""}`,
           `Clockwise seats: ${state.playerOrder.join(" → ")}.`,
           `Starting player: ${state.startingPlayerId}.`,
+          ...(state.playerOrder.some(
+            (id) => state.players[id]?.botStrategy !== undefined,
+          )
+            ? [
+                `Bot strategies: ${state.playerOrder
+                  .filter(
+                    (id) => state.players[id]?.controller === "algorithmic",
+                  )
+                  .map(
+                    (id) =>
+                      `${id}: ${state.players[id]!.botStrategy ?? "reference"}`,
+                  )
+                  .join(", ")}.`,
+              ]
+            : []),
           `Initial struggle order: ${state.regionCards.map((card) => `${card.slot}. ${title(card.regionId)}`).join(" → ")}.`,
           `Control discs in supply: ${FACTIONS.map((faction) => `${state.controlDiscsInSupply[faction]} ${title(faction)}`).join(", ")}. Instability discs in France: ${state.instabilityDiscsInFrance}.`,
         ],

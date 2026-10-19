@@ -19,6 +19,35 @@ afterEach(() => {
 });
 const createdAt = "2026-10-19T10:00:00.000Z";
 describe("public game archive", () => {
+  it("preserves per-seat bot strategies in saved and exported logs", () => {
+    const session = setupSession(2);
+    const playerId = session.state.activePlayerId;
+    const state = {
+      ...session.state,
+      players: {
+        ...session.state.players,
+        [playerId]: {
+          ...session.state.players[playerId]!,
+          controller: "algorithmic" as const,
+          botStrategy: "patient" as const,
+        },
+      },
+    };
+    const snapshot = archiveSnapshot(newGameId(), createdAt, {
+      ...session,
+      state,
+    });
+    expect(saveArchive(snapshot)).toBe(true);
+    expect(
+      readArchives().games[0]!.players.find((p) => p.name === playerId)
+        ?.botStrategy,
+    ).toBe("patient");
+    expect(
+      JSON.parse(serializeArchive(snapshot)).players.find(
+        (p: { name: string }) => p.name === playerId,
+      ).botStrategy,
+    ).toBe("patient");
+  });
   it("exports only the public schema, retaining game identity and witnessed moves", () => {
     const session = play(
       setupSession(3, "standard", "private-export-seed"),

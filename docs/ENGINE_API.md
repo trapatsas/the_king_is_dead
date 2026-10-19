@@ -177,3 +177,13 @@ without restoring engine state or starting controllers.
 
 There is no backend, so in-memory state is not a security boundary against
 someone with browser developer tools on the shared device.
+
+## Algorithmic strategy metadata
+
+`PlayerConfig.botStrategy` optionally names `reference` or `patient` for an
+algorithmic seat. It is public metadata copied into observations, setup events
+and public archives. Legacy algorithmic seats without the field use Reference.
+Setup and state invariants reject unknown profiles or profiles on nonalgorithmic
+seats. No move or scoring rule depends on this metadata. Both bots submit plans
+through the same public validation boundary. See [Patient strategy](PATIENT_BOT.md)
+for the independent evaluation policy, versioned reference checks and experiments.

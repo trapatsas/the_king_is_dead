@@ -1,4 +1,5 @@
 import type {
+  BotStrategy,
   CardInstance,
   ControllerKind,
   FactionCounts,
@@ -21,6 +22,7 @@ import { copyChoice } from "./plans";
 export interface PublicPlayerView {
   readonly id: PlayerId;
   readonly controller: ControllerKind;
+  readonly botStrategy?: BotStrategy;
   readonly court: FactionCounts;
   readonly handCount: number;
   readonly discardCount: number;
@@ -86,6 +88,7 @@ export function getObservation(
     return {
       id,
       controller: player.controller,
+      ...(player.botStrategy ? { botStrategy: player.botStrategy } : {}),
       court: player.court,
       handCount: player.hand.length,
       discardCount: player.discards.length,

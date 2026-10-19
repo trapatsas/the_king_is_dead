@@ -2,6 +2,7 @@ import { createHomeRegions } from "./board";
 import { dealHands } from "./cards";
 import {
   CONTROLLER_KINDS,
+  BOT_STRATEGIES,
   FACTIONS,
   REGION_IDS,
   RULES_VERSION,
@@ -41,6 +42,12 @@ function validateConfig(config: SetupConfig): void {
     if (!CONTROLLER_KINDS.includes(player.controller)) {
       throw new Error("Unknown player controller kind");
     }
+    if (
+      player.botStrategy !== undefined &&
+      (player.controller !== "algorithmic" ||
+        !BOT_STRATEGIES.includes(player.botStrategy))
+    )
+      throw new Error("Invalid bot strategy");
   }
 }
 

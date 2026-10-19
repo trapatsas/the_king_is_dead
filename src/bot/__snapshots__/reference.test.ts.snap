@@ -1,0 +1,252 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`frozen reference strategy > preserves seeded 2-player decisions 1`] = `
+[
+  {
+    "plan": {
+      "baseTurnSequence": 0,
+      "cardId": "standard:p2:outmanoeuvre:1",
+      "effect": {
+        "effectiveCard": "outmanoeuvre",
+        "kind": "effect",
+        "operations": [
+          {
+            "count": 1,
+            "faction": "welsh",
+            "from": {
+              "kind": "region",
+              "regionId": "warwick",
+            },
+            "kind": "transfer",
+            "to": {
+              "kind": "region",
+              "regionId": "essex",
+            },
+          },
+          {
+            "count": 1,
+            "faction": "english",
+            "from": {
+              "kind": "region",
+              "regionId": "warwick",
+            },
+            "kind": "transfer",
+            "to": {
+              "kind": "region",
+              "regionId": "essex",
+            },
+          },
+          {
+            "count": 1,
+            "faction": "english",
+            "from": {
+              "kind": "region",
+              "regionId": "essex",
+            },
+            "kind": "transfer",
+            "to": {
+              "kind": "region",
+              "regionId": "warwick",
+            },
+          },
+        ],
+        "tier": 2,
+      },
+      "kind": "card",
+      "playerId": "p2",
+      "summon": {
+        "count": 1,
+        "faction": "english",
+        "kind": "follower",
+        "regionId": "warwick",
+      },
+    },
+    "seed": "reference-opening-a",
+    "stats": {
+      "horizon": 5,
+      "horizonVisits": 64,
+      "iterations": 64,
+      "maxDepth": 6,
+      "nodes": 113,
+      "reusedVisits": 0,
+      "rootChoices": 12,
+      "terminalVisits": 0,
+    },
+  },
+  {
+    "plan": {
+      "baseTurnSequence": 0,
+      "cardId": "standard:p1:assemble:1",
+      "effect": {
+        "effectiveCard": "assemble",
+        "kind": "effect",
+        "operations": [
+          {
+            "count": 1,
+            "faction": "scottish",
+            "from": {
+              "kind": "supply",
+            },
+            "kind": "transfer",
+            "to": {
+              "kind": "region",
+              "regionId": "warwick",
+            },
+          },
+          {
+            "count": 1,
+            "faction": "welsh",
+            "from": {
+              "kind": "supply",
+            },
+            "kind": "transfer",
+            "to": {
+              "kind": "region",
+              "regionId": "gwynedd",
+            },
+          },
+          {
+            "count": 1,
+            "faction": "english",
+            "from": {
+              "kind": "supply",
+            },
+            "kind": "transfer",
+            "to": {
+              "kind": "region",
+              "regionId": "lancaster",
+            },
+          },
+        ],
+        "tier": 3,
+      },
+      "kind": "card",
+      "playerId": "p1",
+      "summon": {
+        "count": 1,
+        "faction": "english",
+        "kind": "follower",
+        "regionId": "essex",
+      },
+    },
+    "seed": "reference-opening-b",
+    "stats": {
+      "horizon": 5,
+      "horizonVisits": 64,
+      "iterations": 64,
+      "maxDepth": 6,
+      "nodes": 115,
+      "reusedVisits": 0,
+      "rootChoices": 12,
+      "terminalVisits": 0,
+    },
+  },
+]
+`;
+
+exports[`frozen reference strategy > preserves seeded 3-player decisions 1`] = `
+[
+  {
+    "plan": {
+      "baseTurnSequence": 0,
+      "cardId": "standard:p2:welsh-support:1",
+      "effect": {
+        "effectiveCard": "welsh-support",
+        "kind": "effect",
+        "operations": [
+          {
+            "count": 2,
+            "faction": "welsh",
+            "from": {
+              "kind": "supply",
+            },
+            "kind": "transfer",
+            "to": {
+              "kind": "region",
+              "regionId": "lancaster",
+            },
+          },
+        ],
+        "tier": 2,
+      },
+      "kind": "card",
+      "playerId": "p2",
+      "summon": {
+        "count": 1,
+        "faction": "welsh",
+        "kind": "follower",
+        "regionId": "northumbria",
+      },
+    },
+    "seed": "reference-opening-a",
+    "stats": {
+      "horizon": 7,
+      "horizonVisits": 64,
+      "iterations": 64,
+      "maxDepth": 7,
+      "nodes": 237,
+      "reusedVisits": 0,
+      "rootChoices": 12,
+      "terminalVisits": 0,
+    },
+  },
+  {
+    "plan": {
+      "baseTurnSequence": 0,
+      "cardId": "standard:p2:manoeuvre:1",
+      "effect": {
+        "effectiveCard": "manoeuvre",
+        "kind": "effect",
+        "operations": [
+          {
+            "count": 1,
+            "faction": "welsh",
+            "from": {
+              "kind": "region",
+              "regionId": "gwynedd",
+            },
+            "kind": "transfer",
+            "to": {
+              "kind": "region",
+              "regionId": "devon",
+            },
+          },
+          {
+            "count": 1,
+            "faction": "welsh",
+            "from": {
+              "kind": "region",
+              "regionId": "devon",
+            },
+            "kind": "transfer",
+            "to": {
+              "kind": "region",
+              "regionId": "gwynedd",
+            },
+          },
+        ],
+        "tier": 1,
+      },
+      "kind": "card",
+      "playerId": "p2",
+      "summon": {
+        "count": 1,
+        "faction": "english",
+        "kind": "follower",
+        "regionId": "lancaster",
+      },
+    },
+    "seed": "reference-opening-b",
+    "stats": {
+      "horizon": 7,
+      "horizonVisits": 64,
+      "iterations": 64,
+      "maxDepth": 7,
+      "nodes": 236,
+      "reusedVisits": 0,
+      "rootChoices": 12,
+      "terminalVisits": 0,
+    },
+  },
+]
+`;

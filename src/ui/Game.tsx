@@ -189,7 +189,10 @@ export function Game({
         >
           {turn.bot.active && (
             <section aria-label="Bot turn" aria-busy={!turn.bot.error}>
-              <span className="eyebrow">Algorithmic opponent</span>
+              <span className="eyebrow">
+                {turn.bot.strategy === "patient" ? "Patient" : "Reference"}{" "}
+                opponent
+              </span>
               <h2>
                 {turn.bot.error
                   ? "Bot turn paused"

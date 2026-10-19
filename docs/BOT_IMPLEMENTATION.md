@@ -1,7 +1,10 @@
 # Standard bot implementation and evaluation
 
 Implemented 2026-10-19 from the rewritten [research design](BOT_RESEARCH.md).
-This is a playable development prototype, `standard-mcts-v2`. The research
+The original playable development prototype, `standard-mcts-v2`, is now named
+**Reference** in setup. A separate [Patient strategy](PATIENT_BOT.md) adds reserve
+and response preferences without changing the reference evaluator or defaults.
+The research
 release gate remains closed; Advanced, persistence and LLM integration are
 separate unfinished work.
 

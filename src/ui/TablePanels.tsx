@@ -110,7 +110,9 @@ export function CourtsPanel({
             <span>{player.handCount} cards</span>
           </div>
           <span className="court-controller">
-            {player.controller === "algorithmic" ? "Bot" : "Human"}
+            {player.controller === "algorithmic"
+              ? `Bot · ${player.botStrategy === "patient" ? "Patient" : "Reference"}`
+              : "Human"}
           </span>
           <Followers counts={player.court} label={`${player.id} court`} />
           <p>

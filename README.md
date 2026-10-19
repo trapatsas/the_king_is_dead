@@ -28,7 +28,10 @@ Vite listens on `0.0.0.0:5173`; the Dev Container forwards port 5173. Open
 
 With the development server running, open
 `http://localhost:5173/?bots=experimental` and select **Algorithmic · experimental**
-for one or more seats. Bots run in a Worker and play automatically. The preview
+for one or more seats. Each bot has a **Bot strategy** selector: **Reference**
+keeps the original aggressive policy; **Patient** reserves cards for later
+responses and can wait for others to commit. Both can play with humans and each
+other. Bots run in a Worker and play automatically. The preview
 supports two or three players; ordinary setup and production builds remain gated
 because the research strength criterion has not passed. See the
 [implementation and measured results](docs/BOT_IMPLEMENTATION.md).
@@ -106,4 +109,5 @@ browser developer tools.
 - [Algorithmic opponent exploration](docs/BOT_DESIGN.md)
 - [Bot research and annotated bibliography](docs/BOT_RESEARCH.md)
 - [Bot implementation, preview and benchmarks](docs/BOT_IMPLEMENTATION.md)
+- [Patient strategy and reference comparison](docs/PATIENT_BOT.md)
 - [Agent kickoff and first-task scope](docs/AGENT_KICKOFF_PROMPT.md)

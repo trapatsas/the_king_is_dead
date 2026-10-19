@@ -758,3 +758,33 @@ no claim is made about a supplied game until its actual log is available.
 Chromium verified that clipboard and downloaded JSON match, the filename uses
 the game ID, a recorded pass survives export, the live seed is absent, and the
 mobile layout fits, with no uncaught browser errors.
+
+## Patient strategy alongside the frozen reference (2026-10-19)
+
+Added a separately selectable `patient-mcts-v1` with future-response value,
+soft reserves, selective opening passes, conditional pass-to-end forecasts and
+intervention against known losses. `standard-mcts-v2` remains the Reference
+strategy. Its evaluator is unchanged; default shared-search behaviour is
+checked against fixed-seed plans and search statistics captured before the
+extension. Optional public per-seat metadata routes separate Worker instances,
+labels courts and persists in saved/exported logs. Legacy algorithmic seats
+continue to select Reference. No game rules changed.
+
+The new controller passes regression positions from the supplied game: hold
+Assemble before turn 24, repair the losing Invasion before turn 38, and bank a
+winning pass before turn 47. Tests also cover quiet opening waits, exact
+terminal decisions, privacy/metadata boundaries and mixed setup.
+
+At 128 fixed iterations on held-out setup seeds, Patient won 98/100 two-player
+matches against Reference and 55/60 three-player matches against two References.
+It retained about 2.1/2.05 cards at the first struggle versus 0.43/0.12 for the
+reference. Raw records, paired-seed intervals and CPU-budget limitations are
+in [PATIENT_BOT.md](PATIENT_BOT.md). These comparisons are not human-strength
+claims and do not open the production gate.
+
+**Verification:** all five project checks pass, with **365 tests in 27 files**.
+Chromium completed a 32-turn Reference/Patient game and a 51-turn
+human/Reference/Patient game, with maximum searches under 1.402 seconds. Bot
+hands remained hidden; profile routing, archived identity and the dark mobile
+strategy selector passed. Six additional Patient-only three-player smoke games
+terminated within the turn bound.

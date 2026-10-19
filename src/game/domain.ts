@@ -64,9 +64,14 @@ export interface CardInstance {
   readonly type: CardType;
 }
 
+export const BOT_STRATEGIES = Object.freeze(["reference", "patient"] as const);
+export type BotStrategy = (typeof BOT_STRATEGIES)[number];
+
 export interface PlayerConfig {
   readonly id: PlayerId;
   readonly controller: ControllerKind;
+  /** Public controller metadata; absent legacy seats use the reference bot. */
+  readonly botStrategy?: BotStrategy;
 }
 
 /** Array order is clockwise seat order; createGame validates 2 or 3 seats. */
