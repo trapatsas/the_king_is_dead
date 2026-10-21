@@ -438,11 +438,13 @@ function sampleDistinct<T>(
 
 export class InformedBot extends StandardBot {
   constructor(params: Partial<InformedParams> = {}) {
-    super(informedPolicy({ ...DEFAULT_INFORMED_PARAMS, ...params }));
+    super(createInformedPolicy({ ...DEFAULT_INFORMED_PARAMS, ...params }));
   }
 }
 
-function informedPolicy(params: InformedParams): SearchPolicy {
+export function createInformedPolicy(
+  params: InformedParams = DEFAULT_INFORMED_PARAMS,
+): SearchPolicy {
   const forecasts = new WeakMap<GameState, GameResult>();
   const value = (state: GameState) => blendedValue(state, forecasts, params);
   function candidateOf(state: GameState, plan: TurnPlan): Candidate {

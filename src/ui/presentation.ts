@@ -90,6 +90,7 @@ export const BOT_STRATEGY_LABELS = {
   reference: "Reference",
   patient: "Patient",
   informed: "Informed",
+  ml: "ML · pilot",
 } as const;
 
 export const FACTION_MARKS = Object.fromEntries(

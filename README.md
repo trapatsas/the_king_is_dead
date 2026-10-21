@@ -32,7 +32,7 @@ for one or more seats. Each bot has a **Bot strategy** selector: **Reference**
 keeps the original aggressive policy; **Patient** reserves cards for later
 responses and can wait for others to commit; **Informed** ranks its options
 against what every seat can still do with the cards they hold and keeps card
-parity so it has the last word. All three can play with humans and each other. Bots run in a Worker and play automatically. The preview
+parity so it has the last word. All three can play with humans and each other. A fourth **ML · learned value pilot** strategy now evaluates search leaves with a small trained model; its strength is unvalidated. See [ML setup, SQLite capture and training commands](ml/README.md). Bots run in a Worker and play automatically. The preview
 supports two or three players; ordinary setup and production builds remain gated
 because the research strength criterion has not passed. See the
 [implementation and measured results](docs/BOT_IMPLEMENTATION.md) and the
@@ -85,7 +85,8 @@ When everyone passes consecutively, the next struggle resolves.
 public logs remain available. Starting another game asks before leaving the
 current one. If an unexpected error interrupts a
 turn, **Restart this turn** resumes from the last committed turn. No provider is
-connected and the app requests no external resources.
+connected. The local development/preview server now saves accepted Standard
+games to SQLite through same-origin API calls; model assets are served locally.
 
 ## Privacy between players
 
@@ -111,6 +112,9 @@ browser developer tools.
 - [Algorithmic opponent exploration](docs/BOT_DESIGN.md)
 - [Bot research and annotated bibliography](docs/BOT_RESEARCH.md)
 - [Bot implementation, preview and benchmarks](docs/BOT_IMPLEMENTATION.md)
+- [ML bot implementation and pilot](docs/BOT_ML_IMPLEMENTATION.md)
+- [ML training workflow](ml/README.md)
+- [SQLite capture and training contract](docs/SQLITE_TRAINING.md)
 - [Patient strategy and reference comparison](docs/PATIENT_BOT.md)
 - [Informed strategy: review, design and benchmarks](docs/BOT_INFORMED.md)
 - [Agent kickoff and first-task scope](docs/AGENT_KICKOFF_PROMPT.md)

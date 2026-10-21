@@ -38,6 +38,8 @@ export interface SearchStats {
   reusedVisits: number;
 }
 export interface SearchResult {
+  readonly modelId?: string;
+  readonly modelHash?: string;
   readonly plan: TurnPlan;
   readonly stats: SearchStats;
   readonly explanation: string;

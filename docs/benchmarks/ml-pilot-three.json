@@ -1,0 +1,171 @@
+{
+  "version": "ml-mcts-v1",
+  "modelId": "ml-pilot-62c91415c3d9",
+  "opponentModelId": null,
+  "modelHash": "62c91415c3d946f6e8e5c9a500353d41bba6b91f166d77311cb6c5d3a061b407",
+  "timeMs": null,
+  "opponentTimeMs": null,
+  "policyVersions": {
+    "ml": "ml-mcts-v1",
+    "reference": "standard-mcts-v2",
+    "patient": "patient-mcts-v1",
+    "informed": "informed-mcts-v1"
+  },
+  "policy": "ml",
+  "opponent": "informed",
+  "count": 3,
+  "seeds": 2,
+  "iterations": 32,
+  "opponentIterations": 32,
+  "prefix": "ml-pilot-check-three-v1",
+  "informedParams": null,
+  "note": "Node timings, fixed iterations. Draws share one point. CI resamples paired setup seeds; tiny samples are exploratory, not a release gate.",
+  "score": 0.3333333333333333,
+  "seedBootstrap95": [0.3333333333333333, 0.3333333333333333],
+  "games": [
+    {
+      "seed": 0,
+      "seat": 0,
+      "score": 0,
+      "opening": {
+        "firstStruggleTurn": 3,
+        "hands": {
+          "p0": 8,
+          "p1": 8,
+          "p2": 8
+        }
+      },
+      "outcome": "win",
+      "winner": "p2",
+      "contenders": ["p2"],
+      "turns": 57,
+      "method": "coronation",
+      "policyMs": 3708.003114000002,
+      "searches": 19,
+      "iterations": 608,
+      "horizonVisits": 400,
+      "terminalVisits": 218,
+      "maxDepth": 8
+    },
+    {
+      "seed": 0,
+      "seat": 1,
+      "score": 0,
+      "opening": {
+        "firstStruggleTurn": 3,
+        "hands": {
+          "p0": 8,
+          "p1": 8,
+          "p2": 8
+        }
+      },
+      "outcome": "win",
+      "winner": "p0",
+      "contenders": ["p0"],
+      "turns": 31,
+      "method": "coronation",
+      "policyMs": 3089.8904039999998,
+      "searches": 10,
+      "iterations": 320,
+      "horizonVisits": 263,
+      "terminalVisits": 57,
+      "maxDepth": 7
+    },
+    {
+      "seed": 0,
+      "seat": 2,
+      "score": 1,
+      "opening": {
+        "firstStruggleTurn": 3,
+        "hands": {
+          "p0": 8,
+          "p1": 8,
+          "p2": 8
+        }
+      },
+      "outcome": "win",
+      "winner": "p2",
+      "contenders": ["p2"],
+      "turns": 52,
+      "method": "coronation",
+      "policyMs": 3218.2868990000134,
+      "searches": 17,
+      "iterations": 544,
+      "horizonVisits": 475,
+      "terminalVisits": 79,
+      "maxDepth": 8
+    },
+    {
+      "seed": 1,
+      "seat": 0,
+      "score": 1,
+      "opening": {
+        "firstStruggleTurn": 3,
+        "hands": {
+          "p0": 8,
+          "p1": 8,
+          "p2": 8
+        }
+      },
+      "outcome": "win",
+      "winner": "p0",
+      "contenders": ["p0"],
+      "turns": 56,
+      "method": "coronation",
+      "policyMs": 3701.5259489999808,
+      "searches": 19,
+      "iterations": 608,
+      "horizonVisits": 536,
+      "terminalVisits": 85,
+      "maxDepth": 9
+    },
+    {
+      "seed": 1,
+      "seat": 1,
+      "score": 0,
+      "opening": {
+        "firstStruggleTurn": 5,
+        "hands": {
+          "p0": 7,
+          "p1": 8,
+          "p2": 8
+        }
+      },
+      "outcome": "win",
+      "winner": "p2",
+      "contenders": ["p2"],
+      "turns": 43,
+      "method": "coronation",
+      "policyMs": 3150.0051500000045,
+      "searches": 14,
+      "iterations": 448,
+      "horizonVisits": 340,
+      "terminalVisits": 108,
+      "maxDepth": 7
+    },
+    {
+      "seed": 1,
+      "seat": 2,
+      "score": 0,
+      "opening": {
+        "firstStruggleTurn": 3,
+        "hands": {
+          "p0": 8,
+          "p1": 8,
+          "p2": 8
+        }
+      },
+      "outcome": "win",
+      "winner": "p1",
+      "contenders": ["p1"],
+      "turns": 51,
+      "method": "coronation",
+      "policyMs": 3710.1900319999986,
+      "searches": 17,
+      "iterations": 544,
+      "horizonVisits": 489,
+      "terminalVisits": 56,
+      "maxDepth": 7
+    }
+  ]
+}

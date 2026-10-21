@@ -195,13 +195,16 @@ export function Setup({ onStart }: { onStart: (config: SetupConfig) => void }) {
                     <option value="informed">
                       Informed · card-aware forecast
                     </option>
+                    <option value="ml">ML · learned value pilot</option>
                   </select>
                   <span className="hint">
-                    {strategies[index] === "informed"
-                      ? "Ranks its options against what every seat can still do with the cards they hold."
-                      : strategies[index] === "patient"
-                        ? "Keeps cards for later struggles and can wait for others to commit."
-                        : "The original bot, kept as a comparison."}
+                    {strategies[index] === "ml"
+                      ? "Experimental learned evaluation. Pilot model; playing strength is not validated."
+                      : strategies[index] === "informed"
+                        ? "Ranks its options against what every seat can still do with the cards they hold."
+                        : strategies[index] === "patient"
+                          ? "Keeps cards for later struggles and can wait for others to commit."
+                          : "The original bot, kept as a comparison."}
                   </span>
                 </label>
               )}

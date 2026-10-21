@@ -195,7 +195,9 @@ export function Game({
               <h2>
                 {turn.bot.error
                   ? "Bot turn paused"
-                  : `${targetPlayer} is thinking`}
+                  : turn.bot.loading
+                    ? "Loading learned model"
+                    : `${targetPlayer} is thinking`}
               </h2>
               {turn.bot.error ? (
                 <>

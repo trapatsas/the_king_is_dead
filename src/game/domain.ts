@@ -68,6 +68,7 @@ export const BOT_STRATEGIES = Object.freeze([
   "reference",
   "patient",
   "informed",
+  "ml",
 ] as const);
 export type BotStrategy = (typeof BOT_STRATEGIES)[number];
 

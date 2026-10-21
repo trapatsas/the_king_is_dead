@@ -36,6 +36,24 @@ const result = {
 };
 afterEach(() => vi.useRealTimers());
 describe("worker lifecycle", () => {
+  it("prepares ML separately from the search watchdog and reuses the ready model", async () => {
+    vi.useFakeTimers();
+    const worker = new FakeWorker(),
+      client = new BotClient(() => worker as unknown as Worker);
+    const signal = new AbortController().signal;
+    const preparing = client.prepare(signal);
+    expect(worker.postMessage.mock.calls[0]![0]).toEqual({
+      id: 1,
+      prepare: { manifestUrl: "/models/pilot/manifest.json" },
+    });
+    await vi.advanceTimersByTimeAsync(3000);
+    expect(worker.terminate).not.toHaveBeenCalled();
+    worker.onmessage?.({ data: { id: 1, ready: { modelId: "test-model" } } });
+    expect(await preparing).toBe("test-model");
+    expect(await client.prepare(signal)).toBe("test-model");
+    expect(worker.postMessage).toHaveBeenCalledTimes(1);
+    client.dispose();
+  });
   it("sends only redacted input, ignores stale replies, and keeps a completed worker for tree reuse", async () => {
     const worker = new FakeWorker(),
       factory = vi.fn(() => worker as unknown as Worker),
