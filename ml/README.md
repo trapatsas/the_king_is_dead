@@ -31,8 +31,12 @@ Standard games, including human games, save accepted typed commands to
 with the existing engine and commits event/projection/checkpoint/result rows
 atomically. Set `KING_DB_PATH` before starting Vite to use another file.
 Pending saves survive reload in a per-request browser outbox when browser
-storage is available; the UI reports
-save errors and provides retry. Public browser Game history still uses its
+storage is available. The UI retries every ten seconds, on online/focus events,
+and through **Retry save**. A rejected game's commands stay queued in order
+without blocking other games, and only an acknowledged JSON event cursor
+removes a pending request. Restart the dev server after switching to a branch
+with different API/plugin configuration; `/api/storage` must return JSON rather
+than the frontend HTML. Public browser Game history still uses its
 existing local archive. Reloading does not restore the active game UI yet.
 
 The local `npm run build && npm run preview` flow builds and serves both the

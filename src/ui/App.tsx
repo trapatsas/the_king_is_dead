@@ -94,9 +94,22 @@ export function App({ initialSession }: { initialSession?: GameSession }) {
   // re-render the App shell.
   const latest = useRef<GameSession | null>(initialSession ?? null);
   useEffect(() => {
-    capture.current = new StorageClient(setSqliteState);
-    void capture.current.flush();
+    let active = true;
+    const client = new StorageClient((state) => {
+      if (active) setSqliteState(state);
+    });
+    capture.current = client;
+    const retry = () => void client.flush();
+    retry();
+    window.addEventListener("online", retry);
+    window.addEventListener("focus", retry);
+    // A restarted local API does not trigger the browser's online event.
+    const timer = window.setInterval(retry, 10000);
     return () => {
+      active = false;
+      window.removeEventListener("online", retry);
+      window.removeEventListener("focus", retry);
+      window.clearInterval(timer);
       capture.current = null;
     };
   }, []);
@@ -165,11 +178,14 @@ export function App({ initialSession }: { initialSession?: GameSession }) {
         <p role="status" className="notice archive-warning">
           {sqliteState === "saving"
             ? "Saving game…"
-            : "Game save pending. Keep this tab open and retry."}
+            : "Some game saves are pending. Retrying automatically."}
           {sqliteState === "error" && (
-            <button onClick={() => void capture.current?.flush()}>
-              Retry save
-            </button>
+            <>
+              {" "}
+              <button onClick={() => void capture.current?.flush()}>
+                Retry save
+              </button>
+            </>
           )}
         </p>
       )}

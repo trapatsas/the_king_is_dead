@@ -88,8 +88,17 @@ games to SQLite through same-origin API calls; model assets are served locally.
 `npm run dev` saves accepted Standard moves to `.data/king.sqlite`. The server
 validates commands with the same rules engine and stores moves, checkpoints,
 results and bot/model provenance. Failed saves remain in a browser outbox for
-retry; a pending-save message appears when the API is unavailable. The public
+retry; a pending-save message appears when the API is unavailable. Saves retry
+every ten seconds, when the browser comes online or regains focus, and when
+**Retry save** is selected. One rejected game's commands do not block other
+games. The public
 browser log is separate from the private SQLite history.
+
+If a save stays pending after switching branches or updating the dev-server
+configuration, restart `npm run dev`. `/api/storage` should return JSON with
+`available: true`; an HTML page or 404 means the save API is not running.
+Refreshing returns to setup but preserves the pending-save outbox. Keep browser
+storage intact so accepted moves can be retried.
 
 To choose a different database on a POSIX shell:
 

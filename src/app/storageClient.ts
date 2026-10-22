@@ -1,4 +1,5 @@
 import { botTelemetry } from "./botTelemetry";
+import { sameChoice } from "../game/plans";
 import type { GameSession } from "../game/events";
 
 export type SaveState = "saving" | "saved" | "error";
@@ -92,6 +93,28 @@ export class StorageClient {
       return false;
     }
   }
+  private enqueue(item: PendingRequest) {
+    const key = this.itemKey(item);
+    const existing = this.queue.find(
+      (pending) => this.itemKey(pending) === key,
+    );
+    if (existing) {
+      const matches =
+        item.url === "/api/games"
+          ? sameChoice(existing.data, item.data)
+          : existing.data.baseEventSequence === item.data.baseEventSequence &&
+            sameChoice(existing.data.plan, item.data.plan);
+      if (!matches) {
+        this.blocked = true;
+        this.status("error");
+      }
+      // Replay/recovery can lack the original search telemetry. Retain the
+      // queued envelope verbatim rather than duplicating or replacing it.
+      return matches;
+    }
+    this.queue.push(item);
+    return true;
+  }
   capture(id: string, session: GameSession) {
     if (this.blocked) {
       this.status("error");
@@ -101,26 +124,32 @@ export class StorageClient {
     if (first?.type !== "GameCreated" || first.config.mode !== "standard")
       return;
     if (!this.setup.has(id)) {
+      if (
+        !this.enqueue({
+          url: "/api/games",
+          data: { id, config: first.config },
+        })
+      )
+        return;
       this.setup.add(id);
-      this.queue.push({
-        url: "/api/games",
-        data: { id, config: first.config },
-      });
     }
     let cursor = this.cursors.get(id) ?? 0;
     for (let i = 1; i < session.events.length; i++) {
       const event = session.events[i]!;
       if (event.type !== "TurnCommitted" || event.eventSequence <= cursor)
         continue;
-      this.queue.push({
-        url: `/api/games/${id}/commands`,
-        data: {
-          requestId: `turn-${event.turnSequence}`,
-          baseEventSequence: event.eventSequence - 1,
-          plan: event.plan,
-          decision: botTelemetry(session, event.turnSequence),
-        },
-      });
+      if (
+        !this.enqueue({
+          url: `/api/games/${id}/commands`,
+          data: {
+            requestId: `turn-${event.turnSequence}`,
+            baseEventSequence: event.eventSequence - 1,
+            plan: event.plan,
+            decision: botTelemetry(session, event.turnSequence),
+          },
+        })
+      )
+        return;
       // Mark the last event in this complete command's batch.
       let end = i;
       while (
@@ -139,24 +168,59 @@ export class StorageClient {
   async flush() {
     if (this.running || this.blocked) return;
     this.running = true;
+    const failedGames = new Set<string>();
+    const gameId = (item: PendingRequest) => this.itemKey(item).split(":")[3]!;
     try {
-      while (this.queue.length) {
+      while (this.queue.some((item) => !failedGames.has(gameId(item)))) {
         this.status("saving");
-        const item = this.queue[0]!;
-        const response = await this.request(item.url, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(item.data),
-        });
-        if (!response.ok) throw new Error("Save rejected");
-        const key = this.itemKey(item);
-        const saved = this.storage?.getItem(key);
-        if (saved && saved !== JSON.stringify(item))
-          throw new Error("Conflicting pending save");
-        this.storage?.removeItem(key);
-        this.queue.shift();
+        const item = this.queue.find(
+          (pending) => !failedGames.has(gameId(pending)),
+        )!;
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 10000);
+        try {
+          const response = await this.request(item.url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(item.data),
+            signal: controller.signal,
+          });
+          if (
+            !response.ok ||
+            !response.headers
+              .get("content-type")
+              ?.startsWith("application/json")
+          )
+            throw new Error("Save API unavailable or rejected the move");
+          const acknowledgement: unknown = await response.json();
+          const minimumSequence =
+            item.url === "/api/games"
+              ? 0
+              : Number(item.data.baseEventSequence) + 1;
+          if (
+            !acknowledgement ||
+            typeof acknowledgement !== "object" ||
+            !("eventSequence" in acknowledgement) ||
+            !Number.isSafeInteger(acknowledgement.eventSequence) ||
+            !Number.isSafeInteger(minimumSequence) ||
+            Number(acknowledgement.eventSequence) < minimumSequence
+          )
+            throw new Error("Save was not acknowledged");
+          const key = this.itemKey(item);
+          const saved = this.storage?.getItem(key);
+          if (saved && saved !== JSON.stringify(item))
+            throw new Error("Conflicting pending save");
+          this.storage?.removeItem(key);
+          this.queue.splice(this.queue.indexOf(item), 1);
+        } catch {
+          // Preserve this game's order and all unsent data, while allowing
+          // independent new games to save past an older rejected command.
+          failedGames.add(gameId(item));
+        } finally {
+          clearTimeout(timer);
+        }
       }
-      this.status("saved");
+      this.status(this.queue.length ? "error" : "saved");
     } catch {
       this.status("error");
     } finally {
