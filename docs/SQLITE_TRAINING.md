@@ -10,14 +10,13 @@ below remains synthetic; real pilot datasets are generated separately.
 
 ## Files and architecture
 
-| File                                                             | Purpose                                                                                           |
-| ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| [sqlite/schema.sql](sqlite/schema.sql)                           | Existing proposal migration 1: canonical game history, exact plans/events, snapshots and outcomes |
-| [sqlite/002_training.sql](sqlite/002_training.sql)               | Migration 2: validated games, versioned feature cache, frozen datasets and batch-reading view     |
-| [sqlite/training_queries.sql](sqlite/training_queries.sql)       | Indexed batch reads, input audits and dataset coverage queries                                    |
-| [sqlite/training_export.sql](sqlite/training_export.sql)         | Schema for a separate portable training-only SQLite file                                          |
-| [sqlite/validate_training.py](sqlite/validate_training.py)       | SQL constraints, perspective-label and query-plan checks; synthetic example generator             |
-| [sqlite/training-example.sqlite](sqlite/training-example.sqlite) | Tiny synthetic two-row training-file example; not real games or real encoded features             |
+| File                                                       | Purpose                                                                                           |
+| ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| [sqlite/schema.sql](sqlite/schema.sql)                     | Existing proposal migration 1: canonical game history, exact plans/events, snapshots and outcomes |
+| [sqlite/002_training.sql](sqlite/002_training.sql)         | Migration 2: validated games, versioned feature cache, frozen datasets and batch-reading view     |
+| [sqlite/training_queries.sql](sqlite/training_queries.sql) | Indexed batch reads, input audits and dataset coverage queries                                    |
+| [sqlite/training_export.sql](sqlite/training_export.sql)   | Schema for a separate portable training-only SQLite file                                          |
+| [sqlite/validate_training.py](sqlite/validate_training.py) | SQL constraints, perspective-label and query-plan checks; synthetic example generator             |
 
 ```mermaid
 flowchart LR
@@ -211,8 +210,9 @@ features:       BLOB, 1896 bytes, float32 little-endian
 sample_weight:  1.0
 ```
 
-[training-example.sqlite](sqlite/training-example.sqlite) demonstrates the real
-file format with two **synthetic schema fixtures**. Its feature version is
+A locally generated SQLite example demonstrates the real file format with two
+**synthetic schema fixtures**. Generate it with the command at the end of this
+document; the binary database is ignored rather than versioned. Its feature version is
 `fixture-474-v1`, its manifest says `synthetic: true`, and it is not eligible for
 training a real bot. Actual `standard-v1` datasets are created by the implemented encoder/replay
 pipeline through the commands in `ml/README.md`.

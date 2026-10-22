@@ -4,17 +4,17 @@ A local-first implementation of **The King Is Dead — Second Edition**, followi
 the [project ruleset](the_king_is_dead_2nd_edition_rulebook.md) for two or three
 independent players.
 
-**Current stage: Milestones 0–5 complete; Milestone 6 in progress.** Standard games are playable in the browser for
-two or three local human players, with immediately available cards, legal action choices,
-draft previews, and full result explanations. Easy, Medium and Hard bots are
-available in normal setup in both development and production builds.
-Save/resume and Advanced gameplay follow the ordered
-[implementation plan](docs/IMPLEMENTATION_PLAN.md). See the
-[milestone report](docs/IMPLEMENTATION_STATUS.md) for verification.
+Standard games are playable for two or three humans or bots, with legal action
+choices, draft previews, automatic bot turns and full result explanations.
+Completed and in-progress Standard histories save to SQLite when the local Node
+API is available. Advanced gameplay and active-game resume are not implemented
+yet; refreshing returns to setup.
 
 ## Run locally
 
-Use the supplied Dev Container or Node 24:
+Use the supplied Dev Container or **Node.js 24.x**. Python is optional and only
+needed for training and SQL-contract checks; playing the game requires no
+Python environment, GPU or external model service.
 
 ```sh
 npm ci
@@ -45,19 +45,6 @@ Bots run automatically in a Worker and support two or three players.
 No experimental URL parameter is required.
 See the [implementation and measured results](docs/BOT_IMPLEMENTATION.md) and
 [Informed strategy's review, design and benchmarks](docs/BOT_INFORMED.md).
-
-## Verify
-
-```sh
-npm run typecheck
-npm run lint
-npm run test:run
-npm run format:check
-npm run build
-```
-
-`npm test` starts Vitest in watch mode. `npm run typecheck` also compiles the
-engine with ES2022 libraries and no DOM/Node globals.
 
 ## Play locally
 
@@ -95,6 +82,88 @@ current one. If an unexpected error interrupts a
 turn, **Restart this turn** resumes from the last committed turn. No provider is
 connected. The local development/preview server now saves accepted Standard
 games to SQLite through same-origin API calls; model assets are served locally.
+
+## SQLite storage and production preview
+
+`npm run dev` saves accepted Standard moves to `.data/king.sqlite`. The server
+validates commands with the same rules engine and stores moves, checkpoints,
+results and bot/model provenance. Failed saves remain in a browser outbox for
+retry; a pending-save message appears when the API is unavailable. The public
+browser log is separate from the private SQLite history.
+
+To choose a different database on a POSIX shell:
+
+```sh
+KING_DB_PATH=.data/my-games.sqlite npm run dev
+```
+
+To build and preview the normal production app:
+
+```sh
+npm run build
+npm run preview
+```
+
+The build produces the browser app in `dist/` and the Node API bundle in
+`dist-server/api.mjs`; preview serves both. Static-only hosting can run the game,
+but SQLite capture needs a Node server adapter and persistent writable storage.
+Browser ML inference uses Web Crypto and requires localhost or HTTPS.
+
+## Training and mixed bot matches
+
+The [ML workflow](ml/README.md) covers SQLite collection, dataset freezing,
+training, model verification and evaluation. CPU training requires Python 3.11+
+and the isolated environment created by `npm run ml:setup`. Optional checks:
+
+```sh
+npm run ml:setup
+npm run ml:test
+python3 docs/sqlite/validate_training.py
+```
+
+Mixed matches need only Node and the packaged model assets. For 60 games across
+20 setups, rotating Informed, the original ML pilot and v2 through all three
+seats:
+
+```sh
+npm run ml:match -- --seeds=20 --rotations=3 --seed=mixed-3p-v1 --iterations=128
+```
+
+The command prints its report path under `artifacts/ml/matches/` and saves
+accepted games to `.data/ml-matches.sqlite`. Three cyclic rotations preserve
+clockwise relative order; they do not cover all six seating permutations.
+Use `--lineup=<file>` to select other agents/checkpoints. Training and human
+games do not automatically update the deployed model.
+
+## Verify
+
+```sh
+npm run typecheck
+npm run lint
+npm run test:run
+npm run format:check
+npm run build
+```
+
+`npm test` starts Vitest in watch mode. `npm run typecheck` also compiles the
+engine with ES2022 libraries and no DOM/Node globals.
+
+## Repository contents
+
+Version control includes source, SQL migrations, tests/fixtures, dependency
+lockfiles, documentation, selected benchmark/case-study records and the packaged
+model manifests, parity fixtures and weights. The two immutable `.bin` files
+under `public/models/` are intentional exceptions to the binary ignore rule:
+v2 powers Hard, while the original pilot supports reproducible comparisons.
+They let a fresh checkout run without retraining or model downloads.
+
+`.gitignore` excludes dependencies, builds, caches, virtual environments, logs,
+temporary exports, databases and SQLite sidecars, and generated ML checkpoints
+or tensors, including those created outside `.data/` or `artifacts/`. Synthetic
+SQLite examples are regenerated using
+[`docs/sqlite/validate_training.py`](docs/sqlite/validate_training.py), rather
+than committed. Adding an ignore rule does not remove files already tracked;
+generated files must also be removed from Git's index.
 
 ## Cards and public information
 

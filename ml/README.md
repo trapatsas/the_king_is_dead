@@ -142,7 +142,8 @@ npm run ml:match -- --seed=informed-pilot-v2-1 --iterations=1024 --timeMs=1400 -
 ```
 
 The default lineup is [informed-pilot-v2.json](../scripts/ml/lineups/informed-pilot-v2.json).
-It requires the v2 artifact at `artifacts/ml/model-v2-linear/manifest.json`.
+It uses the packaged original pilot and v2 checkpoints under `public/models/`,
+so it works from a fresh checkout without training a model first.
 Each seat has a separate bot instance and its own model identity. The runner
 saves accepted moves, per-seat model provenance and search statistics to
 `.data/ml-matches.sqlite`, then replay-validates/materializes the completed game.
@@ -200,6 +201,9 @@ labels, and games against humans should not automatically change live weights.
 After evaluation, deploying a checkpoint means placing its `manifest.json`,
 parity fixture and immutable weights under a new `public/models/<checkpoint>/`
 directory, selecting its manifest in `src/bot/ml/deployment.ts`, and rebuilding.
+Add an explicit exception for the selected weight file to `.gitignore`; other
+binary checkpoints stay ignored. Keep model manifests, parity fixtures and the
+selected weights together so a checkout can run without downloading models.
 The browser loader and SQLite setup provenance share that selection. Existing
 game setup retries retain their originally recorded model provenance.
 Keep its model ID/hash in reports. The Worker caches one loaded checkpoint for

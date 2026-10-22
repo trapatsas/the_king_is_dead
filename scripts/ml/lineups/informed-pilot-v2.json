@@ -8,6 +8,6 @@
   {
     "name": "ML v2",
     "strategy": "ml",
-    "model": "artifacts/ml/model-v2-linear/manifest.json"
+    "model": "public/models/linear-v2/manifest.json"
   }
 ]

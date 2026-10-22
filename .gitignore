@@ -3,6 +3,7 @@ node_modules/
 
 # Build output and tool caches
 dist/
+dist-server/
 build/
 .vite/
 .vite-temp/
@@ -12,10 +13,15 @@ build/
 # Test results
 coverage/
 test-results/
+playwright-report/
+blob-report/
 
 # Logs and diagnostic reports
 *.log
 report.*.json
+*.cpuprofile
+*.heapprofile
+*.heapsnapshot
 
 # Local environment settings (keep shareable examples)
 .env
@@ -40,7 +46,70 @@ Desktop.ini
 # Local SQLite capture, generated training data and Python environment
 .data/
 artifacts/
-ml/.venv/
+.venv/
+venv/
 __pycache__/
-*.pyc
-dist-server/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.tox/
+.nox/
+.coverage
+.coverage.*
+htmlcov/
+*.egg-info/
+
+# Databases and SQLite sidecars, including files outside .data/ or artifacts/
+*.sqlite
+*.sqlite-*
+*.sqlite3
+*.sqlite3-*
+*.db
+*.db-*
+*.db3
+*.db3-*
+
+# Generated ML checkpoints, tensors and exports
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+*.onnx
+*.h5
+*.hdf5
+*.npy
+*.npz
+*.pkl
+*.pickle
+*.joblib
+*.bin
+
+# Required immutable model assets: Hard bot and original-pilot comparisons
+!/public/models/linear-v2/weights-69f477be34b92b5f.bin
+!/public/models/pilot/weights-62c91415c3d946f6.bin
+
+# Compiled libraries, install packages and temporary exports
+*.o
+*.obj
+*.a
+*.lib
+*.node
+*.wasm
+*.so
+*.so.*
+*.dylib
+*.dll
+*.exe
+*.whl
+*.zip
+*.tar
+*.tgz
+*.gz
+*.bz2
+*.xz
+*.7z
+*.bak
+*.tmp
+*.temp
+*.partial
