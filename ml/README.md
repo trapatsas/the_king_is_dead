@@ -1,10 +1,16 @@
 # ML bot and training workflow
 
-The app now has an experimental `ml-mcts-v1` bot: Informed's legal candidates,
-rollouts and root rules with a learned, masked outcome-value evaluator at leaves.
-It supports two and three Standard seats. The bundled checkpoint is a **small
-pilot**, not a validated strength upgrade. Advanced and automatic promotion
-remain outside this implementation.
+The browser's **Hard bot** uses the v2 linear checkpoint
+`ml-pilot-69f477be34b9`, packaged in `public/models/linear-v2/`. It reuses Informed's
+legal candidates, rollouts and root rules with a learned, masked outcome-value
+evaluator at leaves, blended equally with the baseline. It supports two and
+three Standard seats. Difficulty labels are relative; Advanced and automatic
+promotion remain outside this implementation.
+
+The original pilot stays in `public/models/pilot/` for reproducible research
+comparisons. Headless tools keep explicit model paths (and their original pilot
+default); supply `--model=public/models/linear-v2/manifest.json` to use the browser
+checkpoint there.
 
 ## Play and collect human games
 
@@ -15,9 +21,10 @@ npm ci
 npm run dev
 ```
 
-Open `http://localhost:5173/?bots=experimental`. Choose Algorithmic and
-**ML · learned value pilot** for any seats. Model assets load only when an ML
-turn starts. Reference, Patient and Informed remain available.
+Open `http://localhost:5173/`. Use the single **Player type** menu to choose **Human**, **Easy bot** (Patient),
+**Medium bot** (Informed), or **Hard bot** (ML v2). Agent names stay visible in
+setup and during play. Model assets load only when a Hard turn starts. Human
+cards/actions appear immediately with no private-screen handoff.
 
 Standard games, including human games, save accepted typed commands to
 `.data/king.sqlite` through the same-origin API. The server validates each move
@@ -127,6 +134,47 @@ a model promotion.
 
 ## Evaluate and iterate
 
+To run one three-player game with Informed, the original ML pilot and your
+trained v2 linear model in separate seats:
+
+```sh
+npm run ml:match -- --seed=informed-pilot-v2-1 --iterations=1024 --timeMs=1400 --out=artifacts/ml/informed-pilot-v2-one.json
+```
+
+The default lineup is [informed-pilot-v2.json](../scripts/ml/lineups/informed-pilot-v2.json).
+It requires the v2 artifact at `artifacts/ml/model-v2-linear/manifest.json`.
+Each seat has a separate bot instance and its own model identity. The runner
+saves accepted moves, per-seat model provenance and search statistics to
+`.data/ml-matches.sqlite`, then replay-validates/materializes the completed game.
+The JSON report includes final scoring and the full public game log under
+`game`. This is a headless match; it does not change browser model selection.
+
+Use `--lineup=<file>` for a JSON array of two or three `{ "name", "strategy" }`
+entries, with a `"model"` manifest path for each `"ml"` seat. Paths resolve from
+the working directory. `--db=<file>` selects another source database. Reports
+require a new output path and never overwrite existing files. Omit `--timeMs`
+for fixed-iteration reproduction; with a time cap, search choices can vary.
+One game is a case study; compare multiple setups and seating permutations
+before drawing strength conclusions.
+
+For **60 games across 20 setup seeds**, with each bot occupying every seat once
+per seed, use three cyclic rotations:
+
+```sh
+npm run ml:match -- --seeds=20 --rotations=3 --seed=informed-pilot-v2-screen --iterations=128 --out=artifacts/ml/informed-pilot-v2-60.json
+```
+
+Every game starts with fresh search trees. The batch freezes both models at
+startup and saves every completed game and public log in the report, including
+per-player win/draw/loss counts, shared-draw scores and setup-cluster bootstrap
+intervals. Progress goes to the terminal; the report updates atomically after
+each completed game. An interrupted/failed batch keeps completed games in the
+report and accepted moves in SQLite; automatic batch resume is not implemented.
+Three cyclic rotations cover all seats, while preserving clockwise relative
+order; they do not cover all six three-player seating permutations. For the
+browser search budget, replace `--iterations=128` with
+`--iterations=1024 --timeMs=1400` (a substantially slower run).
+
 ```sh
 npm run bot:benchmark -- --bot=ml --model=artifacts/ml/model-v2/manifest.json --opponent=informed --seeds=50 --iterations=128 --prefix=ml-promote-v2-two
 npm run bot:benchmark -- --bot=ml --model=artifacts/ml/model-v2/manifest.json --opponent=informed --seats=3 --seeds=20 --iterations=128 --prefix=ml-promote-v2-three
@@ -149,8 +197,11 @@ automated opponent reservoir, promotion service, ranking head and Gumbel search
 are future phases. Historical outcome labels are not expert move-imitation
 labels, and games against humans should not automatically change live weights.
 
-After evaluation, deploying a checkpoint means placing its `manifest.json` and
-referenced immutable weights file under `public/models/pilot/` and rebuilding.
+After evaluation, deploying a checkpoint means placing its `manifest.json`,
+parity fixture and immutable weights under a new `public/models/<checkpoint>/`
+directory, selecting its manifest in `src/bot/ml/deployment.ts`, and rebuilding.
+The browser loader and SQLite setup provenance share that selection. Existing
+game setup retries retain their originally recorded model provenance.
 Keep its model ID/hash in reports. The Worker caches one loaded checkpoint for
 that game's lifetime; restart the game to use a new deployment. Model preparation
 has a separate 15-second watchdog; warm searches keep the 1.4-second soft cap

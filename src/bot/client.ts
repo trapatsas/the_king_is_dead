@@ -1,5 +1,6 @@
 import type { SearchRequest, SearchResult } from "./search";
 import type { WorkerReply, WorkerRequest } from "./worker";
+import { ML_MANIFEST_URL } from "./ml/deployment";
 
 /** One operation per Worker. Loading has its own timeout; warm search preserves
  * the original watchdog, cancellation and stale-reply protections. */
@@ -17,7 +18,7 @@ export class BotClient {
     if (signal.aborted) throw new Error("Bot request cancelled");
     if (this.readyModel) return this.readyModel;
     const reply = await this.exchange(
-      { prepare: { manifestUrl: "/models/pilot/manifest.json" } },
+      { prepare: { manifestUrl: ML_MANIFEST_URL } },
       signal,
       15000,
     );

@@ -21,9 +21,6 @@ const slot = (region: RegionId) =>
   });
 const disabled = (element: HTMLElement) =>
   (element as HTMLButtonElement).disabled;
-async function reveal(user: ReturnType<typeof userEvent.setup>) {
-  await user.click(screen.getByRole("button", { name: /^Reveal .* hand$/ }));
-}
 
 describe("direct board choices", () => {
   it.each([
@@ -35,7 +32,7 @@ describe("direct board choices", () => {
       const initial = setupSession();
       const user = userEvent.setup();
       render(<Game initialSession={initial} />);
-      await reveal(user);
+
       await user.click(screen.getByRole("button", { name: "Play Negotiate" }));
       expect(disabled(slot(first))).toBe(false);
       await user.click(slot(first));
@@ -83,7 +80,7 @@ describe("direct board choices", () => {
       });
       const user = userEvent.setup();
       const { container } = render(<Game initialSession={initial} />);
-      await reveal(user);
+
       await user.click(
         screen.getByRole("button", { name: "Play Outmanoeuvre" }),
       );
@@ -116,7 +113,7 @@ describe("direct board choices", () => {
         screen.getByRole("region", { name: "Final turn summary" }).textContent,
       ).toContain("Summon 1 English from Strathclyde");
       await user.click(screen.getByRole("button", { name: "End Turn" }));
-      expect(screen.queryByRole("button", { name: /^Play / })).toBeNull();
+      expect(screen.getAllByRole("button", { name: /^Play / })).toHaveLength(8);
       expect(token("strathclyde", "english").getAttribute("aria-label")).toBe(
         "English followers in Strathclyde: 0",
       );
@@ -131,7 +128,7 @@ describe("direct board choices", () => {
     });
     const user = userEvent.setup();
     render(<Game initialSession={initial} />);
-    await reveal(user);
+
     await user.click(screen.getByRole("button", { name: "Play Outmanoeuvre" }));
     await user.click(token("moray", "english"));
     await user.click(token("strathclyde", "scottish"));
@@ -154,7 +151,7 @@ describe("direct board choices", () => {
     });
     const user = userEvent.setup();
     const first = render(<Game initialSession={initial} />);
-    await reveal(user);
+
     await user.click(screen.getByRole("button", { name: "Play Outmanoeuvre" }));
     expect(disabled(token("moray", "scottish"))).toBe(true);
     expect(disabled(token("strathclyde", "welsh"))).toBe(true);
@@ -170,7 +167,7 @@ describe("direct board choices", () => {
         })}
       />,
     );
-    await reveal(user);
+
     await user.click(screen.getByRole("button", { name: "Play Outmanoeuvre" }));
     await user.click(token("strathclyde", "welsh"));
     await user.click(token("moray", "scottish"));
@@ -179,21 +176,19 @@ describe("direct board choices", () => {
     ).toBeDefined();
   });
 
-  it("starts Manoeuvre from either endpoint, and hides partial picks behind the privacy curtain", async () => {
+  it("starts Manoeuvre from either endpoint and keeps partial picks visible", async () => {
     const initial = withBoard(setupSession(), {
       moray: followers(1),
       devon: followers(0, 2),
     });
     const user = userEvent.setup();
     const { container } = render(<Game initialSession={initial} />);
-    await reveal(user);
+
     await user.click(screen.getByRole("button", { name: "Play Manoeuvre" }));
     await user.click(token("devon", "welsh"));
     expect(container.querySelectorAll(".follower-selected")).toHaveLength(1);
-    await user.click(screen.getByRole("button", { name: "Hide hand" }));
-    expect(container.querySelectorAll(".follower-selected")).toHaveLength(0);
-    expect(disabled(token("moray", "scottish"))).toBe(true);
-    await reveal(user);
+    expect(disabled(token("moray", "scottish"))).toBe(false);
+
     await user.click(token("moray", "scottish"));
     expect(
       screen.getByRole("region", { name: "Summon a follower" }),
@@ -203,7 +198,7 @@ describe("direct board choices", () => {
   it("places Assemble followers via region clicks and summons directly from the resulting board", async () => {
     const user = userEvent.setup();
     render(<Game initialSession={setupSession()} />);
-    await reveal(user);
+
     await user.click(screen.getByRole("button", { name: "Play Assemble 1" }));
     for (const faction of ["Scottish", "Welsh", "English"]) {
       expect(
@@ -225,7 +220,7 @@ describe("direct board choices", () => {
   it("undoes a partial choice without excluding the previous alternatives", async () => {
     const user = userEvent.setup();
     render(<Game initialSession={setupSession()} />);
-    await reveal(user);
+
     await user.click(screen.getByRole("button", { name: "Play Negotiate" }));
     await user.click(slot("devon"));
     await user.click(

@@ -40,6 +40,7 @@ export async function runtime() {
     ml: "bot/ml/mlBot",
     model: "bot/ml/model",
     features: "bot/ml/features",
+    archive: "app/gameArchive",
   }))
     modules[name] = await server.ssrLoadModule(`/src/${path}.ts`);
   return { ...modules, close: () => server.close() };

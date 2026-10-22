@@ -20,10 +20,6 @@ import type { EffectChoice } from "./effectChoices";
 
 afterEach(cleanup);
 
-async function reveal(user: ReturnType<typeof userEvent.setup>) {
-  await user.click(screen.getByRole("button", { name: /^Reveal .* hand$/ }));
-}
-
 async function completeEffect(user: ReturnType<typeof userEvent.setup>) {
   for (let guard = 0; guard < 20; guard += 1) {
     if (screen.queryByRole("region", { name: "Summon a follower" })) return;
@@ -38,13 +34,9 @@ async function completeEffect(user: ReturnType<typeof userEvent.setup>) {
 }
 
 describe("hotseat game UI", () => {
-  it("moves keyboard focus through reveal, effect, summon, summary, and handoff", async () => {
+  it("focuses the first card immediately and advances through each turn", async () => {
     const user = userEvent.setup();
     render(<Game initialSession={setupSession()} />);
-    expect(document.activeElement).toBe(
-      screen.getByRole("button", { name: /^Reveal .* hand$/ }),
-    );
-    await user.keyboard("{Enter}");
     expect(document.activeElement).toBe(
       screen.getByRole("button", { name: "Play Scottish Support" }),
     );
@@ -71,7 +63,7 @@ describe("hotseat game UI", () => {
     );
     await user.keyboard("{Enter}");
     expect(document.activeElement).toBe(
-      screen.getByRole("button", { name: /^Reveal .* hand$/ }),
+      screen.getByRole("button", { name: "Play Scottish Support" }),
     );
   });
 
@@ -79,7 +71,7 @@ describe("hotseat game UI", () => {
     const user = userEvent.setup();
     const session = setupSession();
     render(<Game initialSession={session} />);
-    await reveal(user);
+
     const courtName = `${session.state.activePlayerId} court`;
     const committedCourt = screen.getByLabelText(courtName).textContent;
     const committedRegions = screen
@@ -106,7 +98,7 @@ describe("hotseat game UI", () => {
     expect(screen.getAllByRole("button", { name: /^Play / })).toHaveLength(8);
   });
 
-  it("renders only the revealed player's Cunning cards and removes them when hidden", async () => {
+  it("shows only the active player's Cunning cards and switches hands on commit", async () => {
     const session = setupSession(3, "advanced", "ui-private-cunning");
     const viewer = session.state.activePlayerId;
     const secretCards = [
@@ -120,18 +112,15 @@ describe("hotseat game UI", () => {
     );
     const user = userEvent.setup();
     render(<Game initialSession={session} />);
-    for (const card of [...secretCards, ...ownCards])
-      expect(
-        screen.queryByRole("button", { name: `Play ${title(card.type)}` }),
-      ).toBeNull();
-    await reveal(user);
+
     for (const card of secretCards)
       expect(screen.queryByText(title(card.type), { exact: true })).toBeNull();
     for (const card of ownCards)
       expect(
         screen.getByRole("button", { name: `Play ${title(card.type)}` }),
       ).toBeDefined();
-    await user.click(screen.getByRole("button", { name: "Hide hand" }));
+    await user.click(screen.getByRole("button", { name: "Pass" }));
+    await user.click(screen.getByRole("button", { name: "End Turn" }));
     for (const card of ownCards)
       expect(
         screen.queryByRole("button", { name: `Play ${title(card.type)}` }),
@@ -150,19 +139,11 @@ describe("hotseat game UI", () => {
       "Advanced cards are coming soon",
     );
     await user.selectOptions(screen.getByLabelText("Rules"), "standard");
-    await user.selectOptions(
-      screen.getByLabelText("Player 2 controller"),
-      "llm",
-    );
-    expect(screen.getByRole("status").textContent).toContain("not configured");
     expect(
-      (screen.getByRole("button", { name: /Begin game/ }) as HTMLButtonElement)
-        .disabled,
-    ).toBe(true);
-    await user.selectOptions(
-      screen.getByLabelText("Player 2 controller"),
-      "human",
-    );
+      within(screen.getByLabelText("Player 2 type"))
+        .getAllByRole("option")
+        .map((option) => option.textContent),
+    ).toEqual(["Human", "Easy bot", "Medium bot", "Hard bot"]);
     await user.selectOptions(screen.getByLabelText("Players"), "2");
     await user.click(screen.getByText("Reproducible setup"));
     await user.type(screen.getByLabelText("Setup seed"), "ui-seed");
@@ -172,28 +153,31 @@ describe("hotseat game UI", () => {
     expect(screen.getByText(/^Standard kingdom$/)).toBeDefined();
     expect(screen.queryByText(/ui-seed/)).toBeNull();
     expect(screen.getAllByRole("button", { name: /^Slot / })).toHaveLength(8);
-    expect(screen.queryByRole("button", { name: /^Play / })).toBeNull();
+    expect(screen.getAllByRole("button", { name: /^Play / })).toHaveLength(8);
   });
 
-  it("keeps private cards out of the DOM before reveal, hides them again, and hands over privately", async () => {
+  it("shows cards immediately and changes to the next human hand without a curtain", async () => {
     const session = setupSession();
     const user = userEvent.setup();
     render(<Game initialSession={session} />);
-    expect(screen.queryByRole("button", { name: /^Play / })).toBeNull();
-    await reveal(user);
     expect(screen.getAllByRole("button", { name: /^Play / })).toHaveLength(8);
-    await user.click(screen.getByRole("button", { name: "Hide hand" }));
-    expect(screen.queryByRole("button", { name: /^Play / })).toBeNull();
-    await reveal(user);
+    expect(screen.queryByText("Private court")).toBeNull();
+    expect(screen.queryByRole("button", { name: "Hide hand" })).toBeNull();
+    const oldCard =
+      session.state.players[session.state.activePlayerId]!.hand[0]!;
+
     await user.click(screen.getByRole("button", { name: "Pass" }));
     expect(
       screen.getByRole("region", { name: "Final turn summary" }).textContent,
     ).toContain("Pass this turn");
     await user.click(screen.getByRole("button", { name: "End Turn" }));
-    expect(screen.queryByRole("button", { name: /^Play / })).toBeNull();
+    expect(screen.getAllByRole("button", { name: /^Play / })).toHaveLength(8);
+    expect(document.getElementById(`card-text-${oldCard.id}`)).toBeNull();
+    expect(screen.queryByRole("button", { name: /^Reveal / })).toBeNull();
     expect(
-      screen.getByRole("button", { name: /^Reveal .* hand$/ }).textContent,
-    ).not.toContain(session.state.activePlayerId);
+      (screen.getByRole("button", { name: "End Turn" }) as HTMLButtonElement)
+        .disabled,
+    ).toBe(true);
   });
 
   it("resets a selected card and a pass without consuming cards or changing the table", async () => {
@@ -201,7 +185,7 @@ describe("hotseat game UI", () => {
     const session = setupSession();
     const before = JSON.stringify(session);
     render(<Game initialSession={session} />);
-    await reveal(user);
+
     await user.click(screen.getByRole("button", { name: "Play Assemble 1" }));
     expect(screen.getByRole("region", { name: "Card effect" })).toBeDefined();
     await user.click(screen.getByRole("button", { name: "Reset Turn" }));
@@ -224,7 +208,7 @@ describe("hotseat game UI", () => {
     const session = setupSession();
     const before = JSON.stringify(session);
     render(<Game initialSession={session} />);
-    await reveal(user);
+
     await user.click(screen.getByRole("button", { name: "Play Assemble 1" }));
     expect(
       screen.getAllByRole("button", { name: /, legal choice$/ }).length,
@@ -259,7 +243,7 @@ describe("hotseat game UI", () => {
     expect(
       screen.queryByRole("region", { name: "Final turn summary" }),
     ).toBeNull();
-    expect(screen.queryByRole("button", { name: /^Play / })).toBeNull();
+    expect(screen.getAllByRole("button", { name: /^Play / })).toHaveLength(8);
     expect(screen.getByText(/TURN 2/)).toBeDefined();
   });
 
@@ -267,7 +251,7 @@ describe("hotseat game UI", () => {
     const user = userEvent.setup();
     const session = withBoard(setupSession(), {});
     render(<Game initialSession={session} />);
-    await reveal(user);
+
     await user.click(screen.getByRole("button", { name: "Play Manoeuvre" }));
     await completeEffect(user);
     expect(
@@ -297,7 +281,6 @@ describe("hotseat game UI", () => {
       const user = userEvent.setup();
       render(<Game initialSession={withBoard(setupSession(count), {})} />);
       for (let index = 0; index < count * 3; index += 1) {
-        await reveal(user);
         await user.click(screen.getByRole("button", { name: "Pass" }));
         await user.click(screen.getByRole("button", { name: "End Turn" }));
       }
@@ -316,7 +299,7 @@ describe("hotseat game UI", () => {
     },
   );
 
-  it("reveals Plot only at its terminal handoff and accepts the owner's faction", async () => {
+  it("opens the Plot choice immediately and accepts the owner's faction", async () => {
     let session = setupSession(3, "advanced", "ui-plot-0");
     for (let index = 1; !findPlotHolder(session.state); index += 1)
       session = setupSession(3, "advanced", `ui-plot-${index}`);
@@ -326,9 +309,9 @@ describe("hotseat game UI", () => {
     const user = userEvent.setup();
     render(<Game initialSession={session} />);
     expect(
-      screen.queryByRole("button", { name: "Support Scottish" }),
-    ).toBeNull();
-    await reveal(user);
+      screen.getByRole("button", { name: "Support Scottish" }),
+    ).toBeDefined();
+
     await user.click(screen.getByRole("button", { name: "Support Scottish" }));
     expect(screen.getByRole("region", { name: "Game result" })).toBeDefined();
     expect(
@@ -343,14 +326,12 @@ describe("hotseat game UI", () => {
     await user.click(screen.getByRole("button", { name: "Keep playing" }));
     expect(screen.queryByRole("dialog")).toBeNull();
     expect(
-      screen.getByRole("button", { name: /^Reveal .* hand$/ }),
+      screen.getByRole("button", { name: "Play Scottish Support" }),
     ).toBeDefined();
     await user.click(screen.getByRole("button", { name: "New game" }));
     await user.click(screen.getByRole("button", { name: "Leave game" }));
     expect(screen.getByRole("button", { name: /Begin game/ })).toBeDefined();
-    expect(
-      screen.queryByRole("button", { name: /^Reveal .* hand$/ }),
-    ).toBeNull();
+    expect(screen.queryByRole("button", { name: /^Play / })).toBeNull();
   });
 
   it("offers a collapsible actual game log only after the final result", async () => {
@@ -358,7 +339,7 @@ describe("hotseat game UI", () => {
     const initial = withBoard(setupSession(2), {});
     render(<Game initialSession={pass(initial, 5)} />);
     expect(screen.queryByRole("region", { name: "Game log" })).toBeNull();
-    await reveal(user);
+
     await user.click(screen.getByRole("button", { name: "Pass" }));
     await user.click(screen.getByRole("button", { name: "Reset Turn" }));
     await user.click(screen.getByRole("button", { name: "Pass" }));

@@ -44,7 +44,7 @@ describe("worker lifecycle", () => {
     const preparing = client.prepare(signal);
     expect(worker.postMessage.mock.calls[0]![0]).toEqual({
       id: 1,
-      prepare: { manifestUrl: "/models/pilot/manifest.json" },
+      prepare: { manifestUrl: "/models/linear-v2/manifest.json" },
     });
     await vi.advanceTimersByTimeAsync(3000);
     expect(worker.terminate).not.toHaveBeenCalled();

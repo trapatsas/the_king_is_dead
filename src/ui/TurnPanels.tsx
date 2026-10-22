@@ -5,30 +5,6 @@ import type { HotseatTurn } from "./useHotseatTurn";
 
 type Actions = HotseatTurn["actions"];
 
-export function PrivacyCurtain({
-  player,
-  onReveal,
-}: {
-  player: string;
-  onReveal: () => void;
-}) {
-  return (
-    <section className="privacy-panel">
-      <span className="privacy-symbol" aria-hidden="true">
-        ♜
-      </span>
-      <span className="eyebrow">Private court</span>
-      <h2>Pass to {player}</h2>
-      <p>
-        Only {player} should reveal this hand. Other players should look away.
-      </p>
-      <button autoFocus className="primary" onClick={onReveal}>
-        Reveal {player}’s hand
-      </button>
-    </section>
-  );
-}
-
 export function PlotPanel({
   player,
   onChoose,
@@ -69,9 +45,6 @@ export function HandPanel({
     <>
       <div className="section-title">
         <h2>Your hand</h2>
-        <button className="quiet" onClick={actions.hide}>
-          Hide hand
-        </button>
       </div>
       <p className="hint">
         Choose one card, or pass. Cards are spent only at End Turn.

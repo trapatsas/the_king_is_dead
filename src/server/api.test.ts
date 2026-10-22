@@ -43,6 +43,61 @@ async function post(path: string, data: unknown) {
   });
 }
 describe("same-origin SQLite capture API", () => {
+  it("keeps original model provenance on setup retries after a model deployment", async () => {
+    const hard = {
+      mode: "standard" as const,
+      seed: "older-model-game",
+      players: [
+        { id: "A", controller: "human" as const },
+        {
+          id: "Hard",
+          controller: "algorithmic" as const,
+          botStrategy: "ml" as const,
+        },
+      ],
+    };
+    repo.create(id, hard, {
+      source: "live",
+      bots: {
+        Hard: {
+          version: "ml-mcts-v1",
+          params: { modelId: "original-pilot", modelHash: "old-hash" },
+        },
+      },
+    });
+    expect((await post("/api/games", { id, config: hard })).status).toBe(200);
+    expect(
+      JSON.parse(
+        String(
+          repo.get("SELECT params_json FROM bot_configs WHERE strategy='ml'")
+            ?.params_json,
+        ),
+      ).modelId,
+    ).toBe("original-pilot");
+    expect(
+      (await post("/api/games", { id, config: { ...hard, seed: "different" } }))
+        .status,
+    ).toBe(409);
+  });
+  it("records the v2 checkpoint selected for the Hard bot", async () => {
+    const hard = {
+      ...config,
+      players: [
+        { id: "A", controller: "human" },
+        { id: "Hard", controller: "algorithmic", botStrategy: "ml" },
+      ],
+    };
+    expect((await post("/api/games", { id, config: hard })).status).toBe(200);
+    const row = repo.get(
+      "SELECT params_json FROM bot_configs WHERE strategy='ml'",
+    );
+    expect(JSON.parse(String(row?.params_json))).toMatchObject({
+      modelId: "ml-pilot-69f477be34b9",
+      modelHash:
+        "69f477be34b92b5f1a0a5e9f2ab549494dc151469d1afb9e9864a690ba547f0c",
+      learnedWeight: 0.5,
+    });
+  });
   it("captures idempotent commands and serves only public observations", async () => {
     expect((await post("/api/games", { id, config })).status).toBe(200);
     const state = repo.session(id).state;

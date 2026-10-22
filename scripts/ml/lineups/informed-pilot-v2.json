@@ -1,0 +1,13 @@
+[
+  { "name": "Informed", "strategy": "informed" },
+  {
+    "name": "ML pilot",
+    "strategy": "ml",
+    "model": "public/models/pilot/manifest.json"
+  },
+  {
+    "name": "ML v2",
+    "strategy": "ml",
+    "model": "artifacts/ml/model-v2-linear/manifest.json"
+  }
+]

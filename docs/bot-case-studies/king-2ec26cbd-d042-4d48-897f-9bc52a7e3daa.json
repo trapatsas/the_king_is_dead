@@ -1,0 +1,820 @@
+{
+  "version": 1,
+  "id": "king-2ec26cbd-d042-4d48-897f-9bc52a7e3daa",
+  "createdAt": "2026-10-21T22:44:02.571Z",
+  "updatedAt": "2026-10-21T22:54:30.473Z",
+  "mode": "standard",
+  "players": [
+    {
+      "name": "ML Bot",
+      "controller": "algorithmic",
+      "botStrategy": "ml"
+    },
+    {
+      "name": "Trapatsas",
+      "controller": "human"
+    },
+    {
+      "name": "Informed",
+      "controller": "algorithmic",
+      "botStrategy": "informed"
+    }
+  ],
+  "status": "finished",
+  "turns": 68,
+  "entries": [
+    {
+      "sequence": 0,
+      "label": "Setup",
+      "heading": "The kingdom is prepared",
+      "details": [
+        "Standard · 3 players · Seed: kingdom-3429563383",
+        "Clockwise seats: ML Bot → Trapatsas → Informed.",
+        "Starting player: Informed.",
+        "Bot strategies: ML Bot: ml, Informed: informed.",
+        "Initial struggle order: 1. Moray → 2. Essex → 3. Strathclyde → 4. Warwick → 5. Devon → 6. Northumbria → 7. Lancaster → 8. Gwynedd.",
+        "Control discs in supply: 8 Scottish, 8 Welsh, 8 English. Instability discs in France: 3."
+      ],
+      "followers": {
+        "caption": "Initial follower allocation",
+        "rows": [
+          {
+            "label": "Moray",
+            "counts": {
+              "scottish": 2,
+              "welsh": 2,
+              "english": 0
+            }
+          },
+          {
+            "label": "Strathclyde",
+            "counts": {
+              "scottish": 2,
+              "welsh": 1,
+              "english": 1
+            }
+          },
+          {
+            "label": "Lancaster",
+            "counts": {
+              "scottish": 1,
+              "welsh": 2,
+              "english": 1
+            }
+          },
+          {
+            "label": "Northumbria",
+            "counts": {
+              "scottish": 2,
+              "welsh": 1,
+              "english": 1
+            }
+          },
+          {
+            "label": "Gwynedd",
+            "counts": {
+              "scottish": 1,
+              "welsh": 2,
+              "english": 1
+            }
+          },
+          {
+            "label": "Warwick",
+            "counts": {
+              "scottish": 1,
+              "welsh": 1,
+              "english": 2
+            }
+          },
+          {
+            "label": "Essex",
+            "counts": {
+              "scottish": 1,
+              "welsh": 0,
+              "english": 3
+            }
+          },
+          {
+            "label": "Devon",
+            "counts": {
+              "scottish": 2,
+              "welsh": 1,
+              "english": 1
+            }
+          },
+          {
+            "label": "ML Bot court",
+            "counts": {
+              "scottish": 0,
+              "welsh": 1,
+              "english": 1
+            }
+          },
+          {
+            "label": "Trapatsas court",
+            "counts": {
+              "scottish": 1,
+              "welsh": 0,
+              "english": 1
+            }
+          },
+          {
+            "label": "Informed court",
+            "counts": {
+              "scottish": 0,
+              "welsh": 0,
+              "english": 2
+            }
+          },
+          {
+            "label": "Common supply",
+            "counts": {
+              "scottish": 5,
+              "welsh": 7,
+              "english": 4
+            }
+          },
+          {
+            "label": "Removed to the box",
+            "counts": {
+              "scottish": 0,
+              "welsh": 0,
+              "english": 0
+            }
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 1,
+      "label": "Turn 1",
+      "heading": "Informed passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 2,
+      "label": "Turn 2",
+      "heading": "ML Bot passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 3,
+      "label": "Turn 3",
+      "heading": "Trapatsas passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 4,
+      "label": "After turn 3",
+      "heading": "Power struggle 1 · Moray",
+      "details": [
+        "The largest follower counts were tied, so the region became unstable. An instability disc was placed.",
+        "All followers returned to the common supply. Region card 1 was turned face down."
+      ],
+      "followers": {
+        "caption": "Followers at the power struggle",
+        "rows": [
+          {
+            "label": "Moray",
+            "counts": {
+              "scottish": 2,
+              "welsh": 2,
+              "english": 0
+            }
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 5,
+      "label": "Turn 4",
+      "heading": "Informed passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 6,
+      "label": "Turn 5",
+      "heading": "ML Bot passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 7,
+      "label": "Turn 6",
+      "heading": "Trapatsas passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 8,
+      "label": "After turn 6",
+      "heading": "Power struggle 2 · Essex",
+      "details": [
+        "English had more followers than each other faction and gained control. A English control disc was placed.",
+        "All followers returned to the common supply. Region card 2 was turned face down."
+      ],
+      "followers": {
+        "caption": "Followers at the power struggle",
+        "rows": [
+          {
+            "label": "Essex",
+            "counts": {
+              "scottish": 1,
+              "welsh": 0,
+              "english": 3
+            }
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 9,
+      "label": "Turn 7",
+      "heading": "Informed passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 10,
+      "label": "Turn 8",
+      "heading": "ML Bot passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 11,
+      "label": "Turn 9 · Action 1",
+      "heading": "Trapatsas played Scottish Support",
+      "details": [
+        "No card effect: No eligible uncontrolled border region",
+        "Summon: Trapatsas took 1 Welsh from Lancaster into their court."
+      ]
+    },
+    {
+      "sequence": 12,
+      "label": "Turn 10",
+      "heading": "Informed passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 13,
+      "label": "Turn 11",
+      "heading": "ML Bot passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 14,
+      "label": "Turn 12",
+      "heading": "Trapatsas passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 15,
+      "label": "After turn 12",
+      "heading": "Power struggle 3 · Strathclyde",
+      "details": [
+        "Scottish had more followers than each other faction and gained control. A Scottish control disc was placed.",
+        "All followers returned to the common supply. Region card 3 was turned face down."
+      ],
+      "followers": {
+        "caption": "Followers at the power struggle",
+        "rows": [
+          {
+            "label": "Strathclyde",
+            "counts": {
+              "scottish": 2,
+              "welsh": 1,
+              "english": 1
+            }
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 16,
+      "label": "Turn 13",
+      "heading": "Informed passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 17,
+      "label": "Turn 14",
+      "heading": "ML Bot passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 18,
+      "label": "Turn 15 · Action 2",
+      "heading": "Trapatsas played Welsh Support",
+      "details": [
+        "Effect 1: Move 2 Welsh from supply to Warwick.",
+        "Summon: Trapatsas took 1 Welsh from Warwick into their court."
+      ]
+    },
+    {
+      "sequence": 19,
+      "label": "Turn 16",
+      "heading": "Informed passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 20,
+      "label": "Turn 17",
+      "heading": "ML Bot passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 21,
+      "label": "Turn 18",
+      "heading": "Trapatsas passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 22,
+      "label": "After turn 18",
+      "heading": "Power struggle 4 · Warwick",
+      "details": [
+        "The largest follower counts were tied, so the region became unstable. An instability disc was placed.",
+        "All followers returned to the common supply. Region card 4 was turned face down."
+      ],
+      "followers": {
+        "caption": "Followers at the power struggle",
+        "rows": [
+          {
+            "label": "Warwick",
+            "counts": {
+              "scottish": 1,
+              "welsh": 2,
+              "english": 2
+            }
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 23,
+      "label": "Turn 19",
+      "heading": "Informed passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 24,
+      "label": "Turn 20",
+      "heading": "ML Bot passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 25,
+      "label": "Turn 21 · Action 3",
+      "heading": "Trapatsas played English Support",
+      "details": [
+        "Effect 1: Move 2 English from supply to Devon.",
+        "Summon: Trapatsas took 1 English from Devon into their court."
+      ]
+    },
+    {
+      "sequence": 26,
+      "label": "Turn 22",
+      "heading": "Informed passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 27,
+      "label": "Turn 23 · Action 4",
+      "heading": "ML Bot played Negotiate",
+      "details": [
+        "Effect 1: Exchange Gwynedd and Devon cards; place your disc on Gwynedd.",
+        "Summon: ML Bot took 1 Scottish from Northumbria into their court."
+      ]
+    },
+    {
+      "sequence": 28,
+      "label": "Turn 24",
+      "heading": "Trapatsas passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 29,
+      "label": "Turn 25 · Action 5",
+      "heading": "Informed played English Support",
+      "details": [
+        "Effect 1: Move 2 English from supply to Devon.",
+        "Summon: Informed took 1 Scottish from Gwynedd into their court."
+      ]
+    },
+    {
+      "sequence": 30,
+      "label": "Turn 26",
+      "heading": "ML Bot passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 31,
+      "label": "Turn 27 · Action 6",
+      "heading": "Trapatsas played Outmanoeuvre",
+      "details": [
+        "Effect 1: Move 2 Welsh from Gwynedd to Devon.",
+        "Effect 2: Move 1 English from Devon to Gwynedd.",
+        "Summon: Trapatsas took 1 Scottish from Devon into their court."
+      ]
+    },
+    {
+      "sequence": 32,
+      "label": "Turn 28",
+      "heading": "Informed passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 33,
+      "label": "Turn 29",
+      "heading": "ML Bot passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 34,
+      "label": "Turn 30 · Action 7",
+      "heading": "Trapatsas played Manoeuvre",
+      "details": [
+        "Effect 1: Move 1 English from Gwynedd to Devon.",
+        "Effect 2: Move 1 Scottish from Devon to Gwynedd.",
+        "Summon: Trapatsas took 1 English from Devon into their court."
+      ]
+    },
+    {
+      "sequence": 35,
+      "label": "Turn 31 · Action 8",
+      "heading": "Informed played Outmanoeuvre",
+      "details": [
+        "Effect 1: Move 1 Scottish from Gwynedd to Devon.",
+        "Effect 2: Move 2 English from Devon to Gwynedd.",
+        "Summon: Informed took 1 English from Devon into their court."
+      ]
+    },
+    {
+      "sequence": 36,
+      "label": "Turn 32",
+      "heading": "ML Bot passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 37,
+      "label": "Turn 33",
+      "heading": "Trapatsas passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 38,
+      "label": "Turn 34 · Action 9",
+      "heading": "Informed played Assemble",
+      "details": [
+        "Effect 1: Move 1 Scottish from supply to Northumbria.",
+        "Effect 2: Move 1 Welsh from supply to Northumbria.",
+        "Effect 3: Move 1 English from supply to Northumbria.",
+        "Summon: Informed took 1 English from Lancaster into their court."
+      ]
+    },
+    {
+      "sequence": 39,
+      "label": "Turn 35",
+      "heading": "ML Bot passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 40,
+      "label": "Turn 36",
+      "heading": "Trapatsas passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 41,
+      "label": "Turn 37 · Action 10",
+      "heading": "Informed played Welsh Support",
+      "details": [
+        "Effect 1: Move 2 Welsh from supply to Devon.",
+        "Summon: Informed took 1 English from Gwynedd into their court."
+      ]
+    },
+    {
+      "sequence": 42,
+      "label": "Turn 38",
+      "heading": "ML Bot passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 43,
+      "label": "Turn 39",
+      "heading": "Trapatsas passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 44,
+      "label": "Turn 40",
+      "heading": "Informed passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 45,
+      "label": "After turn 40",
+      "heading": "Power struggle 5 · Gwynedd",
+      "details": [
+        "English had more followers than each other faction and gained control. A English control disc was placed.",
+        "All followers returned to the common supply. Region card 5 was turned face down."
+      ],
+      "followers": {
+        "caption": "Followers at the power struggle",
+        "rows": [
+          {
+            "label": "Gwynedd",
+            "counts": {
+              "scottish": 0,
+              "welsh": 0,
+              "english": 2
+            }
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 46,
+      "label": "Turn 41 · Action 11",
+      "heading": "ML Bot played Scottish Support",
+      "details": [
+        "Effect 1: Move 2 Scottish from supply to Northumbria.",
+        "Summon: ML Bot took 1 Scottish from Northumbria into their court."
+      ]
+    },
+    {
+      "sequence": 47,
+      "label": "Turn 42 · Action 12",
+      "heading": "Trapatsas played Assemble",
+      "details": [
+        "Effect 1: Move 1 Scottish from supply to Devon.",
+        "Effect 2: Move 1 Welsh from supply to Devon.",
+        "Effect 3: Move 1 English from supply to Lancaster.",
+        "Summon: Trapatsas took 1 Scottish from Northumbria into their court."
+      ]
+    },
+    {
+      "sequence": 48,
+      "label": "Turn 43 · Action 13",
+      "heading": "Informed played Manoeuvre",
+      "details": [
+        "Effect 1: Move 1 English from Lancaster to Northumbria.",
+        "Effect 2: Move 1 Welsh from Northumbria to Lancaster.",
+        "Summon: Informed took 1 Scottish from Northumbria into their court."
+      ]
+    },
+    {
+      "sequence": 49,
+      "label": "Turn 44 · Action 14",
+      "heading": "ML Bot played Manoeuvre",
+      "details": [
+        "Effect 1: Move 1 English from Northumbria to Devon.",
+        "Effect 2: Move 1 Welsh from Devon to Northumbria.",
+        "Summon: ML Bot took 1 Welsh from Lancaster into their court."
+      ]
+    },
+    {
+      "sequence": 50,
+      "label": "Turn 45",
+      "heading": "Trapatsas passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 51,
+      "label": "Turn 46 · Action 15",
+      "heading": "Informed played Negotiate",
+      "details": [
+        "Effect 1: Exchange Northumbria and Devon cards; place your disc on Devon.",
+        "Summon: Informed took 1 Scottish from Devon into their court."
+      ]
+    },
+    {
+      "sequence": 52,
+      "label": "Turn 47 · Action 16",
+      "heading": "ML Bot played Assemble",
+      "details": [
+        "Effect 1: Move 1 Scottish from supply to Northumbria.",
+        "Effect 2: Move 1 Welsh from supply to Northumbria.",
+        "Effect 3: Move 1 English from supply to Northumbria.",
+        "Summon: ML Bot took 1 English from Northumbria into their court."
+      ]
+    },
+    {
+      "sequence": 53,
+      "label": "Turn 48",
+      "heading": "Trapatsas passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 54,
+      "label": "Turn 49",
+      "heading": "Informed passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 55,
+      "label": "Turn 50",
+      "heading": "ML Bot passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 56,
+      "label": "After turn 50",
+      "heading": "Power struggle 6 · Devon",
+      "details": [
+        "Welsh had more followers than each other faction and gained control. A Welsh control disc was placed.",
+        "All followers returned to the common supply. Region card 6 was turned face down."
+      ],
+      "followers": {
+        "caption": "Followers at the power struggle",
+        "rows": [
+          {
+            "label": "Devon",
+            "counts": {
+              "scottish": 1,
+              "welsh": 5,
+              "english": 1
+            }
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 57,
+      "label": "Turn 51 · Action 17",
+      "heading": "Trapatsas played Assemble",
+      "details": [
+        "Effect 1: Move 1 Scottish from supply to Northumbria.",
+        "Effect 2: Move 1 Welsh from supply to Northumbria.",
+        "Effect 3: Move 1 English from supply to Lancaster.",
+        "Summon: Trapatsas took 1 Welsh from Northumbria into their court."
+      ]
+    },
+    {
+      "sequence": 58,
+      "label": "Turn 52 · Action 18",
+      "heading": "Informed played Scottish Support",
+      "details": [
+        "Effect 1: Move 2 Scottish from supply to Northumbria.",
+        "Summon: Informed took 1 Welsh from Lancaster into their court."
+      ]
+    },
+    {
+      "sequence": 59,
+      "label": "Turn 53 · Action 19",
+      "heading": "ML Bot played Outmanoeuvre",
+      "details": [
+        "Effect 1: Move 1 English from Lancaster to Northumbria.",
+        "Effect 2: Move 2 Welsh from Northumbria to Lancaster.",
+        "Summon: ML Bot took 1 Scottish from Lancaster into their court."
+      ]
+    },
+    {
+      "sequence": 60,
+      "label": "Turn 54",
+      "heading": "Trapatsas passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 61,
+      "label": "Turn 55",
+      "heading": "Informed passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 62,
+      "label": "Turn 56 · Action 20",
+      "heading": "ML Bot played Assemble",
+      "details": [
+        "Effect 1: Move 1 Scottish from supply to Lancaster.",
+        "Effect 2: Move 1 Welsh from supply to Lancaster.",
+        "Effect 3: Move 1 English from supply to Northumbria.",
+        "Summon: ML Bot took 1 Welsh from Northumbria into their court."
+      ]
+    },
+    {
+      "sequence": 63,
+      "label": "Turn 57",
+      "heading": "Trapatsas passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 64,
+      "label": "Turn 58",
+      "heading": "Informed passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 65,
+      "label": "Turn 59 · Action 21",
+      "heading": "ML Bot played Welsh Support",
+      "details": [
+        "No card effect: No eligible uncontrolled border region",
+        "Summon: ML Bot took 1 Welsh from Lancaster into their court."
+      ]
+    },
+    {
+      "sequence": 66,
+      "label": "Turn 60",
+      "heading": "Trapatsas passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 67,
+      "label": "Turn 61 · Action 22",
+      "heading": "Informed played Assemble",
+      "details": [
+        "Effect 1: Move 1 Scottish from supply to Lancaster.",
+        "Effect 2: Move 1 Welsh from supply to Lancaster.",
+        "Effect 3: Move 1 English from supply to Northumbria.",
+        "Summon: Informed took 1 Scottish from Northumbria into their court."
+      ]
+    },
+    {
+      "sequence": 68,
+      "label": "Turn 62",
+      "heading": "ML Bot passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 69,
+      "label": "Turn 63 · Action 23",
+      "heading": "Trapatsas played Negotiate",
+      "details": [
+        "Effect 1: Exchange Lancaster and Northumbria cards; place your disc on Northumbria.",
+        "Summon: Trapatsas took 1 English from Northumbria into their court."
+      ]
+    },
+    {
+      "sequence": 70,
+      "label": "Turn 64",
+      "heading": "Informed passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 71,
+      "label": "Turn 65 · Action 24",
+      "heading": "ML Bot played English Support",
+      "details": [
+        "Effect 1: Move 2 English from supply to Lancaster.",
+        "Summon: ML Bot took 1 English from Lancaster into their court."
+      ]
+    },
+    {
+      "sequence": 72,
+      "label": "Turn 66",
+      "heading": "Trapatsas passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 73,
+      "label": "Turn 67",
+      "heading": "Informed passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 74,
+      "label": "Turn 68",
+      "heading": "ML Bot passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 75,
+      "label": "After turn 68",
+      "heading": "Power struggle 7 · Northumbria",
+      "details": [
+        "The largest follower counts were tied, so the region became unstable. An instability disc was placed.",
+        "All followers returned to the common supply. Region card 7 was turned face down."
+      ],
+      "followers": {
+        "caption": "Followers at the power struggle",
+        "rows": [
+          {
+            "label": "Northumbria",
+            "counts": {
+              "scottish": 4,
+              "welsh": 0,
+              "english": 4
+            }
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 76,
+      "label": "After turn 68",
+      "heading": "Invasion · normal play ends",
+      "details": [
+        "The third instability disc was placed at Northumbria. Final scoring compares complete court sets, then the Invasion tiebreak."
+      ]
+    },
+    {
+      "sequence": 77,
+      "label": "Final result",
+      "heading": "ML Bot wins by Invasion",
+      "details": [
+        "Invasion: ML Bot wins by latest final committed action among the tied players.",
+        "Invasion court comparison:",
+        "Complete Sets: Informed: 1, ML Bot: 3, Trapatsas: 3. Remaining: ML Bot, Trapatsas.",
+        "Latest Action: ML Bot: 24, Trapatsas: 23. Remaining: ML Bot."
+      ]
+    }
+  ]
+}

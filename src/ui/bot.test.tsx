@@ -9,16 +9,22 @@ import { editFixture } from "../test/standardFixtures";
 import { Game } from "./Game";
 import { Setup } from "./Setup";
 
-const mocks = vi.hoisted(() => ({ search: vi.fn(), dispose: vi.fn() }));
+const mocks = vi.hoisted(() => ({
+  search: vi.fn(),
+  prepare: vi.fn(),
+  dispose: vi.fn(),
+}));
 vi.mock("../bot/client", () => ({
   BotClient: class {
     search = mocks.search;
+    prepare = mocks.prepare;
     dispose = mocks.dispose;
   },
 }));
 afterEach(() => {
   cleanup();
   vi.resetAllMocks();
+  vi.unstubAllEnvs();
   window.history.replaceState(null, "", "/");
 });
 function botSession() {
@@ -45,6 +51,34 @@ function result(session = botSession()): SearchResult {
 }
 
 describe("bot orchestration", () => {
+  it("prepares the Hard model before searching and displays its underlying agent", async () => {
+    let ready!: (id: string) => void;
+    mocks.prepare.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          ready = resolve;
+        }),
+    );
+    mocks.search.mockImplementation(() => new Promise(() => {}));
+    const session = editFixture(botSession(), (state) => {
+      state.players[state.activePlayerId]!.botStrategy = "ml";
+    });
+    render(<Game initialSession={session} />);
+    expect(screen.getByText("Loading learned model")).toBeDefined();
+    expect(
+      screen.getByRole("region", { name: "Bot turn" }).textContent,
+    ).toContain("Hard bot");
+    expect(screen.getByText("Agent: ML v2 · linear value model")).toBeDefined();
+    expect(mocks.search).not.toHaveBeenCalled();
+    await act(() => ready("ml-pilot-69f477be34b9"));
+    expect(mocks.search).toHaveBeenCalledOnce();
+    const [req] = mocks.search.mock.calls[0]! as [SearchRequest, AbortSignal];
+    expect(
+      req.observation.players.find((p) => p.id === req.observation.viewer)
+        ?.botStrategy,
+    ).toBe("ml");
+    expect(screen.queryByRole("button", { name: /^Play / })).toBeNull();
+  });
   it("sends the patient profile to its worker without exposing a bot hand", () => {
     mocks.search.mockImplementation(() => new Promise(() => {}));
     const session = editFixture(botSession(), (state) => {
@@ -59,7 +93,7 @@ describe("bot orchestration", () => {
     ).toBe("patient");
     expect(
       screen.getByRole("region", { name: "Bot turn" }).textContent,
-    ).toContain("Patient opponent");
+    ).toContain("Easy bot");
     expect(screen.queryByRole("button", { name: /^Play / })).toBeNull();
   });
   it("routes the informed profile to the worker and labels the thinking panel", () => {
@@ -76,7 +110,7 @@ describe("bot orchestration", () => {
     ).toBe("informed");
     expect(
       screen.getByRole("region", { name: "Bot turn" }).textContent,
-    ).toContain("Informed opponent");
+    ).toContain("Medium bot");
     expect(screen.queryByRole("button", { name: /^Play / })).toBeNull();
   });
   it("shows thinking with no hand or human controls, then validates and hands over", async () => {
@@ -101,7 +135,7 @@ describe("bot orchestration", () => {
     expect(onCommit).toHaveBeenCalledOnce();
     expect(onCommit.mock.calls[0]![0].state.turnSequence).toBe(1);
     expect(
-      screen.getByRole("button", { name: /Reveal .* hand/ }),
+      screen.getByRole("button", { name: "Play Scottish Support" }),
     ).toBeDefined();
   });
   it("rejects stale replies without changing history and supports retry", async () => {
@@ -119,7 +153,7 @@ describe("bot orchestration", () => {
     mocks.search.mockResolvedValue(result(session));
     await user.click(screen.getByRole("button", { name: "Retry bot turn" }));
     expect(
-      await screen.findByRole("button", { name: /Reveal .* hand/ }),
+      await screen.findByRole("button", { name: "Play Scottish Support" }),
     ).toBeDefined();
     expect(onCommit).toHaveBeenCalledOnce();
   });
@@ -141,26 +175,29 @@ describe("bot orchestration", () => {
     await act(() => resolve(result(session)));
     expect(onCommit).not.toHaveBeenCalled();
   });
-  it("keeps the research release gate closed and permits explicit development preview", async () => {
-    const user = userEvent.setup();
-    const view = render(<Setup onStart={vi.fn()} />);
-    await user.selectOptions(
-      screen.getByLabelText("Player 2 controller"),
-      "algorithmic",
-    );
-    expect(
-      (screen.getByRole("button", { name: /Begin game/ }) as HTMLButtonElement)
-        .disabled,
-    ).toBe(true);
-    view.unmount();
-    window.history.replaceState(null, "", "/?bots=experimental");
-    const start = vi.fn();
-    render(<Setup onStart={start} />);
-    await user.selectOptions(
-      screen.getByLabelText("Player 2 controller"),
-      "algorithmic",
-    );
-    await user.click(screen.getByRole("button", { name: /Begin game/ }));
-    expect(start.mock.calls[0]![0].players[1].controller).toBe("algorithmic");
-  });
+  it.each(["patient", "informed", "ml"])(
+    "starts %s from normal setup in production mode",
+    async (strategy) => {
+      vi.stubEnv("DEV", false);
+      window.history.replaceState(null, "", "/");
+      const user = userEvent.setup();
+      const start = vi.fn();
+      render(<Setup onStart={start} />);
+      await user.selectOptions(
+        screen.getByLabelText("Player 2 type"),
+        strategy,
+      );
+      expect(
+        screen.queryByText(/Algorithmic opponents are in development/),
+      ).toBeNull();
+      expect(
+        screen.queryByText(/Experimental Standard bot preview/),
+      ).toBeNull();
+      await user.click(screen.getByRole("button", { name: /Begin game/ }));
+      expect(start.mock.calls[0]![0].players[1]).toMatchObject({
+        controller: "algorithmic",
+        botStrategy: strategy,
+      });
+    },
+  );
 });

@@ -19,6 +19,7 @@
     "ml:export": "node scripts/ml/run.mjs export",
     "ml:materialize": "node scripts/ml/run.mjs materialize",
     "ml:verify": "node scripts/ml/verify-model.mjs",
+    "ml:match": "node scripts/ml/match.mjs",
     "ml:setup": "python3 ml/setup.py",
     "ml:test": "ml/.venv/bin/python -m unittest discover -s ml -p \"test_*.py\""
   },

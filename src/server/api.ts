@@ -1,7 +1,7 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { GameRepository } from "./repository";
+import { GameRepository, hash } from "./repository";
 import type { BotProvenance } from "./repository";
 import type { SetupConfig } from "../game/domain";
 import type { BotTelemetry } from "../app/botTelemetry";
@@ -9,6 +9,7 @@ import type { TurnPlan } from "../game/turnTypes";
 import { getObservation } from "../game/visibility";
 import { projectPublicLog } from "../ui/finishedLog";
 import { DEFAULT_INFORMED_PARAMS } from "../bot/informed";
+import { ML_MANIFEST_URL } from "../bot/ml/deployment";
 
 async function body(req: IncomingMessage): Promise<Record<string, unknown>> {
   if (!req.headers["content-type"]?.startsWith("application/json"))
@@ -59,6 +60,21 @@ export function gameApi(repo: GameRepository) {
         const input = await body(req);
         const config = input.config as SetupConfig;
         if (!Array.isArray(config?.players)) throw new Error("Invalid setup");
+        // Setup retries retain their original checkpoint provenance after a
+        // deployment changes the model selected for newly created games.
+        if (
+          repo.get("SELECT id FROM games WHERE public_id=?", String(input.id))
+        ) {
+          const session = repo.session(String(input.id));
+          const setup = session.events[0];
+          if (
+            setup?.type !== "GameCreated" ||
+            hash(setup.config) !== hash(config)
+          )
+            throw new Error("Game ID reused with different setup");
+          send(200, { eventSequence: session.state.eventSequence });
+          return;
+        }
         const bots: Record<string, BotProvenance> = {};
         for (const p of config.players) {
           if (p.botStrategy === "informed")
@@ -72,10 +88,7 @@ export function gameApi(repo: GameRepository) {
             };
           if (p.botStrategy === "ml") {
             const manifest = JSON.parse(
-              readFileSync(
-                resolve("public/models/pilot/manifest.json"),
-                "utf8",
-              ),
+              readFileSync(resolve("public", ML_MANIFEST_URL.slice(1)), "utf8"),
             );
             bots[p.id] = {
               version: "ml-mcts-v1",

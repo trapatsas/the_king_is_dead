@@ -654,27 +654,6 @@ details p {
 .turn-panel .section-title h2 {
   font-size: 1.9rem;
 }
-.privacy-panel {
-  text-align: center;
-  padding: 2rem 0.4rem;
-}
-.privacy-panel h2 {
-  margin: 1rem 0;
-  font-size: 2.1rem;
-}
-.privacy-panel p {
-  color: var(--muted);
-  font-size: 0.8rem;
-}
-.privacy-symbol {
-  display: block;
-  font-size: 3rem;
-  color: var(--gold);
-  margin-bottom: 1.3rem;
-}
-.privacy-panel .primary {
-  width: 100%;
-}
 .hand {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -1065,19 +1044,6 @@ details p {
     height: 570px;
     margin: 0 1.5rem 1rem;
   }
-  .turn-panel .privacy-panel {
-    padding: 1rem;
-  }
-  .privacy-symbol {
-    font-size: 2rem;
-    margin-bottom: 0.5rem;
-  }
-  .privacy-panel h2 {
-    font-size: 1.8rem;
-  }
-  .privacy-panel .primary {
-    width: auto;
-  }
   .summon-choices {
     grid-template-columns: repeat(3, 1fr);
   }
@@ -1340,10 +1306,7 @@ details p {
   gap: 0.5rem;
   margin-bottom: 1rem;
 }
-.seat-strategy {
+.seat-agent {
   grid-column: 1 / -1;
-}
-.seat-strategy .hint {
-  display: block;
   margin: 0.4rem 0 0.7rem;
 }

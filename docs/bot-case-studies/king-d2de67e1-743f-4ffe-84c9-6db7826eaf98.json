@@ -1,0 +1,839 @@
+{
+  "version": 1,
+  "id": "king-d2de67e1-743f-4ffe-84c9-6db7826eaf98",
+  "createdAt": "2026-10-21T12:12:28.073Z",
+  "updatedAt": "2026-10-21T12:26:58.824Z",
+  "mode": "standard",
+  "players": [
+    {
+      "name": "Panos",
+      "controller": "human"
+    },
+    {
+      "name": "Informed",
+      "controller": "algorithmic",
+      "botStrategy": "informed"
+    },
+    {
+      "name": "ML Bot",
+      "controller": "algorithmic",
+      "botStrategy": "ml"
+    }
+  ],
+  "status": "finished",
+  "turns": 71,
+  "entries": [
+    {
+      "sequence": 0,
+      "label": "Setup",
+      "heading": "The kingdom is prepared",
+      "details": [
+        "Standard · 3 players · Seed: kingdom-2011281742",
+        "Clockwise seats: Panos → Informed → ML Bot.",
+        "Starting player: ML Bot.",
+        "Bot strategies: Informed: informed, ML Bot: ml.",
+        "Initial struggle order: 1. Strathclyde → 2. Gwynedd → 3. Essex → 4. Warwick → 5. Devon → 6. Moray → 7. Northumbria → 8. Lancaster.",
+        "Control discs in supply: 8 Scottish, 8 Welsh, 8 English. Instability discs in France: 3."
+      ],
+      "followers": {
+        "caption": "Initial follower allocation",
+        "rows": [
+          {
+            "label": "Moray",
+            "counts": {
+              "scottish": 3,
+              "welsh": 0,
+              "english": 1
+            }
+          },
+          {
+            "label": "Strathclyde",
+            "counts": {
+              "scottish": 1,
+              "welsh": 1,
+              "english": 2
+            }
+          },
+          {
+            "label": "Lancaster",
+            "counts": {
+              "scottish": 2,
+              "welsh": 1,
+              "english": 1
+            }
+          },
+          {
+            "label": "Northumbria",
+            "counts": {
+              "scottish": 2,
+              "welsh": 1,
+              "english": 1
+            }
+          },
+          {
+            "label": "Gwynedd",
+            "counts": {
+              "scottish": 0,
+              "welsh": 3,
+              "english": 1
+            }
+          },
+          {
+            "label": "Warwick",
+            "counts": {
+              "scottish": 1,
+              "welsh": 0,
+              "english": 3
+            }
+          },
+          {
+            "label": "Essex",
+            "counts": {
+              "scottish": 0,
+              "welsh": 1,
+              "english": 3
+            }
+          },
+          {
+            "label": "Devon",
+            "counts": {
+              "scottish": 3,
+              "welsh": 1,
+              "english": 0
+            }
+          },
+          {
+            "label": "Panos court",
+            "counts": {
+              "scottish": 0,
+              "welsh": 1,
+              "english": 1
+            }
+          },
+          {
+            "label": "Informed court",
+            "counts": {
+              "scottish": 1,
+              "welsh": 1,
+              "english": 0
+            }
+          },
+          {
+            "label": "ML Bot court",
+            "counts": {
+              "scottish": 1,
+              "welsh": 1,
+              "english": 0
+            }
+          },
+          {
+            "label": "Common supply",
+            "counts": {
+              "scottish": 4,
+              "welsh": 7,
+              "english": 5
+            }
+          },
+          {
+            "label": "Removed to the box",
+            "counts": {
+              "scottish": 0,
+              "welsh": 0,
+              "english": 0
+            }
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 1,
+      "label": "Turn 1",
+      "heading": "ML Bot passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 2,
+      "label": "Turn 2",
+      "heading": "Panos passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 3,
+      "label": "Turn 3",
+      "heading": "Informed passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 4,
+      "label": "After turn 3",
+      "heading": "Power struggle 1 · Strathclyde",
+      "details": [
+        "English had more followers than each other faction and gained control. A English control disc was placed.",
+        "All followers returned to the common supply. Region card 1 was turned face down."
+      ],
+      "followers": {
+        "caption": "Followers at the power struggle",
+        "rows": [
+          {
+            "label": "Strathclyde",
+            "counts": {
+              "scottish": 1,
+              "welsh": 1,
+              "english": 2
+            }
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 5,
+      "label": "Turn 4",
+      "heading": "ML Bot passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 6,
+      "label": "Turn 5 · Action 1",
+      "heading": "Panos played Manoeuvre",
+      "details": [
+        "Effect 1: Move 1 Welsh from Gwynedd to Warwick.",
+        "Effect 2: Move 1 English from Warwick to Gwynedd.",
+        "Summon: Panos took 1 Welsh from Gwynedd into their court."
+      ]
+    },
+    {
+      "sequence": 7,
+      "label": "Turn 6",
+      "heading": "Informed passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 8,
+      "label": "Turn 7",
+      "heading": "ML Bot passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 9,
+      "label": "Turn 8",
+      "heading": "Panos passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 10,
+      "label": "After turn 8",
+      "heading": "Power struggle 2 · Gwynedd",
+      "details": [
+        "English had more followers than each other faction and gained control. A English control disc was placed.",
+        "All followers returned to the common supply. Region card 2 was turned face down."
+      ],
+      "followers": {
+        "caption": "Followers at the power struggle",
+        "rows": [
+          {
+            "label": "Gwynedd",
+            "counts": {
+              "scottish": 0,
+              "welsh": 1,
+              "english": 2
+            }
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 11,
+      "label": "Turn 9",
+      "heading": "Informed passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 12,
+      "label": "Turn 10",
+      "heading": "ML Bot passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 13,
+      "label": "Turn 11 · Action 2",
+      "heading": "Panos played Scottish Support",
+      "details": [
+        "No card effect: No eligible uncontrolled border region",
+        "Summon: Panos took 1 English from Essex into their court."
+      ]
+    },
+    {
+      "sequence": 14,
+      "label": "Turn 12",
+      "heading": "Informed passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 15,
+      "label": "Turn 13",
+      "heading": "ML Bot passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 16,
+      "label": "Turn 14",
+      "heading": "Panos passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 17,
+      "label": "After turn 14",
+      "heading": "Power struggle 3 · Essex",
+      "details": [
+        "English had more followers than each other faction and gained control. A English control disc was placed.",
+        "All followers returned to the common supply. Region card 3 was turned face down."
+      ],
+      "followers": {
+        "caption": "Followers at the power struggle",
+        "rows": [
+          {
+            "label": "Essex",
+            "counts": {
+              "scottish": 0,
+              "welsh": 1,
+              "english": 2
+            }
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 18,
+      "label": "Turn 15",
+      "heading": "Informed passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 19,
+      "label": "Turn 16",
+      "heading": "ML Bot passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 20,
+      "label": "Turn 17",
+      "heading": "Panos passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 21,
+      "label": "After turn 17",
+      "heading": "Power struggle 4 · Warwick",
+      "details": [
+        "English had more followers than each other faction and gained control. A English control disc was placed.",
+        "All followers returned to the common supply. Region card 4 was turned face down."
+      ],
+      "followers": {
+        "caption": "Followers at the power struggle",
+        "rows": [
+          {
+            "label": "Warwick",
+            "counts": {
+              "scottish": 1,
+              "welsh": 1,
+              "english": 2
+            }
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 22,
+      "label": "Turn 18 · Action 3",
+      "heading": "Informed played Scottish Support",
+      "details": [
+        "No card effect: No eligible uncontrolled border region",
+        "Summon: Informed took 1 English from Moray into their court."
+      ]
+    },
+    {
+      "sequence": 23,
+      "label": "Turn 19",
+      "heading": "ML Bot passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 24,
+      "label": "Turn 20 · Action 4",
+      "heading": "Panos played Assemble",
+      "details": [
+        "Effect 1: Move 1 Scottish from supply to Moray.",
+        "Effect 2: Move 1 Welsh from supply to Moray.",
+        "Effect 3: Move 1 English from supply to Moray.",
+        "Summon: Panos took 1 English from Moray into their court."
+      ]
+    },
+    {
+      "sequence": 25,
+      "label": "Turn 21",
+      "heading": "Informed passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 26,
+      "label": "Turn 22",
+      "heading": "ML Bot passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 27,
+      "label": "Turn 23 · Action 5",
+      "heading": "Panos played Assemble",
+      "details": [
+        "Effect 1: Move 1 Scottish from supply to Moray.",
+        "Effect 2: Move 1 Welsh from supply to Moray.",
+        "Effect 3: Move 1 English from supply to Moray.",
+        "Summon: Panos took 1 English from Moray into their court."
+      ]
+    },
+    {
+      "sequence": 28,
+      "label": "Turn 24",
+      "heading": "Informed passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 29,
+      "label": "Turn 25",
+      "heading": "ML Bot passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 30,
+      "label": "Turn 26 · Action 6",
+      "heading": "Panos played English Support",
+      "details": [
+        "Effect 1: Move 2 English from supply to Northumbria.",
+        "Summon: Panos took 1 Scottish from Northumbria into their court."
+      ]
+    },
+    {
+      "sequence": 31,
+      "label": "Turn 27",
+      "heading": "Informed passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 32,
+      "label": "Turn 28",
+      "heading": "ML Bot passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 33,
+      "label": "Turn 29",
+      "heading": "Panos passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 34,
+      "label": "After turn 29",
+      "heading": "Power struggle 5 · Devon",
+      "details": [
+        "Scottish had more followers than each other faction and gained control. A Scottish control disc was placed.",
+        "All followers returned to the common supply. Region card 5 was turned face down."
+      ],
+      "followers": {
+        "caption": "Followers at the power struggle",
+        "rows": [
+          {
+            "label": "Devon",
+            "counts": {
+              "scottish": 3,
+              "welsh": 1,
+              "english": 0
+            }
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 35,
+      "label": "Turn 30",
+      "heading": "Informed passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 36,
+      "label": "Turn 31",
+      "heading": "ML Bot passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 37,
+      "label": "Turn 32",
+      "heading": "Panos passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 38,
+      "label": "After turn 32",
+      "heading": "Power struggle 6 · Moray",
+      "details": [
+        "Scottish had more followers than each other faction and gained control. A Scottish control disc was placed.",
+        "All followers returned to the common supply. Region card 6 was turned face down."
+      ],
+      "followers": {
+        "caption": "Followers at the power struggle",
+        "rows": [
+          {
+            "label": "Moray",
+            "counts": {
+              "scottish": 5,
+              "welsh": 2,
+              "english": 0
+            }
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 39,
+      "label": "Turn 33",
+      "heading": "Informed passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 40,
+      "label": "Turn 34",
+      "heading": "ML Bot passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 41,
+      "label": "Turn 35",
+      "heading": "Panos passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 42,
+      "label": "After turn 35",
+      "heading": "Power struggle 7 · Northumbria",
+      "details": [
+        "English had more followers than each other faction and gained control. A English control disc was placed.",
+        "All followers returned to the common supply. Region card 7 was turned face down."
+      ],
+      "followers": {
+        "caption": "Followers at the power struggle",
+        "rows": [
+          {
+            "label": "Northumbria",
+            "counts": {
+              "scottish": 1,
+              "welsh": 1,
+              "english": 3
+            }
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 43,
+      "label": "Turn 36 · Action 7",
+      "heading": "Informed played Manoeuvre",
+      "details": [
+        "No card effect: No legal two-region follower swap",
+        "Summon: Informed took 1 English from Lancaster into their court."
+      ]
+    },
+    {
+      "sequence": 44,
+      "label": "Turn 37",
+      "heading": "ML Bot passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 45,
+      "label": "Turn 38",
+      "heading": "Panos passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 46,
+      "label": "Turn 39 · Action 8",
+      "heading": "Informed played English Support",
+      "details": [
+        "Effect 1: Move 2 English from supply to Lancaster.",
+        "Summon: Informed took 1 English from Lancaster into their court."
+      ]
+    },
+    {
+      "sequence": 47,
+      "label": "Turn 40",
+      "heading": "ML Bot passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 48,
+      "label": "Turn 41",
+      "heading": "Panos passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 49,
+      "label": "Turn 42 · Action 9",
+      "heading": "Informed played Outmanoeuvre",
+      "details": [
+        "No card effect: No legal bordering-region follower swap",
+        "Summon: Informed took 1 English from Lancaster into their court."
+      ]
+    },
+    {
+      "sequence": 50,
+      "label": "Turn 43",
+      "heading": "ML Bot passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 51,
+      "label": "Turn 44",
+      "heading": "Panos passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 52,
+      "label": "Turn 45 · Action 10",
+      "heading": "Informed played Assemble",
+      "details": [
+        "Effect 1: Move 1 Scottish from supply to Lancaster.",
+        "Effect 2: Move 1 Welsh from supply to Lancaster.",
+        "Effect 3: Move 1 English from supply to Lancaster.",
+        "Summon: Informed took 1 English from Lancaster into their court."
+      ]
+    },
+    {
+      "sequence": 53,
+      "label": "Turn 46 · Action 11",
+      "heading": "ML Bot played Negotiate",
+      "details": [
+        "No card effect: Fewer than two face-up unmarked region cards",
+        "Summon: ML Bot took 1 Scottish from Lancaster into their court."
+      ]
+    },
+    {
+      "sequence": 54,
+      "label": "Turn 47",
+      "heading": "Panos passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 55,
+      "label": "Turn 48",
+      "heading": "Informed passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 56,
+      "label": "Turn 49 · Action 12",
+      "heading": "ML Bot played Assemble",
+      "details": [
+        "Effect 1: Move 1 Scottish from supply to Lancaster.",
+        "Effect 2: Move 1 Welsh from supply to Lancaster.",
+        "Effect 3: Move 1 English from supply to Lancaster.",
+        "Summon: ML Bot took 1 English from Lancaster into their court."
+      ]
+    },
+    {
+      "sequence": 57,
+      "label": "Turn 50",
+      "heading": "Panos passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 58,
+      "label": "Turn 51",
+      "heading": "Informed passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 59,
+      "label": "Turn 52 · Action 13",
+      "heading": "ML Bot played Assemble",
+      "details": [
+        "Effect 1: Move 1 Scottish from supply to Lancaster.",
+        "Effect 2: Move 1 Welsh from supply to Lancaster.",
+        "Effect 3: Move 1 English from supply to Lancaster.",
+        "Summon: ML Bot took 1 English from Lancaster into their court."
+      ]
+    },
+    {
+      "sequence": 60,
+      "label": "Turn 53",
+      "heading": "Panos passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 61,
+      "label": "Turn 54",
+      "heading": "Informed passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 62,
+      "label": "Turn 55 · Action 14",
+      "heading": "ML Bot played Outmanoeuvre",
+      "details": [
+        "No card effect: No legal bordering-region follower swap",
+        "Summon: ML Bot took 1 Scottish from Lancaster into their court."
+      ]
+    },
+    {
+      "sequence": 63,
+      "label": "Turn 56",
+      "heading": "Panos passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 64,
+      "label": "Turn 57",
+      "heading": "Informed passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 65,
+      "label": "Turn 58 · Action 15",
+      "heading": "ML Bot played Scottish Support",
+      "details": [
+        "No card effect: No eligible uncontrolled border region",
+        "Summon: ML Bot took 1 Scottish from Lancaster into their court."
+      ]
+    },
+    {
+      "sequence": 66,
+      "label": "Turn 59",
+      "heading": "Panos passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 67,
+      "label": "Turn 60",
+      "heading": "Informed passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 68,
+      "label": "Turn 61 · Action 16",
+      "heading": "ML Bot played Welsh Support",
+      "details": [
+        "No card effect: No eligible uncontrolled border region",
+        "Summon: ML Bot took 1 Scottish from Lancaster into their court."
+      ]
+    },
+    {
+      "sequence": 69,
+      "label": "Turn 62",
+      "heading": "Panos passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 70,
+      "label": "Turn 63",
+      "heading": "Informed passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 71,
+      "label": "Turn 64 · Action 17",
+      "heading": "ML Bot played Manoeuvre",
+      "details": [
+        "No card effect: No legal two-region follower swap",
+        "Summon: ML Bot took 1 Scottish from Lancaster into their court."
+      ]
+    },
+    {
+      "sequence": 72,
+      "label": "Turn 65",
+      "heading": "Panos passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 73,
+      "label": "Turn 66",
+      "heading": "Informed passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 74,
+      "label": "Turn 67 · Action 18",
+      "heading": "ML Bot played English Support",
+      "details": [
+        "Effect 1: Move 2 English from supply to Lancaster.",
+        "Summon: ML Bot took 1 Welsh from Lancaster into their court."
+      ]
+    },
+    {
+      "sequence": 75,
+      "label": "Turn 68 · Action 19",
+      "heading": "Panos played Welsh Support",
+      "details": [
+        "No card effect: No eligible uncontrolled border region",
+        "Summon: Panos took 1 English from Lancaster into their court."
+      ]
+    },
+    {
+      "sequence": 76,
+      "label": "Turn 69",
+      "heading": "Informed passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 77,
+      "label": "Turn 70",
+      "heading": "ML Bot passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 78,
+      "label": "Turn 71",
+      "heading": "Panos passed",
+      "details": ["No card played; no follower summoned."]
+    },
+    {
+      "sequence": 79,
+      "label": "After turn 71",
+      "heading": "Power struggle 8 · Lancaster",
+      "details": [
+        "Welsh had more followers than each other faction and gained control. A Welsh control disc was placed.",
+        "All followers returned to the common supply. Region card 8 was turned face down."
+      ],
+      "followers": {
+        "caption": "Followers at the power struggle",
+        "rows": [
+          {
+            "label": "Lancaster",
+            "counts": {
+              "scottish": 0,
+              "welsh": 3,
+              "english": 1
+            }
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 80,
+      "label": "After turn 71",
+      "heading": "Coronation · normal play ends",
+      "details": [
+        "All eight regions have resolved. Final scoring compares faction power and court support, then the Coronation tiebreaks."
+      ]
+    },
+    {
+      "sequence": 81,
+      "label": "Final result",
+      "heading": "Informed wins by Coronation",
+      "details": [
+        "english > scottish > welsh: Informed wins by earliest final committed action (never acted counts earliest).",
+        "Faction ranking: English → Scottish → Welsh.",
+        "Leading Faction (English): Informed: 5, ML Bot: 2, Panos: 5. Remaining: Informed, Panos.",
+        "Second Faction (Scottish): Informed: 1, Panos: 1. Remaining: Informed, Panos.",
+        "Earliest Final Action: Informed: 10, Panos: 19. Remaining: Informed."
+      ]
+    }
+  ]
+}

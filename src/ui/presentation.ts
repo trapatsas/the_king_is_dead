@@ -3,6 +3,7 @@ import type { CardType, GameState, PlayerId, RegionId } from "../game/domain";
 import type { AcceptedEvent } from "../game/events";
 import type { EffectOperation, EffectPlan } from "../game/turnTypes";
 import { getObservation } from "../game/visibility";
+import { ML_AGENT_NAME } from "../bot/ml/deployment";
 
 export function title(value: string): string {
   return value
@@ -30,13 +31,10 @@ export const CARD_TEXT: Partial<Record<CardType, string>> = {
 };
 
 /** Every rendered table view goes through the engine's redacted observation:
- * public information plus, at most, the revealed viewer's own hand. Full engine
+ * public information plus, at most, the active viewer's own hand. Full engine
  * state and accepted history must never be spread into view props. */
-export function projectTable(
-  state: GameState,
-  revealedPlayer: PlayerId | null,
-) {
-  const observation = getObservation(state, revealedPlayer);
+export function projectTable(state: GameState, viewer: PlayerId | null) {
+  const observation = getObservation(state, viewer);
   return {
     regions: observation.regions,
     regionCards: observation.regionCards,
@@ -88,9 +86,16 @@ export function describeEffect(plan: EffectPlan): string {
 
 export const BOT_STRATEGY_LABELS = {
   reference: "Reference",
+  patient: "Easy",
+  informed: "Medium",
+  ml: "Hard",
+} as const;
+
+export const BOT_AGENT_NAMES = {
+  reference: "Reference",
   patient: "Patient",
   informed: "Informed",
-  ml: "ML · pilot",
+  ml: ML_AGENT_NAME,
 } as const;
 
 export const FACTION_MARKS = Object.fromEntries(
