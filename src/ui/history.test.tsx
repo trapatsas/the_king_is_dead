@@ -22,7 +22,7 @@ afterEach(() => {
   window.history.replaceState(null, "", "/");
 });
 describe("visible last moves", () => {
-  it("keeps the last committed card and effect/summon details visible behind handoff", () => {
+  it("keeps the last committed card and effect/summon details visible during the next turn", () => {
     const session = setupSession(),
       after = play(session, "scottish-support");
     render(<Game initialSession={after} />);
@@ -32,7 +32,7 @@ describe("visible last moves", () => {
     expect(move.textContent).toContain("Turn 1");
     expect(move.textContent).toContain("Played Scottish Support");
     expect(move.textContent).toContain("Summon:");
-    expect(screen.queryByRole("button", { name: /^Play / })).toBeNull();
+    expect(screen.getAllByRole("button", { name: /^Play / })).toHaveLength(8);
   });
   it("replaces a card with Passed on that player's next turn and retains other seats' latest moves", () => {
     const initial = setupSession(2),
@@ -59,7 +59,7 @@ describe("visible last moves", () => {
     const user = userEvent.setup();
     render(<App initialSession={setupSession(2)} />);
     const archived = readArchives().games[0]!;
-    await user.click(screen.getByRole("button", { name: /^Reveal .* hand$/ }));
+
     await user.click(screen.getByRole("button", { name: "Pass" }));
     expect(screen.getAllByText("Has not played yet")).toHaveLength(2);
     expect(readArchives().games[0]!.entries).toEqual(archived.entries);
@@ -69,57 +69,47 @@ describe("visible last moves", () => {
     );
   });
 });
-describe("seat names", () => {
-  it("configures humans, the reference bot and the patient bot in the same game", async () => {
-    window.history.replaceState(null, "", "/?bots=experimental");
+describe("seat names and difficulties", () => {
+  it("uses one menu per seat and maps Easy and Medium to the correct agents", async () => {
     const user = userEvent.setup(),
       start = vi.fn();
     render(<Setup onStart={start} />);
-    await user.selectOptions(
-      screen.getByLabelText("Player 2 controller"),
-      "algorithmic",
-    );
-    await user.selectOptions(
-      screen.getByLabelText("Player 3 controller"),
-      "algorithmic",
-    );
+    expect(screen.getAllByRole("combobox")).toHaveLength(5);
     expect(
-      (screen.getByLabelText("Player 2 strategy") as HTMLSelectElement).value,
-    ).toBe("reference");
+      within(screen.getByLabelText("Player 2 type"))
+        .getAllByRole("option")
+        .map((option) => option.textContent),
+    ).toEqual(["Human", "Easy bot", "Medium bot", "Hard bot"]);
+    await user.selectOptions(screen.getByLabelText("Player 2 type"), "patient");
     await user.selectOptions(
-      screen.getByLabelText("Player 3 strategy"),
-      "patient",
+      screen.getByLabelText("Player 3 type"),
+      "informed",
     );
+    expect(screen.getByText(/Agent: Patient/)).toBeDefined();
+    expect(screen.getByText(/Agent: Informed/)).toBeDefined();
     await user.click(screen.getByRole("button", { name: /Begin game/ }));
     expect(start.mock.calls[0]![0].players).toEqual([
       { id: "Player 1", controller: "human" },
-      { id: "Bot 2", controller: "algorithmic", botStrategy: "reference" },
-      { id: "Bot 3", controller: "algorithmic", botStrategy: "patient" },
+      { id: "Bot 2", controller: "algorithmic", botStrategy: "patient" },
+      { id: "Bot 3", controller: "algorithmic", botStrategy: "informed" },
     ]);
   });
-  it("offers the informed strategy with its own hint", async () => {
-    window.history.replaceState(null, "", "/?bots=experimental");
+  it("offers Hard with the v2 model name and removes its agent hint when Human is chosen", async () => {
     const user = userEvent.setup(),
       start = vi.fn();
     render(<Setup onStart={start} />);
-    await user.selectOptions(
-      screen.getByLabelText("Player 3 controller"),
-      "algorithmic",
-    );
-    await user.selectOptions(
-      screen.getByLabelText("Player 3 strategy"),
-      "informed",
-    );
-    expect(screen.getByText(/what every seat can still do/)).toBeDefined();
+    await user.selectOptions(screen.getByLabelText("Player 3 type"), "ml");
+    expect(screen.getByText(/Agent: ML v2 · linear value model/)).toBeDefined();
     await user.click(screen.getByRole("button", { name: /Begin game/ }));
     expect(start.mock.calls[0]![0].players[2]).toEqual({
       id: "Bot 3",
       controller: "algorithmic",
-      botStrategy: "informed",
+      botStrategy: "ml",
     });
+    await user.selectOptions(screen.getByLabelText("Player 3 type"), "human");
+    expect(screen.queryByText(/Agent: ML v2/)).toBeNull();
   });
   it("uses custom human and bot names and rejects ambiguous duplicates", async () => {
-    window.history.replaceState(null, "", "/?bots=experimental");
     const user = userEvent.setup(),
       start = vi.fn();
     render(<Setup onStart={start} />);
@@ -129,8 +119,8 @@ describe("seat names", () => {
     );
     await user.type(screen.getByLabelText("Player 1 name"), " Alice ");
     await user.selectOptions(
-      screen.getByLabelText("Player 2 controller"),
-      "algorithmic",
+      screen.getByLabelText("Player 2 type"),
+      "informed",
     );
     await user.type(screen.getByLabelText("Player 2 name"), "alice");
     expect(
@@ -142,7 +132,7 @@ describe("seat names", () => {
     await user.click(screen.getByRole("button", { name: /Begin game/ }));
     expect(start.mock.calls[0]![0].players).toEqual([
       { id: "Alice", controller: "human" },
-      { id: "Merlin", controller: "algorithmic", botStrategy: "reference" },
+      { id: "Merlin", controller: "algorithmic", botStrategy: "informed" },
     ]);
   });
 });
@@ -176,7 +166,7 @@ describe("game log archive UI", () => {
     const initial = setupSession(2);
     const view = render(<App initialSession={initial} />);
     const id = readArchives().games[0]!.id;
-    await user.click(screen.getByRole("button", { name: /^Reveal .* hand$/ }));
+
     await user.click(screen.getByRole("button", { name: "Pass" }));
     await user.click(screen.getByRole("button", { name: "End Turn" }));
     view.unmount();

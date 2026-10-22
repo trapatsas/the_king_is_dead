@@ -1,4 +1,5 @@
 import { createServer } from "vite";
+import { loadModel } from "./ml/runtime.mjs";
 import { fileURLToPath } from "node:url";
 const args = Object.fromEntries(
   process.argv.slice(2).map((arg) => arg.replace(/^--/, "").split("=")),
@@ -16,12 +17,24 @@ if (
   !Number.isSafeInteger(seeds) ||
   seeds < 1 ||
   seeds > 10000 ||
-  !["mcts", "reference", "patient", "informed", "one-ply", "random"].includes(
-    policy,
-  ) ||
-  !["mcts", "reference", "patient", "informed", "random", "one-ply"].includes(
-    opponent,
-  )
+  ![
+    "mcts",
+    "reference",
+    "patient",
+    "informed",
+    "ml",
+    "one-ply",
+    "random",
+  ].includes(policy) ||
+  ![
+    "mcts",
+    "reference",
+    "patient",
+    "informed",
+    "ml",
+    "random",
+    "one-ply",
+  ].includes(opponent)
 )
   throw new Error("Invalid benchmark options");
 const server = await createServer({
@@ -41,6 +54,8 @@ try {
     simulation,
     patient,
     informed,
+    ml,
+    modelModule,
   ] = await Promise.all(
     [
       "/src/game/setup.ts",
@@ -51,9 +66,27 @@ try {
       "/src/bot/simulation.ts",
       "/src/bot/patient.ts",
       "/src/bot/informed.ts",
+      "/src/bot/ml/mlBot.ts",
+      "/src/bot/ml/model.ts",
     ].map((path) => server.ssrLoadModule(path)),
   );
-  const BOTS = ["mcts", "reference", "patient", "informed"];
+  const testedModel =
+    policy === "ml"
+      ? await loadModel(
+          args.model ?? "public/models/pilot/manifest.json",
+          modelModule,
+        )
+      : null;
+  const opponentModel =
+    opponent === "ml"
+      ? await loadModel(
+          args.opponentModel ??
+            args.model ??
+            "public/models/pilot/manifest.json",
+          modelModule,
+        )
+      : null;
+  const BOTS = ["mcts", "reference", "patient", "informed", "ml"];
   const games = [];
   for (let seed = 0; seed < seeds; seed++) {
     for (let seat = 0; seat < count; seat++) {
@@ -85,6 +118,8 @@ try {
           };
         }),
       });
+      const testedMl = testedModel ? new ml.MlBot(testedModel) : null;
+      const opponentMl = opponentModel ? new ml.MlBot(opponentModel) : null;
       const stats = [];
       let policyMs = 0;
       let opening = null;
@@ -97,11 +132,20 @@ try {
         let plan;
         const start = performance.now();
         if (BOTS.includes(strategy)) {
-          const result = bots[strategy].search({
+          const controller =
+            strategy === "ml"
+              ? isBot
+                ? testedMl
+                : opponentMl
+              : bots[strategy];
+          const result = controller.search({
             observation: visibility.getObservation(state, state.activePlayerId),
             memory: memory.witnessedCards(session),
             budget: {
               iterations: isBot ? iterations : opponentIterations,
+              ...((isBot ? args.timeMs : args.opponentTimeMs)
+                ? { timeMs: Number(isBot ? args.timeMs : args.opponentTimeMs) }
+                : {}),
               seed: Math.floor(random() * 2 ** 32),
             },
           });
@@ -181,12 +225,22 @@ try {
     JSON.stringify(
       {
         version:
-          policy === "patient"
-            ? patient.PATIENT_BOT_VERSION
-            : policy === "informed"
-              ? informed.INFORMED_BOT_VERSION
-              : search.BOT_VERSION,
+          policy === "ml"
+            ? ml.ML_BOT_VERSION
+            : policy === "patient"
+              ? patient.PATIENT_BOT_VERSION
+              : policy === "informed"
+                ? informed.INFORMED_BOT_VERSION
+                : search.BOT_VERSION,
+        modelId: testedModel?.manifest.modelId ?? null,
+        opponentModelId: opponentModel?.manifest.modelId ?? null,
+        modelHash: testedModel?.manifest.weightsSha256 ?? null,
+        timeMs: args.timeMs ? Number(args.timeMs) : null,
+        opponentTimeMs: args.opponentTimeMs
+          ? Number(args.opponentTimeMs)
+          : null,
         policyVersions: {
+          ml: ml.ML_BOT_VERSION,
           reference: search.BOT_VERSION,
           patient: patient.PATIENT_BOT_VERSION,
           informed: informed.INFORMED_BOT_VERSION,

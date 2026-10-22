@@ -69,7 +69,7 @@ describe("appearance preference", () => {
   it("preserves the active hand and uncommitted turn when changing palettes", async () => {
     const user = userEvent.setup();
     render(<App initialSession={setupSession()} />);
-    await user.click(screen.getByRole("button", { name: /^Reveal .* hand$/ }));
+
     await user.click(screen.getByRole("button", { name: "Pass" }));
     const summary = screen.getByRole("region", {
       name: "Final turn summary",
@@ -83,13 +83,13 @@ describe("appearance preference", () => {
     expect(screen.getAllByRole("button", { name: /^Play / })).toHaveLength(8);
     await user.click(screen.getByRole("button", { name: "End Turn" }));
     expect(screen.getByText(/TURN 2/)).toBeDefined();
-    expect(screen.queryByRole("button", { name: /^Play / })).toBeNull();
+    expect(screen.getAllByRole("button", { name: /^Play / })).toHaveLength(8);
     expect(document.documentElement.dataset.theme).toBe("dark");
     await user.click(
       screen.getByRole("button", { name: "Switch to light mode" }),
     );
     expect(
-      screen.getByRole("button", { name: /^Reveal .* hand$/ }),
+      screen.getByRole("button", { name: "Play Scottish Support" }),
     ).toBeDefined();
   });
 });

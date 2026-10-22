@@ -1,0 +1,53 @@
+{
+  "formatVersion": 1,
+  "modelId": "ml-pilot-69f477be34b9",
+  "featureVersion": "standard-v1",
+  "inputSize": 474,
+  "supportedSeats": [2, 3],
+  "weightsFile": "weights-69f477be34b92b5f.bin",
+  "weightsSha256": "69f477be34b92b5f1a0a5e9f2ab549494dc151469d1afb9e9864a690ba547f0c",
+  "layers": [
+    {
+      "input": 474,
+      "output": 3,
+      "activation": "linear"
+    }
+  ],
+  "learnedWeight": 0.5,
+  "training": {
+    "status": "pilot-unvalidated",
+    "datasetManifestHash": "7752409565a9c48cef1d1532596cab995960be15c8e9d1848e2afc03d26a4c6b",
+    "datasetSha256": "1625fd836a54b08d0b2a1c319a583f2da2234fcb76668a69f1a45a43c0a60d41",
+    "seed": 2026,
+    "hidden": 0,
+    "torchVersion": "2.14.1+cpu",
+    "numpyVersion": "2.4.6",
+    "trainPositions": 17867,
+    "validation": {
+      "all": {
+        "crossEntropy": 0.7025849296682993,
+        "brier": 0.43476662934276433,
+        "positions": 3714
+      },
+      "2": {
+        "crossEntropy": 0.5237816334795311,
+        "brier": 0.3187530289658912,
+        "positions": 1456
+      },
+      "3": {
+        "crossEntropy": 0.904311736424764,
+        "brier": 0.565653764284574,
+        "positions": 2258
+      }
+    },
+    "epochs": 30,
+    "config": {
+      "epochs": 30,
+      "hidden": 0,
+      "batch_size": 256,
+      "seed": 2026,
+      "threads": 2,
+      "learned_weight": 0.5
+    }
+  }
+}

@@ -9,7 +9,7 @@ import {
   resetTurn,
 } from "../app/draft";
 import { choosePlot, endTurn } from "../app/session";
-import type { Faction, PlayerId, RegionId } from "../game/domain";
+import type { Faction, RegionId } from "../game/domain";
 import { IllegalTurnError } from "../game/errors";
 import type { GameSession } from "../game/events";
 import { turnEngine } from "../game/turns";
@@ -56,7 +56,7 @@ export function regionPicks(options: readonly EffectOption[]): RegionId[] {
 /**
  * Local hotseat controller. This is the only UI code that holds the full
  * session; everything it returns is either a redacted `getObservation`
- * projection or the revealed viewer's own legal choices.
+ * projection or the active human player's own legal choices.
  */
 export function useHotseatTurn(
   initialSession: GameSession,
@@ -66,7 +66,6 @@ export function useHotseatTurn(
   const [draft, setDraft] = useState<TurnDraft | null>(() =>
     initialDraft(initialSession),
   );
-  const [revealed, setRevealed] = useState<PlayerId | null>(null);
   const [effectChoice, setEffectChoice] = useState<EffectChoice | null>(null);
   const [error, setError] = useState<string | null>(null);
   const { state } = session;
@@ -75,8 +74,7 @@ export function useHotseatTurn(
       ? (state.plot?.playerId ?? state.activePlayerId)
       : state.activePlayerId;
   const isHuman = state.players[targetPlayer]?.controller === "human";
-  const visible =
-    isHuman && revealed === targetPlayer && state.phase !== "finished";
+  const visible = isHuman && state.phase !== "finished";
   const preview = useMemo(
     () => (draft ? turnEngine.previewTurn(state, draft) : null),
     [state, draft],
@@ -120,7 +118,6 @@ export function useHotseatTurn(
     setSession(next);
     setDraft(initialDraft(next));
     setEffectChoice(null);
-    setRevealed(null);
     onCommit?.(next);
   }
   const bot = useBotTurn(session, accept);
@@ -138,11 +135,6 @@ export function useHotseatTurn(
   }
 
   const actions = {
-    reveal: () => safely(() => setRevealed(targetPlayer)),
-    hide: () => {
-      setRevealed(null);
-      setError(null);
-    },
     startCard: (cardId: string) =>
       safely(() => {
         const next = draftCard(requireDraft(), cardId);

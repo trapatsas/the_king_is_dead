@@ -9,15 +9,11 @@ import { CARD_TEXT } from "./presentation";
 
 afterEach(cleanup);
 
-async function reveal(user: ReturnType<typeof userEvent.setup>) {
-  await user.click(screen.getByRole("button", { name: /^Reveal .* hand$/ }));
-}
-
 describe("keyboard focus and accessible names", () => {
   it("keeps focus on the board after a board pick disables the used control", async () => {
     const user = userEvent.setup();
     render(<Game initialSession={setupSession()} />);
-    await reveal(user);
+
     await user.click(
       screen.getByRole("button", { name: "Play Scottish Support" }),
     );
@@ -53,10 +49,9 @@ describe("keyboard focus and accessible names", () => {
     ).toBeDefined();
   });
 
-  it("describes each hand card with its rule text", async () => {
-    const user = userEvent.setup();
+  it("describes each hand card with its rule text", () => {
     render(<Game initialSession={setupSession()} />);
-    await reveal(user);
+
     const card = screen.getByRole("button", { name: "Play Negotiate" });
     const description = document.getElementById(
       card.getAttribute("aria-describedby")!,
@@ -108,7 +103,7 @@ describe("recovery and game identity", () => {
       await user.click(screen.getByRole("button", { name: /Begin game/ }));
     }
     await begin();
-    await reveal(user);
+
     await user.click(screen.getByRole("button", { name: "Pass" }));
     await user.click(screen.getByRole("button", { name: "End Turn" }));
     expect(screen.getByText(/TURN 2/)).toBeDefined();

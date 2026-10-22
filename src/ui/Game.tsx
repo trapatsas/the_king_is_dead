@@ -4,7 +4,7 @@ import type { GameSession } from "../game/events";
 import { Board, RegionTrack } from "./Board";
 import type { FollowerPick } from "./effectChoices";
 import { GameLogPanel } from "./GameLogPanel";
-import { BOT_STRATEGY_LABELS, title } from "./presentation";
+import { BOT_AGENT_NAMES, BOT_STRATEGY_LABELS, title } from "./presentation";
 import { Result } from "./Result";
 import {
   CourtsPanel,
@@ -19,7 +19,6 @@ import {
   HandPanel,
   PlanSummary,
   PlotPanel,
-  PrivacyCurtain,
   SummonPanel,
 } from "./TurnPanels";
 import { useHotseatTurn } from "./useHotseatTurn";
@@ -190,12 +189,17 @@ export function Game({
           {turn.bot.active && (
             <section aria-label="Bot turn" aria-busy={!turn.bot.error}>
               <span className="eyebrow">
-                {BOT_STRATEGY_LABELS[turn.bot.strategy]} opponent
+                {BOT_STRATEGY_LABELS[turn.bot.strategy]} bot
               </span>
+              <p className="hint">
+                Agent: {BOT_AGENT_NAMES[turn.bot.strategy]}
+              </p>
               <h2>
                 {turn.bot.error
                   ? "Bot turn paused"
-                  : `${targetPlayer} is thinking`}
+                  : turn.bot.loading
+                    ? "Loading learned model"
+                    : `${targetPlayer} is thinking`}
               </h2>
               {turn.bot.error ? (
                 <>
@@ -213,9 +217,6 @@ export function Game({
                 </p>
               )}
             </section>
-          )}
-          {phase !== "finished" && !visible && !turn.bot.active && (
-            <PrivacyCurtain player={targetPlayer} onReveal={actions.reveal} />
           )}
           {visible && phase === "plot-choice" && (
             <PlotPanel player={targetPlayer} onChoose={actions.choosePlot} />

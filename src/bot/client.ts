@@ -1,18 +1,44 @@
 import type { SearchRequest, SearchResult } from "./search";
 import type { WorkerReply, WorkerRequest } from "./worker";
+import { ML_MANIFEST_URL } from "./ml/deployment";
 
-/** One live request per game. Cancellation/watchdog terminate busy JS instead
- * of queuing an abort message the worker could only read after search ends.
- */
+/** One operation per Worker. Loading has its own timeout; warm search preserves
+ * the original watchdog, cancellation and stale-reply protections. */
 export class BotClient {
   private worker: Worker | null = null;
   private sequence = 0;
   private cancel: (() => void) | null = null;
+  private readyModel: string | null = null;
   constructor(
     private readonly createWorker = () =>
       new Worker(new URL("./worker.ts", import.meta.url), { type: "module" }),
   ) {}
-  search(search: SearchRequest, signal: AbortSignal): Promise<SearchResult> {
+
+  async prepare(signal: AbortSignal): Promise<string> {
+    if (signal.aborted) throw new Error("Bot request cancelled");
+    if (this.readyModel) return this.readyModel;
+    const reply = await this.exchange(
+      { prepare: { manifestUrl: ML_MANIFEST_URL } },
+      signal,
+      15000,
+    );
+    if (!("ready" in reply)) throw new Error("Unexpected preparation reply");
+    this.readyModel = reply.ready.modelId;
+    return this.readyModel;
+  }
+  async search(
+    search: SearchRequest,
+    signal: AbortSignal,
+  ): Promise<SearchResult> {
+    const reply = await this.exchange({ search }, signal, 2500);
+    if (!("result" in reply)) throw new Error("Unexpected search reply");
+    return reply.result;
+  }
+  private exchange(
+    payload: { search: SearchRequest } | { prepare: { manifestUrl: string } },
+    signal: AbortSignal,
+    timeout: number,
+  ): Promise<WorkerReply> {
     this.cancel?.();
     return new Promise((resolve, reject) => {
       if (signal.aborted) {
@@ -36,12 +62,13 @@ export class BotClient {
         cleanup();
         worker.terminate();
         this.worker = null;
+        this.readyModel = null;
         reject(new Error(message));
       };
       const abort = () => fail("Bot request cancelled");
       const timer = setTimeout(
         () => fail("The bot took too long. Try again."),
-        2500,
+        timeout,
       );
       this.cancel = abort;
       signal.addEventListener("abort", abort, { once: true });
@@ -51,11 +78,14 @@ export class BotClient {
       worker.onmessage = (event: MessageEvent<WorkerReply>) => {
         const reply = event.data;
         if (settled || !reply || reply.id !== id) return;
+        if ("error" in reply) {
+          fail(reply.error);
+          return;
+        }
         cleanup();
-        if ("result" in reply) resolve(reply.result);
-        else reject(new Error(reply.error));
+        resolve(reply);
       };
-      const request: WorkerRequest = { id, search };
+      const request: WorkerRequest = { id, ...payload };
       try {
         worker.postMessage(request);
       } catch {
@@ -63,9 +93,10 @@ export class BotClient {
       }
     });
   }
-  dispose(): void {
+  dispose() {
     this.cancel?.();
     this.worker?.terminate();
     this.worker = null;
+    this.readyModel = null;
   }
 }

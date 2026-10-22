@@ -1,50 +1,35 @@
 import { useState } from "react";
-import type {
-  BotStrategy,
-  ControllerKind,
-  GameMode,
-  SetupConfig,
-} from "../game/domain";
+import type { GameMode, SetupConfig } from "../game/domain";
+import { BOT_AGENT_NAMES } from "./presentation";
+
+type SeatChoice = "human" | "patient" | "informed" | "ml";
+const SEAT_OPTIONS: { value: SeatChoice; label: string }[] = [
+  { value: "human", label: "Human" },
+  { value: "patient", label: "Easy bot" },
+  { value: "informed", label: "Medium bot" },
+  { value: "ml", label: "Hard bot" },
+];
 
 export function Setup({ onStart }: { onStart: (config: SetupConfig) => void }) {
   const [count, setCount] = useState(3);
   const [mode, setMode] = useState<GameMode>("standard");
-  const [controllers, setControllers] = useState<ControllerKind[]>([
-    "human",
-    "human",
-    "human",
-  ]);
-  const [strategies, setStrategies] = useState<BotStrategy[]>([
-    "reference",
-    "reference",
-    "reference",
-  ]);
+  const [seats, setSeats] = useState<SeatChoice[]>(["human", "human", "human"]);
   const [seed, setSeed] = useState("");
   const [names, setNames] = useState(["", "", ""]);
-  const playerNames = controllers
+  const playerNames = seats
     .slice(0, count)
     .map(
-      (controller, index) =>
+      (seat, index) =>
         names[index]!.trim() ||
-        `${controller === "algorithmic" ? "Bot" : "Player"} ${index + 1}`,
+        `${seat === "human" ? "Player" : "Bot"} ${index + 1}`,
     );
   const duplicateNames =
     new Set(playerNames.map((name) => name.toLocaleLowerCase())).size !== count;
-  // Research release gate remains closed. An explicit development URL supports
-  // human play-testing without advertising the prototype as release-ready.
-  const experimentalBots =
-    import.meta.env.DEV &&
-    new URLSearchParams(window.location.search).get("bots") === "experimental";
-  const chosenControllers = controllers.slice(0, count);
   const unavailable = duplicateNames
     ? "Give each player and bot a different name."
     : mode === "advanced"
       ? "Advanced cards are coming soon. Choose Standard to play."
-      : chosenControllers.includes("llm")
-        ? "LLM seats are not configured. Choose an available controller to play."
-        : chosenControllers.includes("algorithmic") && !experimentalBots
-          ? "Algorithmic opponents are in development. Choose Human for every seat to play."
-          : null;
+      : null;
   return (
     <main className="setup-layout">
       <section className="intro">
@@ -69,7 +54,7 @@ export function Setup({ onStart }: { onStart: (config: SetupConfig) => void }) {
           <p>
             2–3 players
             <br />
-            Pass the device between turns
+            Play locally with people or bots
           </p>
         </div>
       </section>
@@ -84,12 +69,10 @@ export function Setup({ onStart }: { onStart: (config: SetupConfig) => void }) {
           onStart({
             seed: freshSeed,
             mode,
-            players: controllers.slice(0, count).map((controller, index) => ({
+            players: seats.slice(0, count).map((seat, index) => ({
               id: playerNames[index]!,
-              controller,
-              ...(controller === "algorithmic"
-                ? { botStrategy: strategies[index]! }
-                : {}),
+              controller: seat === "human" ? "human" : "algorithmic",
+              ...(seat !== "human" ? { botStrategy: seat } : {}),
             })),
           });
         }}
@@ -116,15 +99,9 @@ export function Setup({ onStart }: { onStart: (config: SetupConfig) => void }) {
             <option value={3}>3 players</option>
           </select>
         </label>
-        {experimentalBots && (
-          <p className="notice">
-            Experimental Standard bot preview. Playing-strength validation is
-            still in progress.
-          </p>
-        )}
         <fieldset>
           <legend>Seats · clockwise order</legend>
-          {controllers.slice(0, count).map((controller, index) => (
+          {seats.slice(0, count).map((seat, index) => (
             <div className="seat-row" key={index}>
               <label>
                 Seat {index + 1} name
@@ -133,9 +110,9 @@ export function Setup({ onStart }: { onStart: (config: SetupConfig) => void }) {
                   value={names[index]}
                   maxLength={40}
                   placeholder={
-                    controller === "algorithmic"
-                      ? `Bot ${index + 1}`
-                      : `Player ${index + 1}`
+                    seat === "human"
+                      ? `Player ${index + 1}`
+                      : `Bot ${index + 1}`
                   }
                   onChange={(event) =>
                     setNames((previous) =>
@@ -147,63 +124,39 @@ export function Setup({ onStart }: { onStart: (config: SetupConfig) => void }) {
                 />
               </label>
               <label>
-                Controller
+                Player type
                 <select
-                  aria-label={`Player ${index + 1} controller`}
-                  value={controller}
+                  aria-label={`Player ${index + 1} type`}
+                  aria-describedby={
+                    seat !== "human" ? `seat-agent-${index}` : undefined
+                  }
+                  value={seat}
                   onChange={(event) =>
-                    setControllers((previous) =>
+                    setSeats((previous) =>
                       previous.map((entry, i) =>
                         i === index
-                          ? (event.target.value as ControllerKind)
+                          ? (event.target.value as SeatChoice)
                           : entry,
                       ),
                     )
                   }
                 >
-                  <option value="human">Human · local</option>
-                  <option value="algorithmic">
-                    {experimentalBots
-                      ? "Algorithmic · experimental"
-                      : "Algorithmic · in development"}
-                  </option>
-                  <option value="llm">LLM · not configured</option>
+                  {SEAT_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
                 </select>
               </label>
-              {controller === "algorithmic" && (
-                <label className="seat-strategy">
-                  Bot strategy
-                  <select
-                    aria-label={`Player ${index + 1} strategy`}
-                    value={strategies[index]}
-                    onChange={(event) =>
-                      setStrategies((previous) =>
-                        previous.map((value, i) =>
-                          i === index
-                            ? (event.target.value as BotStrategy)
-                            : value,
-                        ),
-                      )
-                    }
-                  >
-                    <option value="reference">
-                      Reference · original aggressive bot
-                    </option>
-                    <option value="patient">
-                      Patient · reserve and respond
-                    </option>
-                    <option value="informed">
-                      Informed · card-aware forecast
-                    </option>
-                  </select>
-                  <span className="hint">
-                    {strategies[index] === "informed"
+              {seat !== "human" && (
+                <p className="hint seat-agent" id={`seat-agent-${index}`}>
+                  Agent: {BOT_AGENT_NAMES[seat]}.{" "}
+                  {seat === "ml"
+                    ? "Uses learned evaluation to assess future positions."
+                    : seat === "informed"
                       ? "Ranks its options against what every seat can still do with the cards they hold."
-                      : strategies[index] === "patient"
-                        ? "Keeps cards for later struggles and can wait for others to commit."
-                        : "The original bot, kept as a comparison."}
-                  </span>
-                </label>
+                      : "Keeps cards for later struggles and can wait for others to commit."}
+                </p>
               )}
             </div>
           ))}

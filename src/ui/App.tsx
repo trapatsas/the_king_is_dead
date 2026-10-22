@@ -3,6 +3,8 @@ import type { RefObject } from "react";
 import type { SetupConfig } from "../game/domain";
 import type { GameSession } from "../game/events";
 import { archiveSnapshot, newGameId, saveArchive } from "../app/gameArchive";
+import { StorageClient } from "../app/storageClient";
+import type { SaveState } from "../app/storageClient";
 import { GameHistory } from "./GameHistory";
 import { createGame } from "../game/setup";
 import { GameErrorBoundary } from "./ErrorBoundary";
@@ -79,6 +81,8 @@ export function App({ initialSession }: { initialSession?: GameSession }) {
   );
   const [historyOpen, setHistoryOpen] = useState(false);
   const [historyGameId, setHistoryGameId] = useState<string | null>(null);
+  const capture = useRef<StorageClient | null>(null);
+  const [sqliteState, setSqliteState] = useState<SaveState>("saved");
   const [storageError, setStorageError] = useState(false);
   useEffect(() => {
     if (game)
@@ -89,6 +93,16 @@ export function App({ initialSession }: { initialSession?: GameSession }) {
   // Latest committed session; read only for error recovery, so commits do not
   // re-render the App shell.
   const latest = useRef<GameSession | null>(initialSession ?? null);
+  useEffect(() => {
+    capture.current = new StorageClient(setSqliteState);
+    void capture.current.flush();
+    return () => {
+      capture.current = null;
+    };
+  }, []);
+  useEffect(() => {
+    if (game) capture.current?.capture(game.id, latest.current ?? game.session);
+  }, [game?.id]);
   const newGameRef = useRef<HTMLButtonElement>(null);
   const [confirmNew, setConfirmNew] = useState(false);
   const [setupError, setSetupError] = useState<string | null>(null);
@@ -147,6 +161,18 @@ export function App({ initialSession }: { initialSession?: GameSession }) {
           onClose={() => setHistoryOpen(false)}
         />
       )}
+      {sqliteState !== "saved" && (
+        <p role="status" className="notice archive-warning">
+          {sqliteState === "saving"
+            ? "Saving game…"
+            : "Game save pending. Keep this tab open and retry."}
+          {sqliteState === "error" && (
+            <button onClick={() => void capture.current?.flush()}>
+              Retry save
+            </button>
+          )}
+        </p>
+      )}
       {storageError && (
         <p role="status" className="notice archive-warning">
           The latest game log could not be saved in this browser. Playing can
@@ -181,6 +207,7 @@ export function App({ initialSession }: { initialSession?: GameSession }) {
             }}
             onCommit={(session) => {
               latest.current = session;
+              capture.current?.capture(game.id, session);
               setStorageError(
                 !saveArchive(archiveSnapshot(game.id, game.createdAt, session)),
               );

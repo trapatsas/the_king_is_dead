@@ -36,3 +36,11 @@ report.*.json
 ._*
 Thumbs.db
 Desktop.ini
+
+# Local SQLite capture, generated training data and Python environment
+.data/
+artifacts/
+ml/.venv/
+__pycache__/
+*.pyc
+dist-server/
