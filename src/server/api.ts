@@ -1,6 +1,7 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
+import { dirname, resolve } from "node:path";
+import { ResumeAccess } from "./resumeAccess";
 import { GameRepository, hash } from "./repository";
 import type { BotProvenance } from "./repository";
 import type { SetupConfig } from "../game/domain";
@@ -8,7 +9,8 @@ import type { BotTelemetry } from "../app/botTelemetry";
 import type { TurnPlan } from "../game/turnTypes";
 import { getObservation } from "../game/visibility";
 import { projectPublicLog } from "../ui/finishedLog";
-import { DEFAULT_INFORMED_PARAMS } from "../bot/informed";
+import { DEFAULT_INFORMED_PARAMS, INFORMED_BOT_VERSION } from "../bot/informed";
+import { ML_BOT_VERSION } from "../bot/ml/mlBot";
 import { ML_MANIFEST_URL } from "../bot/ml/deployment";
 
 async function body(req: IncomingMessage): Promise<Record<string, unknown>> {
@@ -27,7 +29,7 @@ async function body(req: IncomingMessage): Promise<Record<string, unknown>> {
   return input as Record<string, unknown>;
 }
 
-export function gameApi(repo: GameRepository) {
+export function gameApi(repo: GameRepository, resumeAccess?: ResumeAccess) {
   return async (
     req: IncomingMessage,
     res: ServerResponse,
@@ -56,6 +58,27 @@ export function gameApi(repo: GameRepository) {
         send(200, { available: true, schemaVersion: 2 });
         return;
       }
+      if (url.pathname === "/api/resume" && req.method === "POST") {
+        const input = await body(req);
+        const id = resumeAccess?.game(input.token);
+        const row = id
+          ? repo.get(
+              "SELECT created_at_ms FROM games WHERE public_id=? AND mode='standard' AND source='live'",
+              id,
+            )
+          : null;
+        if (!id || !row) {
+          send(404, { error: "This recovery link is invalid or expired." });
+          return;
+        }
+        send(200, {
+          version: 1,
+          id,
+          createdAt: new Date(Number(row.created_at_ms)).toISOString(),
+          session: repo.session(id),
+        });
+        return;
+      }
       if (url.pathname === "/api/games" && req.method === "POST") {
         const input = await body(req);
         const config = input.config as SetupConfig;
@@ -79,7 +102,7 @@ export function gameApi(repo: GameRepository) {
         for (const p of config.players) {
           if (p.botStrategy === "informed")
             bots[p.id] = {
-              version: "informed-mcts-v1",
+              version: INFORMED_BOT_VERSION,
               params: {
                 ...DEFAULT_INFORMED_PARAMS,
                 iterations: 1024,
@@ -91,7 +114,7 @@ export function gameApi(repo: GameRepository) {
               readFileSync(resolve("public", ML_MANIFEST_URL.slice(1)), "utf8"),
             );
             bots[p.id] = {
-              version: "ml-mcts-v1",
+              version: ML_BOT_VERSION,
               params: {
                 modelId: manifest.modelId,
                 modelHash: manifest.weightsSha256,
@@ -145,8 +168,13 @@ export function gameApi(repo: GameRepository) {
 
 /** Called by the same-origin development / local-preview adapter. */
 export function openStorage() {
-  const repo = new GameRepository(
-    process.env.KING_DB_PATH ?? ".data/king.sqlite",
-  );
-  return { handler: gameApi(repo), close: () => repo.close() };
+  const path = resolve(process.env.KING_DB_PATH ?? ".data/king.sqlite");
+  const repo = new GameRepository(path);
+  return {
+    handler: gameApi(
+      repo,
+      new ResumeAccess(resolve(dirname(path), "resume-access")),
+    ),
+    close: () => repo.close(),
+  };
 }

@@ -18,7 +18,10 @@ import {
 } from "./effectChoices";
 import type { EffectChoice } from "./effectChoices";
 
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  sessionStorage.clear();
+});
 
 async function completeEffect(user: ReturnType<typeof userEvent.setup>) {
   for (let guard = 0; guard < 20; guard += 1) {

@@ -4,12 +4,16 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { setupSession } from "../test/turnFixtures";
 import { App } from "./App";
 
-beforeEach(() => localStorage.clear());
+beforeEach(() => {
+  localStorage.clear();
+  sessionStorage.clear();
+});
 afterEach(() => {
   cleanup();
   vi.unstubAllGlobals();
   vi.useRealTimers();
   localStorage.clear();
+  sessionStorage.clear();
 });
 function recoveredRequest() {
   const request = vi

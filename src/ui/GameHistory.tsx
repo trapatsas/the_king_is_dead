@@ -1,20 +1,25 @@
 import { useEffect, useRef, useState } from "react";
 import { readArchives, serializeArchive } from "../app/gameArchive";
 import type { ArchivedGame } from "../app/gameArchive";
+import { hasGamePosition, loadGamePosition } from "../app/activeGame";
+import type { SavedGame } from "../app/activeGame";
 import { GameLogPanel } from "./GameLogPanel";
 
 export function GameHistory({
   onClose,
   initialGameId,
+  onResume,
 }: {
   onClose: () => void;
   initialGameId: string | null;
+  onResume: (game: SavedGame) => void;
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const close = useRef<HTMLButtonElement>(null);
   const [archive, setArchive] = useState(() => readArchives());
   const [query, setQuery] = useState("");
   const [selectedId, setSelectedId] = useState(initialGameId);
+  const [resumeError, setResumeError] = useState<string | null>(null);
   const [exportStatus, setExportStatus] = useState<{
     id: string;
     message: string;
@@ -100,7 +105,8 @@ export function GameHistory({
       </div>
       <p className="hint">
         Public logs are saved in this browser, including unfinished games. Find
-        a game by its ID or a player’s name. Logs do not resume play.
+        a game by its ID or a player’s name. Resume unfinished games saved in
+        this browser from their last committed turn.
       </p>
       {archive.unavailable && (
         <p role="status">
@@ -130,12 +136,19 @@ export function GameHistory({
               <li key={game.id}>
                 <button
                   aria-pressed={selectedId === game.id}
-                  onClick={() => setSelectedId(game.id)}
+                  onClick={() => {
+                    setSelectedId(game.id);
+                    setResumeError(null);
+                  }}
                 >
                   <strong>{game.players.map((p) => p.name).join(" · ")}</strong>
                   <span>
-                    {game.status === "finished" ? "Finished" : "Partial log"} ·{" "}
-                    {game.turns} turns
+                    {game.status === "finished"
+                      ? "Finished"
+                      : hasGamePosition(game.id)
+                        ? "In progress"
+                        : "Partial log"}{" "}
+                    · {game.turns} turns
                   </span>
                   <time dateTime={game.createdAt}>
                     {new Date(game.createdAt).toLocaleString()}
@@ -158,11 +171,37 @@ export function GameHistory({
             <section aria-label="Selected game log">
               <p className="saved-game-id">Game ID: {selected.id}</p>
               <div className="log-export-actions">
+                {selected.status === "partial" &&
+                  hasGamePosition(selected.id) && (
+                    <button
+                      className="primary"
+                      onClick={() => {
+                        const saved = loadGamePosition(selected.id);
+                        if (!saved.game || saved.error) {
+                          setResumeError(
+                            "This saved position could not be resumed. Your current game has not changed.",
+                          );
+                          return;
+                        }
+                        onResume(saved.game);
+                      }}
+                    >
+                      Resume game
+                    </button>
+                  )}
                 <button onClick={() => void copyLog(selected)}>Copy log</button>
                 <button onClick={() => downloadLog(selected)}>
                   Download log
                 </button>
               </div>
+              {selected.status === "partial" &&
+                !hasGamePosition(selected.id) && (
+                  <p className="hint">
+                    Only the log is available. No playable position is saved in
+                    this browser.
+                  </p>
+                )}
+              {resumeError && <p role="alert">{resumeError}</p>}
               {exportStatus?.id === selected.id && (
                 <p role="status">{exportStatus.message}</p>
               )}

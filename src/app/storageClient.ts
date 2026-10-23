@@ -9,7 +9,7 @@ interface PendingRequest {
 }
 
 /** Ordered, idempotent delivery of ACCEPTED commands only. Pending data survives
- * reload, even though restoring the UI's active game is a separate feature. */
+ * reload; activeGame.ts separately restores the committed UI session. */
 export class StorageClient {
   private queue: PendingRequest[] = [];
   private running = false;

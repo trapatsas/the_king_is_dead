@@ -8,24 +8,39 @@ export function sqliteCapturePlugin() {
   let needsBackend = false;
   const install = (server, load) => {
     let instance;
+    let factory;
+    const close = () => {
+      const service = instance;
+      instance = undefined;
+      factory = undefined;
+      service?.close();
+    };
     server.middlewares.use(async (req, res, next) => {
       if (!req.url?.startsWith("/api/")) {
         next();
         return;
       }
       try {
-        instance ??= load().then((module) => module.openStorage());
-        const service = await instance;
-        await service.handler(req, res, next);
+        const module = await load();
+        if (factory !== module.openStorage) {
+          close();
+          instance = module.openStorage();
+          factory = module.openStorage;
+        }
+        await instance.handler(req, res, next);
       } catch {
-        instance = undefined;
+        try {
+          close();
+        } catch {
+          /* Preserve the storage-unavailable response. */
+        }
         res.statusCode = 503;
         res.setHeader("Content-Type", "application/json");
         res.end(JSON.stringify({ error: "SQLite storage unavailable" }));
       }
     });
     server.httpServer?.once("close", () => {
-      void instance?.then((service) => service.close());
+      close();
     });
   };
   return {

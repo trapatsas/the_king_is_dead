@@ -14,11 +14,15 @@ import { projectLastMoves, projectPublicLog } from "./finishedLog";
 import { App, Game } from "./App";
 import { Setup } from "./Setup";
 
-beforeEach(() => localStorage.clear());
+beforeEach(() => {
+  localStorage.clear();
+  sessionStorage.clear();
+});
 afterEach(() => {
   cleanup();
   vi.restoreAllMocks();
   localStorage.clear();
+  sessionStorage.clear();
   window.history.replaceState(null, "", "/");
 });
 describe("visible last moves", () => {
@@ -161,7 +165,7 @@ describe("game log archive UI", () => {
     );
     expect(screen.getByRole("button", { name: "Download log" })).toBeDefined();
   });
-  it("reopens logs by ID after leaving/reloading, without resuming the old game", async () => {
+  it("reopens public logs by ID while retaining the restored active game", async () => {
     const user = userEvent.setup();
     const initial = setupSession(2);
     const view = render(<App initialSession={initial} />);
@@ -186,7 +190,7 @@ describe("game log archive UI", () => {
     await user.click(
       within(dialog).getByRole("button", { name: "Close history" }),
     );
-    expect(screen.getByRole("button", { name: /Begin game/ })).toBeDefined();
+    expect(screen.getByText(/TURN 2/)).toBeDefined();
     expect(document.activeElement).toBe(
       screen.getByRole("button", { name: "Game history" }),
     );

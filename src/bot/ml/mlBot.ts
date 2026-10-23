@@ -1,13 +1,14 @@
 import type { GameState } from "../../game/domain";
 import { terminalUtility } from "../evaluation";
 import { createInformedPolicy } from "../informed";
+import { lockedCoronationFaction } from "../coronation";
 import type { SearchRequest, SearchResult } from "../search";
 import { StandardBot } from "../search";
 import { encodePosition, restoreValues } from "./features";
 import { maskedValues } from "./model";
 import type { ValueModel } from "./model";
 
-export const ML_BOT_VERSION = "ml-mcts-v1";
+export const ML_BOT_VERSION = "ml-mcts-v2";
 export function evaluateLearned(state: GameState, model: ValueModel): number[] {
   if (state.result) return terminalUtility(state.result, state.playerOrder);
   if (!model.manifest.supportedSeats.includes(state.playerOrder.length))
@@ -35,6 +36,9 @@ export class MlBot extends StandardBot {
           : (state) => {
               if (state.result)
                 return terminalUtility(state.result, state.playerOrder);
+              // A raw linear prediction cannot override a proven faction
+              // victory. Use the faction-aware control throughout this endgame.
+              if (lockedCoronationFaction(state)) return leaf(state);
               const learned = evaluateLearned(state, model);
               if (weight === 1) return learned;
               const control = leaf(state);

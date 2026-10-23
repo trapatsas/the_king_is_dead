@@ -9,6 +9,7 @@ import { THEME_STORAGE_KEY } from "./theme";
 
 beforeEach(() => {
   localStorage.clear();
+  sessionStorage.clear();
 });
 afterEach(() => {
   cleanup();

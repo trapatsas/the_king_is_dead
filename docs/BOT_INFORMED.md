@@ -1,11 +1,22 @@
 # Informed bot: card-aware forecast and tempo
 
-`informed-mcts-v1` is the third selectable Standard strategy, built after a
+`informed-mcts-v2` is the third selectable Standard strategy, built after a
 review of the [Reference](BOT_IMPLEMENTATION.md) and [Patient](PATIENT_BOT.md)
 bots. It shares their legality, simulation, scoring, multiplayer MCTS and
 Worker plumbing; it changes what the search proposes, how it values positions,
 and when it acts. Both older strategies are preserved unchanged for comparison.
 The production release gate is unchanged by this work.
+
+The v2 change addresses the [TRAP game case study](BOT_CORONATION_V2.md): once
+resolved control discs prove which faction must lead, and too few unresolved
+regions remain for Invasion, the forecast assigns that faction full leading
+probability. In the final region the root policy collects scarce winning
+support before an opponent can take it. It spends otherwise unusable cards
+first and avoids leaving newly created winning followers for the next seat.
+This rule applies before the ordinary passing margin, including searches too
+small to expand a card at the root. Immediate winning passes and the
+spent-opponent solver retain precedence. The ordinary 0.12 margin is retained
+for positions without this proof.
 
 ## Review of the existing bots
 

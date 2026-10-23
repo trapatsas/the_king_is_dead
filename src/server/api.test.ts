@@ -4,8 +4,13 @@ import type { Server } from "node:http";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { GameRepository } from "./repository";
 import { gameApi } from "./api";
+import { ResumeAccess } from "./resumeAccess";
+import { mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { passPlan } from "../bot/simulation";
 let repo: GameRepository, server: Server, base: string;
+let resumeAccess: ResumeAccess, resumeDirectory: string;
 const id = "king-00000000-0000-0000-0000-000000000123";
 const config = {
   mode: "standard",
@@ -17,7 +22,9 @@ const config = {
 };
 beforeEach(async () => {
   repo = new GameRepository(":memory:");
-  const handler = gameApi(repo);
+  resumeDirectory = mkdtempSync(join(tmpdir(), "king-api-resume-"));
+  resumeAccess = new ResumeAccess(resumeDirectory);
+  const handler = gameApi(repo, resumeAccess);
   server = createServer((req, res) => {
     void handler(req, res, () => {
       res.statusCode = 404;
@@ -34,6 +41,7 @@ afterEach(async () => {
     server.close((e) => (e ? reject(e) : done())),
   );
   repo.close();
+  rmSync(resumeDirectory, { recursive: true, force: true });
 });
 async function post(path: string, data: unknown) {
   return fetch(base + path, {
@@ -43,6 +51,37 @@ async function post(path: string, data: unknown) {
   });
 }
 describe("same-origin SQLite capture API", () => {
+  it("requires a scoped secret for private legacy resume and keeps ordinary history redacted", async () => {
+    await post("/api/games", { id, config });
+    const denied = await post("/api/resume", { id });
+    expect(denied.status).toBe(404);
+    expect(JSON.stringify(await denied.json())).not.toContain(config.seed);
+    expect((await post("/api/resume", { token: "a".repeat(64) })).status).toBe(
+      404,
+    );
+    const token = resumeAccess.issue(id);
+    const recovered = await post("/api/resume", {
+      token,
+      id: "king-00000000-0000-0000-0000-000000000999",
+    });
+    expect(recovered.status).toBe(200);
+    expect(recovered.headers.get("cache-control")).toBe("no-store");
+    const saved = await recovered.json();
+    expect(saved.id).toBe(id);
+    expect(saved.session).toEqual(repo.session(id));
+    const cross = await fetch(base + "/api/resume", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Origin: "https://other.invalid",
+      },
+      body: JSON.stringify({ token }),
+    });
+    expect(cross.status).toBe(403);
+    expect(
+      JSON.stringify(await (await fetch(base + "/api/games/" + id)).json()),
+    ).not.toContain(config.seed);
+  });
   it("keeps original model provenance on setup retries after a model deployment", async () => {
     const hard = {
       mode: "standard" as const,

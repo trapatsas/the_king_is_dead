@@ -1,0 +1,2250 @@
+{
+  "note": "Exploratory fixed-iteration comparison against git HEAD Informed v1, four setup seeds per seat count; all seat rotations. No claim of human strength.",
+  "iterations": 64,
+  "summary": [
+    {
+      "count": 2,
+      "games": 8,
+      "score": 0.5
+    },
+    {
+      "count": 3,
+      "games": 12,
+      "score": 0.3333333333333333
+    }
+  ],
+  "games": [
+    {
+      "count": 2,
+      "seed": 0,
+      "seat": 0,
+      "score": 1,
+      "turns": 32,
+      "searches": 16,
+      "ms": 2015.740726999999,
+      "result": {
+        "kind": "win",
+        "winner": "p0",
+        "method": "invasion",
+        "explanation": "Invasion: p0 wins by latest final committed action among the tied players.",
+        "details": {
+          "players": [
+            {
+              "playerId": "p0",
+              "court": {
+                "scottish": 3,
+                "welsh": 6,
+                "english": 1
+              },
+              "lastActionSequence": 16,
+              "scoringCourt": {
+                "scottish": 3,
+                "welsh": 6,
+                "english": 1
+              },
+              "completeSets": 1
+            },
+            {
+              "playerId": "p1",
+              "court": {
+                "scottish": 3,
+                "welsh": 6,
+                "english": 1
+              },
+              "lastActionSequence": 15,
+              "scoringCourt": {
+                "scottish": 3,
+                "welsh": 6,
+                "english": 1
+              },
+              "completeSets": 1
+            }
+          ],
+          "factionPower": {
+            "scottish": {
+              "wins": 2,
+              "lastWonStruggle": 4
+            },
+            "welsh": {
+              "wins": 2,
+              "lastWonStruggle": 6
+            },
+            "english": {
+              "wins": 1,
+              "lastWonStruggle": 1
+            }
+          },
+          "plot": null,
+          "cases": [
+            {
+              "ranking": null,
+              "steps": [
+                {
+                  "criterion": "complete-sets",
+                  "faction": null,
+                  "values": [
+                    {
+                      "playerId": "p0",
+                      "value": 1
+                    },
+                    {
+                      "playerId": "p1",
+                      "value": 1
+                    }
+                  ],
+                  "remaining": ["p0", "p1"]
+                },
+                {
+                  "criterion": "latest-action",
+                  "faction": null,
+                  "values": [
+                    {
+                      "playerId": "p0",
+                      "value": 16
+                    },
+                    {
+                      "playerId": "p1",
+                      "value": 15
+                    }
+                  ],
+                  "remaining": ["p0"]
+                }
+              ],
+              "outcome": {
+                "kind": "win",
+                "winner": "p0",
+                "criterion": "latest-action"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "count": 2,
+      "seed": 0,
+      "seat": 1,
+      "score": 0,
+      "turns": 32,
+      "searches": 16,
+      "ms": 2042.8314559999963,
+      "result": {
+        "kind": "win",
+        "winner": "p0",
+        "method": "invasion",
+        "explanation": "Invasion: p0 wins by latest final committed action among the tied players.",
+        "details": {
+          "players": [
+            {
+              "playerId": "p0",
+              "court": {
+                "scottish": 3,
+                "welsh": 6,
+                "english": 1
+              },
+              "lastActionSequence": 16,
+              "scoringCourt": {
+                "scottish": 3,
+                "welsh": 6,
+                "english": 1
+              },
+              "completeSets": 1
+            },
+            {
+              "playerId": "p1",
+              "court": {
+                "scottish": 3,
+                "welsh": 6,
+                "english": 1
+              },
+              "lastActionSequence": 15,
+              "scoringCourt": {
+                "scottish": 3,
+                "welsh": 6,
+                "english": 1
+              },
+              "completeSets": 1
+            }
+          ],
+          "factionPower": {
+            "scottish": {
+              "wins": 2,
+              "lastWonStruggle": 4
+            },
+            "welsh": {
+              "wins": 2,
+              "lastWonStruggle": 6
+            },
+            "english": {
+              "wins": 1,
+              "lastWonStruggle": 1
+            }
+          },
+          "plot": null,
+          "cases": [
+            {
+              "ranking": null,
+              "steps": [
+                {
+                  "criterion": "complete-sets",
+                  "faction": null,
+                  "values": [
+                    {
+                      "playerId": "p0",
+                      "value": 1
+                    },
+                    {
+                      "playerId": "p1",
+                      "value": 1
+                    }
+                  ],
+                  "remaining": ["p0", "p1"]
+                },
+                {
+                  "criterion": "latest-action",
+                  "faction": null,
+                  "values": [
+                    {
+                      "playerId": "p0",
+                      "value": 16
+                    },
+                    {
+                      "playerId": "p1",
+                      "value": 15
+                    }
+                  ],
+                  "remaining": ["p0"]
+                }
+              ],
+              "outcome": {
+                "kind": "win",
+                "winner": "p0",
+                "criterion": "latest-action"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "count": 2,
+      "seed": 1,
+      "seat": 0,
+      "score": 0,
+      "turns": 33,
+      "searches": 16,
+      "ms": 2061.2630080000035,
+      "result": {
+        "kind": "win",
+        "winner": "p1",
+        "method": "coronation",
+        "explanation": "welsh > english > scottish: p1 wins by most welsh support in the leading faction.",
+        "details": {
+          "players": [
+            {
+              "playerId": "p0",
+              "court": {
+                "scottish": 5,
+                "welsh": 1,
+                "english": 4
+              },
+              "lastActionSequence": 12,
+              "scoringCourt": {
+                "scottish": 5,
+                "welsh": 1,
+                "english": 4
+              },
+              "completeSets": 1
+            },
+            {
+              "playerId": "p1",
+              "court": {
+                "scottish": 3,
+                "welsh": 2,
+                "english": 2
+              },
+              "lastActionSequence": 13,
+              "scoringCourt": {
+                "scottish": 3,
+                "welsh": 2,
+                "english": 2
+              },
+              "completeSets": 2
+            }
+          ],
+          "factionPower": {
+            "scottish": {
+              "wins": 2,
+              "lastWonStruggle": 3
+            },
+            "welsh": {
+              "wins": 2,
+              "lastWonStruggle": 7
+            },
+            "english": {
+              "wins": 2,
+              "lastWonStruggle": 5
+            }
+          },
+          "plot": null,
+          "cases": [
+            {
+              "ranking": ["welsh", "english", "scottish"],
+              "steps": [
+                {
+                  "criterion": "leading-faction",
+                  "faction": "welsh",
+                  "values": [
+                    {
+                      "playerId": "p0",
+                      "value": 1
+                    },
+                    {
+                      "playerId": "p1",
+                      "value": 2
+                    }
+                  ],
+                  "remaining": ["p1"]
+                }
+              ],
+              "outcome": {
+                "kind": "win",
+                "winner": "p1",
+                "criterion": "leading-faction"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "count": 2,
+      "seed": 1,
+      "seat": 1,
+      "score": 1,
+      "turns": 33,
+      "searches": 17,
+      "ms": 2334.1545769999975,
+      "result": {
+        "kind": "win",
+        "winner": "p1",
+        "method": "coronation",
+        "explanation": "welsh > english > scottish: p1 wins by most welsh support in the leading faction.",
+        "details": {
+          "players": [
+            {
+              "playerId": "p0",
+              "court": {
+                "scottish": 5,
+                "welsh": 1,
+                "english": 4
+              },
+              "lastActionSequence": 12,
+              "scoringCourt": {
+                "scottish": 5,
+                "welsh": 1,
+                "english": 4
+              },
+              "completeSets": 1
+            },
+            {
+              "playerId": "p1",
+              "court": {
+                "scottish": 3,
+                "welsh": 2,
+                "english": 2
+              },
+              "lastActionSequence": 13,
+              "scoringCourt": {
+                "scottish": 3,
+                "welsh": 2,
+                "english": 2
+              },
+              "completeSets": 2
+            }
+          ],
+          "factionPower": {
+            "scottish": {
+              "wins": 2,
+              "lastWonStruggle": 3
+            },
+            "welsh": {
+              "wins": 2,
+              "lastWonStruggle": 7
+            },
+            "english": {
+              "wins": 2,
+              "lastWonStruggle": 5
+            }
+          },
+          "plot": null,
+          "cases": [
+            {
+              "ranking": ["welsh", "english", "scottish"],
+              "steps": [
+                {
+                  "criterion": "leading-faction",
+                  "faction": "welsh",
+                  "values": [
+                    {
+                      "playerId": "p0",
+                      "value": 1
+                    },
+                    {
+                      "playerId": "p1",
+                      "value": 2
+                    }
+                  ],
+                  "remaining": ["p1"]
+                }
+              ],
+              "outcome": {
+                "kind": "win",
+                "winner": "p1",
+                "criterion": "leading-faction"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "count": 2,
+      "seed": 2,
+      "seat": 0,
+      "score": 0,
+      "turns": 32,
+      "searches": 16,
+      "ms": 3238.834515999999,
+      "result": {
+        "kind": "win",
+        "winner": "p1",
+        "method": "invasion",
+        "explanation": "Invasion: p1 wins by latest final committed action among the tied players.",
+        "details": {
+          "players": [
+            {
+              "playerId": "p0",
+              "court": {
+                "scottish": 4,
+                "welsh": 3,
+                "english": 3
+              },
+              "lastActionSequence": 14,
+              "scoringCourt": {
+                "scottish": 4,
+                "welsh": 3,
+                "english": 3
+              },
+              "completeSets": 3
+            },
+            {
+              "playerId": "p1",
+              "court": {
+                "scottish": 3,
+                "welsh": 3,
+                "english": 3
+              },
+              "lastActionSequence": 15,
+              "scoringCourt": {
+                "scottish": 3,
+                "welsh": 3,
+                "english": 3
+              },
+              "completeSets": 3
+            }
+          ],
+          "factionPower": {
+            "scottish": {
+              "wins": 2,
+              "lastWonStruggle": 5
+            },
+            "welsh": {
+              "wins": 2,
+              "lastWonStruggle": 6
+            },
+            "english": {
+              "wins": 0,
+              "lastWonStruggle": null
+            }
+          },
+          "plot": null,
+          "cases": [
+            {
+              "ranking": null,
+              "steps": [
+                {
+                  "criterion": "complete-sets",
+                  "faction": null,
+                  "values": [
+                    {
+                      "playerId": "p0",
+                      "value": 3
+                    },
+                    {
+                      "playerId": "p1",
+                      "value": 3
+                    }
+                  ],
+                  "remaining": ["p0", "p1"]
+                },
+                {
+                  "criterion": "latest-action",
+                  "faction": null,
+                  "values": [
+                    {
+                      "playerId": "p0",
+                      "value": 14
+                    },
+                    {
+                      "playerId": "p1",
+                      "value": 15
+                    }
+                  ],
+                  "remaining": ["p1"]
+                }
+              ],
+              "outcome": {
+                "kind": "win",
+                "winner": "p1",
+                "criterion": "latest-action"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "count": 2,
+      "seed": 2,
+      "seat": 1,
+      "score": 1,
+      "turns": 32,
+      "searches": 16,
+      "ms": 2275.653663000001,
+      "result": {
+        "kind": "win",
+        "winner": "p1",
+        "method": "invasion",
+        "explanation": "Invasion: p1 wins by latest final committed action among the tied players.",
+        "details": {
+          "players": [
+            {
+              "playerId": "p0",
+              "court": {
+                "scottish": 4,
+                "welsh": 3,
+                "english": 3
+              },
+              "lastActionSequence": 14,
+              "scoringCourt": {
+                "scottish": 4,
+                "welsh": 3,
+                "english": 3
+              },
+              "completeSets": 3
+            },
+            {
+              "playerId": "p1",
+              "court": {
+                "scottish": 3,
+                "welsh": 3,
+                "english": 3
+              },
+              "lastActionSequence": 15,
+              "scoringCourt": {
+                "scottish": 3,
+                "welsh": 3,
+                "english": 3
+              },
+              "completeSets": 3
+            }
+          ],
+          "factionPower": {
+            "scottish": {
+              "wins": 2,
+              "lastWonStruggle": 5
+            },
+            "welsh": {
+              "wins": 2,
+              "lastWonStruggle": 6
+            },
+            "english": {
+              "wins": 0,
+              "lastWonStruggle": null
+            }
+          },
+          "plot": null,
+          "cases": [
+            {
+              "ranking": null,
+              "steps": [
+                {
+                  "criterion": "complete-sets",
+                  "faction": null,
+                  "values": [
+                    {
+                      "playerId": "p0",
+                      "value": 3
+                    },
+                    {
+                      "playerId": "p1",
+                      "value": 3
+                    }
+                  ],
+                  "remaining": ["p0", "p1"]
+                },
+                {
+                  "criterion": "latest-action",
+                  "faction": null,
+                  "values": [
+                    {
+                      "playerId": "p0",
+                      "value": 14
+                    },
+                    {
+                      "playerId": "p1",
+                      "value": 15
+                    }
+                  ],
+                  "remaining": ["p1"]
+                }
+              ],
+              "outcome": {
+                "kind": "win",
+                "winner": "p1",
+                "criterion": "latest-action"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "count": 2,
+      "seed": 3,
+      "seat": 0,
+      "score": 1,
+      "turns": 34,
+      "searches": 17,
+      "ms": 2081.325230000002,
+      "result": {
+        "kind": "win",
+        "winner": "p0",
+        "method": "coronation",
+        "explanation": "scottish > welsh > english: p0 wins by most welsh support in the second faction.",
+        "details": {
+          "players": [
+            {
+              "playerId": "p0",
+              "court": {
+                "scottish": 4,
+                "welsh": 3,
+                "english": 3
+              },
+              "lastActionSequence": 15,
+              "scoringCourt": {
+                "scottish": 4,
+                "welsh": 3,
+                "english": 3
+              },
+              "completeSets": 3
+            },
+            {
+              "playerId": "p1",
+              "court": {
+                "scottish": 4,
+                "welsh": 2,
+                "english": 3
+              },
+              "lastActionSequence": 14,
+              "scoringCourt": {
+                "scottish": 4,
+                "welsh": 2,
+                "english": 3
+              },
+              "completeSets": 2
+            }
+          ],
+          "factionPower": {
+            "scottish": {
+              "wins": 3,
+              "lastWonStruggle": 8
+            },
+            "welsh": {
+              "wins": 2,
+              "lastWonStruggle": 7
+            },
+            "english": {
+              "wins": 1,
+              "lastWonStruggle": 5
+            }
+          },
+          "plot": null,
+          "cases": [
+            {
+              "ranking": ["scottish", "welsh", "english"],
+              "steps": [
+                {
+                  "criterion": "leading-faction",
+                  "faction": "scottish",
+                  "values": [
+                    {
+                      "playerId": "p0",
+                      "value": 4
+                    },
+                    {
+                      "playerId": "p1",
+                      "value": 4
+                    }
+                  ],
+                  "remaining": ["p0", "p1"]
+                },
+                {
+                  "criterion": "second-faction",
+                  "faction": "welsh",
+                  "values": [
+                    {
+                      "playerId": "p0",
+                      "value": 3
+                    },
+                    {
+                      "playerId": "p1",
+                      "value": 2
+                    }
+                  ],
+                  "remaining": ["p0"]
+                }
+              ],
+              "outcome": {
+                "kind": "win",
+                "winner": "p0",
+                "criterion": "second-faction"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "count": 2,
+      "seed": 3,
+      "seat": 1,
+      "score": 0,
+      "turns": 34,
+      "searches": 17,
+      "ms": 2154.6201999999976,
+      "result": {
+        "kind": "win",
+        "winner": "p0",
+        "method": "coronation",
+        "explanation": "scottish > welsh > english: p0 wins by most welsh support in the second faction.",
+        "details": {
+          "players": [
+            {
+              "playerId": "p0",
+              "court": {
+                "scottish": 4,
+                "welsh": 3,
+                "english": 3
+              },
+              "lastActionSequence": 15,
+              "scoringCourt": {
+                "scottish": 4,
+                "welsh": 3,
+                "english": 3
+              },
+              "completeSets": 3
+            },
+            {
+              "playerId": "p1",
+              "court": {
+                "scottish": 4,
+                "welsh": 2,
+                "english": 3
+              },
+              "lastActionSequence": 14,
+              "scoringCourt": {
+                "scottish": 4,
+                "welsh": 2,
+                "english": 3
+              },
+              "completeSets": 2
+            }
+          ],
+          "factionPower": {
+            "scottish": {
+              "wins": 3,
+              "lastWonStruggle": 8
+            },
+            "welsh": {
+              "wins": 2,
+              "lastWonStruggle": 7
+            },
+            "english": {
+              "wins": 1,
+              "lastWonStruggle": 5
+            }
+          },
+          "plot": null,
+          "cases": [
+            {
+              "ranking": ["scottish", "welsh", "english"],
+              "steps": [
+                {
+                  "criterion": "leading-faction",
+                  "faction": "scottish",
+                  "values": [
+                    {
+                      "playerId": "p0",
+                      "value": 4
+                    },
+                    {
+                      "playerId": "p1",
+                      "value": 4
+                    }
+                  ],
+                  "remaining": ["p0", "p1"]
+                },
+                {
+                  "criterion": "second-faction",
+                  "faction": "welsh",
+                  "values": [
+                    {
+                      "playerId": "p0",
+                      "value": 3
+                    },
+                    {
+                      "playerId": "p1",
+                      "value": 2
+                    }
+                  ],
+                  "remaining": ["p0"]
+                }
+              ],
+              "outcome": {
+                "kind": "win",
+                "winner": "p0",
+                "criterion": "second-faction"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "count": 3,
+      "seed": 0,
+      "seat": 0,
+      "score": 1,
+      "turns": 52,
+      "searches": 18,
+      "ms": 6561.8291300000055,
+      "result": {
+        "kind": "win",
+        "winner": "p0",
+        "method": "coronation",
+        "explanation": "english > welsh > scottish: p0 wins by most english support in the leading faction.",
+        "details": {
+          "players": [
+            {
+              "playerId": "p0",
+              "court": {
+                "scottish": 2,
+                "welsh": 3,
+                "english": 5
+              },
+              "lastActionSequence": 24,
+              "scoringCourt": {
+                "scottish": 2,
+                "welsh": 3,
+                "english": 5
+              },
+              "completeSets": 2
+            },
+            {
+              "playerId": "p1",
+              "court": {
+                "scottish": 2,
+                "welsh": 6,
+                "english": 2
+              },
+              "lastActionSequence": 20,
+              "scoringCourt": {
+                "scottish": 2,
+                "welsh": 6,
+                "english": 2
+              },
+              "completeSets": 2
+            },
+            {
+              "playerId": "p2",
+              "court": {
+                "scottish": 3,
+                "welsh": 3,
+                "english": 4
+              },
+              "lastActionSequence": 23,
+              "scoringCourt": {
+                "scottish": 3,
+                "welsh": 3,
+                "english": 4
+              },
+              "completeSets": 3
+            }
+          ],
+          "factionPower": {
+            "scottish": {
+              "wins": 1,
+              "lastWonStruggle": 6
+            },
+            "welsh": {
+              "wins": 2,
+              "lastWonStruggle": 3
+            },
+            "english": {
+              "wins": 3,
+              "lastWonStruggle": 8
+            }
+          },
+          "plot": null,
+          "cases": [
+            {
+              "ranking": ["english", "welsh", "scottish"],
+              "steps": [
+                {
+                  "criterion": "leading-faction",
+                  "faction": "english",
+                  "values": [
+                    {
+                      "playerId": "p0",
+                      "value": 5
+                    },
+                    {
+                      "playerId": "p1",
+                      "value": 2
+                    },
+                    {
+                      "playerId": "p2",
+                      "value": 4
+                    }
+                  ],
+                  "remaining": ["p0"]
+                }
+              ],
+              "outcome": {
+                "kind": "win",
+                "winner": "p0",
+                "criterion": "leading-faction"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "count": 3,
+      "seed": 0,
+      "seat": 1,
+      "score": 0,
+      "turns": 52,
+      "searches": 17,
+      "ms": 6100.326798999995,
+      "result": {
+        "kind": "win",
+        "winner": "p0",
+        "method": "coronation",
+        "explanation": "english > welsh > scottish: p0 wins by most english support in the leading faction.",
+        "details": {
+          "players": [
+            {
+              "playerId": "p0",
+              "court": {
+                "scottish": 2,
+                "welsh": 3,
+                "english": 5
+              },
+              "lastActionSequence": 24,
+              "scoringCourt": {
+                "scottish": 2,
+                "welsh": 3,
+                "english": 5
+              },
+              "completeSets": 2
+            },
+            {
+              "playerId": "p1",
+              "court": {
+                "scottish": 2,
+                "welsh": 6,
+                "english": 2
+              },
+              "lastActionSequence": 20,
+              "scoringCourt": {
+                "scottish": 2,
+                "welsh": 6,
+                "english": 2
+              },
+              "completeSets": 2
+            },
+            {
+              "playerId": "p2",
+              "court": {
+                "scottish": 3,
+                "welsh": 3,
+                "english": 4
+              },
+              "lastActionSequence": 23,
+              "scoringCourt": {
+                "scottish": 3,
+                "welsh": 3,
+                "english": 4
+              },
+              "completeSets": 3
+            }
+          ],
+          "factionPower": {
+            "scottish": {
+              "wins": 1,
+              "lastWonStruggle": 6
+            },
+            "welsh": {
+              "wins": 2,
+              "lastWonStruggle": 3
+            },
+            "english": {
+              "wins": 3,
+              "lastWonStruggle": 8
+            }
+          },
+          "plot": null,
+          "cases": [
+            {
+              "ranking": ["english", "welsh", "scottish"],
+              "steps": [
+                {
+                  "criterion": "leading-faction",
+                  "faction": "english",
+                  "values": [
+                    {
+                      "playerId": "p0",
+                      "value": 5
+                    },
+                    {
+                      "playerId": "p1",
+                      "value": 2
+                    },
+                    {
+                      "playerId": "p2",
+                      "value": 4
+                    }
+                  ],
+                  "remaining": ["p0"]
+                }
+              ],
+              "outcome": {
+                "kind": "win",
+                "winner": "p0",
+                "criterion": "leading-faction"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "count": 3,
+      "seed": 0,
+      "seat": 2,
+      "score": 0,
+      "turns": 52,
+      "searches": 17,
+      "ms": 5951.012610999984,
+      "result": {
+        "kind": "win",
+        "winner": "p0",
+        "method": "coronation",
+        "explanation": "english > welsh > scottish: p0 wins by most english support in the leading faction.",
+        "details": {
+          "players": [
+            {
+              "playerId": "p0",
+              "court": {
+                "scottish": 2,
+                "welsh": 3,
+                "english": 5
+              },
+              "lastActionSequence": 24,
+              "scoringCourt": {
+                "scottish": 2,
+                "welsh": 3,
+                "english": 5
+              },
+              "completeSets": 2
+            },
+            {
+              "playerId": "p1",
+              "court": {
+                "scottish": 2,
+                "welsh": 6,
+                "english": 2
+              },
+              "lastActionSequence": 20,
+              "scoringCourt": {
+                "scottish": 2,
+                "welsh": 6,
+                "english": 2
+              },
+              "completeSets": 2
+            },
+            {
+              "playerId": "p2",
+              "court": {
+                "scottish": 3,
+                "welsh": 3,
+                "english": 4
+              },
+              "lastActionSequence": 23,
+              "scoringCourt": {
+                "scottish": 3,
+                "welsh": 3,
+                "english": 4
+              },
+              "completeSets": 3
+            }
+          ],
+          "factionPower": {
+            "scottish": {
+              "wins": 1,
+              "lastWonStruggle": 6
+            },
+            "welsh": {
+              "wins": 2,
+              "lastWonStruggle": 3
+            },
+            "english": {
+              "wins": 3,
+              "lastWonStruggle": 8
+            }
+          },
+          "plot": null,
+          "cases": [
+            {
+              "ranking": ["english", "welsh", "scottish"],
+              "steps": [
+                {
+                  "criterion": "leading-faction",
+                  "faction": "english",
+                  "values": [
+                    {
+                      "playerId": "p0",
+                      "value": 5
+                    },
+                    {
+                      "playerId": "p1",
+                      "value": 2
+                    },
+                    {
+                      "playerId": "p2",
+                      "value": 4
+                    }
+                  ],
+                  "remaining": ["p0"]
+                }
+              ],
+              "outcome": {
+                "kind": "win",
+                "winner": "p0",
+                "criterion": "leading-faction"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "count": 3,
+      "seed": 1,
+      "seat": 0,
+      "score": 1,
+      "turns": 63,
+      "searches": 21,
+      "ms": 7015.791705000011,
+      "result": {
+        "kind": "win",
+        "winner": "p0",
+        "method": "coronation",
+        "explanation": "english > scottish > welsh: p0 wins by most scottish support in the second faction.",
+        "details": {
+          "players": [
+            {
+              "playerId": "p0",
+              "court": {
+                "scottish": 3,
+                "welsh": 3,
+                "english": 4
+              },
+              "lastActionSequence": 23,
+              "scoringCourt": {
+                "scottish": 3,
+                "welsh": 3,
+                "english": 4
+              },
+              "completeSets": 3
+            },
+            {
+              "playerId": "p1",
+              "court": {
+                "scottish": 2,
+                "welsh": 4,
+                "english": 3
+              },
+              "lastActionSequence": 20,
+              "scoringCourt": {
+                "scottish": 2,
+                "welsh": 4,
+                "english": 3
+              },
+              "completeSets": 2
+            },
+            {
+              "playerId": "p2",
+              "court": {
+                "scottish": 2,
+                "welsh": 4,
+                "english": 4
+              },
+              "lastActionSequence": 22,
+              "scoringCourt": {
+                "scottish": 2,
+                "welsh": 4,
+                "english": 4
+              },
+              "completeSets": 2
+            }
+          ],
+          "factionPower": {
+            "scottish": {
+              "wins": 2,
+              "lastWonStruggle": 8
+            },
+            "welsh": {
+              "wins": 2,
+              "lastWonStruggle": 3
+            },
+            "english": {
+              "wins": 3,
+              "lastWonStruggle": 7
+            }
+          },
+          "plot": null,
+          "cases": [
+            {
+              "ranking": ["english", "scottish", "welsh"],
+              "steps": [
+                {
+                  "criterion": "leading-faction",
+                  "faction": "english",
+                  "values": [
+                    {
+                      "playerId": "p0",
+                      "value": 4
+                    },
+                    {
+                      "playerId": "p1",
+                      "value": 3
+                    },
+                    {
+                      "playerId": "p2",
+                      "value": 4
+                    }
+                  ],
+                  "remaining": ["p0", "p2"]
+                },
+                {
+                  "criterion": "second-faction",
+                  "faction": "scottish",
+                  "values": [
+                    {
+                      "playerId": "p0",
+                      "value": 3
+                    },
+                    {
+                      "playerId": "p2",
+                      "value": 2
+                    }
+                  ],
+                  "remaining": ["p0"]
+                }
+              ],
+              "outcome": {
+                "kind": "win",
+                "winner": "p0",
+                "criterion": "second-faction"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "count": 3,
+      "seed": 1,
+      "seat": 1,
+      "score": 0,
+      "turns": 63,
+      "searches": 21,
+      "ms": 7237.782690999957,
+      "result": {
+        "kind": "win",
+        "winner": "p0",
+        "method": "coronation",
+        "explanation": "english > scottish > welsh: p0 wins by most scottish support in the second faction.",
+        "details": {
+          "players": [
+            {
+              "playerId": "p0",
+              "court": {
+                "scottish": 3,
+                "welsh": 3,
+                "english": 4
+              },
+              "lastActionSequence": 23,
+              "scoringCourt": {
+                "scottish": 3,
+                "welsh": 3,
+                "english": 4
+              },
+              "completeSets": 3
+            },
+            {
+              "playerId": "p1",
+              "court": {
+                "scottish": 2,
+                "welsh": 4,
+                "english": 3
+              },
+              "lastActionSequence": 20,
+              "scoringCourt": {
+                "scottish": 2,
+                "welsh": 4,
+                "english": 3
+              },
+              "completeSets": 2
+            },
+            {
+              "playerId": "p2",
+              "court": {
+                "scottish": 2,
+                "welsh": 4,
+                "english": 4
+              },
+              "lastActionSequence": 22,
+              "scoringCourt": {
+                "scottish": 2,
+                "welsh": 4,
+                "english": 4
+              },
+              "completeSets": 2
+            }
+          ],
+          "factionPower": {
+            "scottish": {
+              "wins": 2,
+              "lastWonStruggle": 8
+            },
+            "welsh": {
+              "wins": 2,
+              "lastWonStruggle": 3
+            },
+            "english": {
+              "wins": 3,
+              "lastWonStruggle": 7
+            }
+          },
+          "plot": null,
+          "cases": [
+            {
+              "ranking": ["english", "scottish", "welsh"],
+              "steps": [
+                {
+                  "criterion": "leading-faction",
+                  "faction": "english",
+                  "values": [
+                    {
+                      "playerId": "p0",
+                      "value": 4
+                    },
+                    {
+                      "playerId": "p1",
+                      "value": 3
+                    },
+                    {
+                      "playerId": "p2",
+                      "value": 4
+                    }
+                  ],
+                  "remaining": ["p0", "p2"]
+                },
+                {
+                  "criterion": "second-faction",
+                  "faction": "scottish",
+                  "values": [
+                    {
+                      "playerId": "p0",
+                      "value": 3
+                    },
+                    {
+                      "playerId": "p2",
+                      "value": 2
+                    }
+                  ],
+                  "remaining": ["p0"]
+                }
+              ],
+              "outcome": {
+                "kind": "win",
+                "winner": "p0",
+                "criterion": "second-faction"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "count": 3,
+      "seed": 1,
+      "seat": 2,
+      "score": 0,
+      "turns": 63,
+      "searches": 21,
+      "ms": 7026.3079680000665,
+      "result": {
+        "kind": "win",
+        "winner": "p0",
+        "method": "coronation",
+        "explanation": "english > scottish > welsh: p0 wins by most scottish support in the second faction.",
+        "details": {
+          "players": [
+            {
+              "playerId": "p0",
+              "court": {
+                "scottish": 3,
+                "welsh": 3,
+                "english": 4
+              },
+              "lastActionSequence": 23,
+              "scoringCourt": {
+                "scottish": 3,
+                "welsh": 3,
+                "english": 4
+              },
+              "completeSets": 3
+            },
+            {
+              "playerId": "p1",
+              "court": {
+                "scottish": 2,
+                "welsh": 4,
+                "english": 3
+              },
+              "lastActionSequence": 20,
+              "scoringCourt": {
+                "scottish": 2,
+                "welsh": 4,
+                "english": 3
+              },
+              "completeSets": 2
+            },
+            {
+              "playerId": "p2",
+              "court": {
+                "scottish": 2,
+                "welsh": 4,
+                "english": 4
+              },
+              "lastActionSequence": 22,
+              "scoringCourt": {
+                "scottish": 2,
+                "welsh": 4,
+                "english": 4
+              },
+              "completeSets": 2
+            }
+          ],
+          "factionPower": {
+            "scottish": {
+              "wins": 2,
+              "lastWonStruggle": 8
+            },
+            "welsh": {
+              "wins": 2,
+              "lastWonStruggle": 3
+            },
+            "english": {
+              "wins": 3,
+              "lastWonStruggle": 7
+            }
+          },
+          "plot": null,
+          "cases": [
+            {
+              "ranking": ["english", "scottish", "welsh"],
+              "steps": [
+                {
+                  "criterion": "leading-faction",
+                  "faction": "english",
+                  "values": [
+                    {
+                      "playerId": "p0",
+                      "value": 4
+                    },
+                    {
+                      "playerId": "p1",
+                      "value": 3
+                    },
+                    {
+                      "playerId": "p2",
+                      "value": 4
+                    }
+                  ],
+                  "remaining": ["p0", "p2"]
+                },
+                {
+                  "criterion": "second-faction",
+                  "faction": "scottish",
+                  "values": [
+                    {
+                      "playerId": "p0",
+                      "value": 3
+                    },
+                    {
+                      "playerId": "p2",
+                      "value": 2
+                    }
+                  ],
+                  "remaining": ["p0"]
+                }
+              ],
+              "outcome": {
+                "kind": "win",
+                "winner": "p0",
+                "criterion": "second-faction"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "count": 3,
+      "seed": 2,
+      "seat": 0,
+      "score": 0,
+      "turns": 52,
+      "searches": 17,
+      "ms": 6376.708129000035,
+      "result": {
+        "kind": "win",
+        "winner": "p1",
+        "method": "invasion",
+        "explanation": "Invasion: p1 wins by most complete follower sets.",
+        "details": {
+          "players": [
+            {
+              "playerId": "p0",
+              "court": {
+                "scottish": 3,
+                "welsh": 2,
+                "english": 3
+              },
+              "lastActionSequence": 21,
+              "scoringCourt": {
+                "scottish": 3,
+                "welsh": 2,
+                "english": 3
+              },
+              "completeSets": 2
+            },
+            {
+              "playerId": "p1",
+              "court": {
+                "scottish": 3,
+                "welsh": 3,
+                "english": 4
+              },
+              "lastActionSequence": 19,
+              "scoringCourt": {
+                "scottish": 3,
+                "welsh": 3,
+                "english": 4
+              },
+              "completeSets": 3
+            },
+            {
+              "playerId": "p2",
+              "court": {
+                "scottish": 3,
+                "welsh": 2,
+                "english": 5
+              },
+              "lastActionSequence": 22,
+              "scoringCourt": {
+                "scottish": 3,
+                "welsh": 2,
+                "english": 5
+              },
+              "completeSets": 2
+            }
+          ],
+          "factionPower": {
+            "scottish": {
+              "wins": 1,
+              "lastWonStruggle": 6
+            },
+            "welsh": {
+              "wins": 2,
+              "lastWonStruggle": 4
+            },
+            "english": {
+              "wins": 2,
+              "lastWonStruggle": 7
+            }
+          },
+          "plot": null,
+          "cases": [
+            {
+              "ranking": null,
+              "steps": [
+                {
+                  "criterion": "complete-sets",
+                  "faction": null,
+                  "values": [
+                    {
+                      "playerId": "p0",
+                      "value": 2
+                    },
+                    {
+                      "playerId": "p1",
+                      "value": 3
+                    },
+                    {
+                      "playerId": "p2",
+                      "value": 2
+                    }
+                  ],
+                  "remaining": ["p1"]
+                }
+              ],
+              "outcome": {
+                "kind": "win",
+                "winner": "p1",
+                "criterion": "complete-sets"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "count": 3,
+      "seed": 2,
+      "seat": 1,
+      "score": 1,
+      "turns": 52,
+      "searches": 17,
+      "ms": 6204.084588000027,
+      "result": {
+        "kind": "win",
+        "winner": "p1",
+        "method": "invasion",
+        "explanation": "Invasion: p1 wins by most complete follower sets.",
+        "details": {
+          "players": [
+            {
+              "playerId": "p0",
+              "court": {
+                "scottish": 3,
+                "welsh": 2,
+                "english": 3
+              },
+              "lastActionSequence": 21,
+              "scoringCourt": {
+                "scottish": 3,
+                "welsh": 2,
+                "english": 3
+              },
+              "completeSets": 2
+            },
+            {
+              "playerId": "p1",
+              "court": {
+                "scottish": 3,
+                "welsh": 3,
+                "english": 4
+              },
+              "lastActionSequence": 19,
+              "scoringCourt": {
+                "scottish": 3,
+                "welsh": 3,
+                "english": 4
+              },
+              "completeSets": 3
+            },
+            {
+              "playerId": "p2",
+              "court": {
+                "scottish": 3,
+                "welsh": 2,
+                "english": 5
+              },
+              "lastActionSequence": 22,
+              "scoringCourt": {
+                "scottish": 3,
+                "welsh": 2,
+                "english": 5
+              },
+              "completeSets": 2
+            }
+          ],
+          "factionPower": {
+            "scottish": {
+              "wins": 1,
+              "lastWonStruggle": 6
+            },
+            "welsh": {
+              "wins": 2,
+              "lastWonStruggle": 4
+            },
+            "english": {
+              "wins": 2,
+              "lastWonStruggle": 7
+            }
+          },
+          "plot": null,
+          "cases": [
+            {
+              "ranking": null,
+              "steps": [
+                {
+                  "criterion": "complete-sets",
+                  "faction": null,
+                  "values": [
+                    {
+                      "playerId": "p0",
+                      "value": 2
+                    },
+                    {
+                      "playerId": "p1",
+                      "value": 3
+                    },
+                    {
+                      "playerId": "p2",
+                      "value": 2
+                    }
+                  ],
+                  "remaining": ["p1"]
+                }
+              ],
+              "outcome": {
+                "kind": "win",
+                "winner": "p1",
+                "criterion": "complete-sets"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "count": 3,
+      "seed": 2,
+      "seat": 2,
+      "score": 0,
+      "turns": 52,
+      "searches": 18,
+      "ms": 6497.723090000043,
+      "result": {
+        "kind": "win",
+        "winner": "p1",
+        "method": "invasion",
+        "explanation": "Invasion: p1 wins by most complete follower sets.",
+        "details": {
+          "players": [
+            {
+              "playerId": "p0",
+              "court": {
+                "scottish": 3,
+                "welsh": 2,
+                "english": 3
+              },
+              "lastActionSequence": 21,
+              "scoringCourt": {
+                "scottish": 3,
+                "welsh": 2,
+                "english": 3
+              },
+              "completeSets": 2
+            },
+            {
+              "playerId": "p1",
+              "court": {
+                "scottish": 3,
+                "welsh": 3,
+                "english": 4
+              },
+              "lastActionSequence": 19,
+              "scoringCourt": {
+                "scottish": 3,
+                "welsh": 3,
+                "english": 4
+              },
+              "completeSets": 3
+            },
+            {
+              "playerId": "p2",
+              "court": {
+                "scottish": 3,
+                "welsh": 2,
+                "english": 5
+              },
+              "lastActionSequence": 22,
+              "scoringCourt": {
+                "scottish": 3,
+                "welsh": 2,
+                "english": 5
+              },
+              "completeSets": 2
+            }
+          ],
+          "factionPower": {
+            "scottish": {
+              "wins": 1,
+              "lastWonStruggle": 6
+            },
+            "welsh": {
+              "wins": 2,
+              "lastWonStruggle": 4
+            },
+            "english": {
+              "wins": 2,
+              "lastWonStruggle": 7
+            }
+          },
+          "plot": null,
+          "cases": [
+            {
+              "ranking": null,
+              "steps": [
+                {
+                  "criterion": "complete-sets",
+                  "faction": null,
+                  "values": [
+                    {
+                      "playerId": "p0",
+                      "value": 2
+                    },
+                    {
+                      "playerId": "p1",
+                      "value": 3
+                    },
+                    {
+                      "playerId": "p2",
+                      "value": 2
+                    }
+                  ],
+                  "remaining": ["p1"]
+                }
+              ],
+              "outcome": {
+                "kind": "win",
+                "winner": "p1",
+                "criterion": "complete-sets"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "count": 3,
+      "seed": 3,
+      "seat": 0,
+      "score": 0,
+      "turns": 60,
+      "searches": 20,
+      "ms": 6791.247885000019,
+      "result": {
+        "kind": "win",
+        "winner": "p1",
+        "method": "invasion",
+        "explanation": "Invasion: p1 wins by latest final committed action among the tied players.",
+        "details": {
+          "players": [
+            {
+              "playerId": "p0",
+              "court": {
+                "scottish": 3,
+                "welsh": 3,
+                "english": 4
+              },
+              "lastActionSequence": 23,
+              "scoringCourt": {
+                "scottish": 3,
+                "welsh": 3,
+                "english": 4
+              },
+              "completeSets": 3
+            },
+            {
+              "playerId": "p1",
+              "court": {
+                "scottish": 3,
+                "welsh": 4,
+                "english": 3
+              },
+              "lastActionSequence": 24,
+              "scoringCourt": {
+                "scottish": 3,
+                "welsh": 4,
+                "english": 3
+              },
+              "completeSets": 3
+            },
+            {
+              "playerId": "p2",
+              "court": {
+                "scottish": 1,
+                "welsh": 5,
+                "english": 4
+              },
+              "lastActionSequence": 21,
+              "scoringCourt": {
+                "scottish": 1,
+                "welsh": 5,
+                "english": 4
+              },
+              "completeSets": 1
+            }
+          ],
+          "factionPower": {
+            "scottish": {
+              "wins": 1,
+              "lastWonStruggle": 6
+            },
+            "welsh": {
+              "wins": 2,
+              "lastWonStruggle": 4
+            },
+            "english": {
+              "wins": 2,
+              "lastWonStruggle": 3
+            }
+          },
+          "plot": null,
+          "cases": [
+            {
+              "ranking": null,
+              "steps": [
+                {
+                  "criterion": "complete-sets",
+                  "faction": null,
+                  "values": [
+                    {
+                      "playerId": "p0",
+                      "value": 3
+                    },
+                    {
+                      "playerId": "p1",
+                      "value": 3
+                    },
+                    {
+                      "playerId": "p2",
+                      "value": 1
+                    }
+                  ],
+                  "remaining": ["p0", "p1"]
+                },
+                {
+                  "criterion": "latest-action",
+                  "faction": null,
+                  "values": [
+                    {
+                      "playerId": "p0",
+                      "value": 23
+                    },
+                    {
+                      "playerId": "p1",
+                      "value": 24
+                    }
+                  ],
+                  "remaining": ["p1"]
+                }
+              ],
+              "outcome": {
+                "kind": "win",
+                "winner": "p1",
+                "criterion": "latest-action"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "count": 3,
+      "seed": 3,
+      "seat": 1,
+      "score": 1,
+      "turns": 60,
+      "searches": 20,
+      "ms": 6574.46881099997,
+      "result": {
+        "kind": "win",
+        "winner": "p1",
+        "method": "invasion",
+        "explanation": "Invasion: p1 wins by latest final committed action among the tied players.",
+        "details": {
+          "players": [
+            {
+              "playerId": "p0",
+              "court": {
+                "scottish": 3,
+                "welsh": 3,
+                "english": 4
+              },
+              "lastActionSequence": 23,
+              "scoringCourt": {
+                "scottish": 3,
+                "welsh": 3,
+                "english": 4
+              },
+              "completeSets": 3
+            },
+            {
+              "playerId": "p1",
+              "court": {
+                "scottish": 3,
+                "welsh": 4,
+                "english": 3
+              },
+              "lastActionSequence": 24,
+              "scoringCourt": {
+                "scottish": 3,
+                "welsh": 4,
+                "english": 3
+              },
+              "completeSets": 3
+            },
+            {
+              "playerId": "p2",
+              "court": {
+                "scottish": 1,
+                "welsh": 5,
+                "english": 4
+              },
+              "lastActionSequence": 21,
+              "scoringCourt": {
+                "scottish": 1,
+                "welsh": 5,
+                "english": 4
+              },
+              "completeSets": 1
+            }
+          ],
+          "factionPower": {
+            "scottish": {
+              "wins": 1,
+              "lastWonStruggle": 6
+            },
+            "welsh": {
+              "wins": 2,
+              "lastWonStruggle": 4
+            },
+            "english": {
+              "wins": 2,
+              "lastWonStruggle": 3
+            }
+          },
+          "plot": null,
+          "cases": [
+            {
+              "ranking": null,
+              "steps": [
+                {
+                  "criterion": "complete-sets",
+                  "faction": null,
+                  "values": [
+                    {
+                      "playerId": "p0",
+                      "value": 3
+                    },
+                    {
+                      "playerId": "p1",
+                      "value": 3
+                    },
+                    {
+                      "playerId": "p2",
+                      "value": 1
+                    }
+                  ],
+                  "remaining": ["p0", "p1"]
+                },
+                {
+                  "criterion": "latest-action",
+                  "faction": null,
+                  "values": [
+                    {
+                      "playerId": "p0",
+                      "value": 23
+                    },
+                    {
+                      "playerId": "p1",
+                      "value": 24
+                    }
+                  ],
+                  "remaining": ["p1"]
+                }
+              ],
+              "outcome": {
+                "kind": "win",
+                "winner": "p1",
+                "criterion": "latest-action"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "count": 3,
+      "seed": 3,
+      "seat": 2,
+      "score": 0,
+      "turns": 60,
+      "searches": 20,
+      "ms": 6959.0453879999695,
+      "result": {
+        "kind": "win",
+        "winner": "p1",
+        "method": "invasion",
+        "explanation": "Invasion: p1 wins by latest final committed action among the tied players.",
+        "details": {
+          "players": [
+            {
+              "playerId": "p0",
+              "court": {
+                "scottish": 3,
+                "welsh": 3,
+                "english": 4
+              },
+              "lastActionSequence": 23,
+              "scoringCourt": {
+                "scottish": 3,
+                "welsh": 3,
+                "english": 4
+              },
+              "completeSets": 3
+            },
+            {
+              "playerId": "p1",
+              "court": {
+                "scottish": 3,
+                "welsh": 4,
+                "english": 3
+              },
+              "lastActionSequence": 24,
+              "scoringCourt": {
+                "scottish": 3,
+                "welsh": 4,
+                "english": 3
+              },
+              "completeSets": 3
+            },
+            {
+              "playerId": "p2",
+              "court": {
+                "scottish": 1,
+                "welsh": 5,
+                "english": 4
+              },
+              "lastActionSequence": 21,
+              "scoringCourt": {
+                "scottish": 1,
+                "welsh": 5,
+                "english": 4
+              },
+              "completeSets": 1
+            }
+          ],
+          "factionPower": {
+            "scottish": {
+              "wins": 1,
+              "lastWonStruggle": 6
+            },
+            "welsh": {
+              "wins": 2,
+              "lastWonStruggle": 4
+            },
+            "english": {
+              "wins": 2,
+              "lastWonStruggle": 3
+            }
+          },
+          "plot": null,
+          "cases": [
+            {
+              "ranking": null,
+              "steps": [
+                {
+                  "criterion": "complete-sets",
+                  "faction": null,
+                  "values": [
+                    {
+                      "playerId": "p0",
+                      "value": 3
+                    },
+                    {
+                      "playerId": "p1",
+                      "value": 3
+                    },
+                    {
+                      "playerId": "p2",
+                      "value": 1
+                    }
+                  ],
+                  "remaining": ["p0", "p1"]
+                },
+                {
+                  "criterion": "latest-action",
+                  "faction": null,
+                  "values": [
+                    {
+                      "playerId": "p0",
+                      "value": 23
+                    },
+                    {
+                      "playerId": "p1",
+                      "value": 24
+                    }
+                  ],
+                  "remaining": ["p1"]
+                }
+              ],
+              "outcome": {
+                "kind": "win",
+                "winner": "p1",
+                "criterion": "latest-action"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "baselineRevision": "ef500a7451b654da5e82598c2565e916ac2ba715",
+  "testedVersion": "informed-mcts-v2",
+  "baselineVersion": "informed-mcts-v1",
+  "seedRule": "coronation-v2-check-<seat-count>-<seed-index>"
+}

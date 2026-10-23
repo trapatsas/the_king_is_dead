@@ -7,6 +7,13 @@ evaluator at leaves, blended equally with the baseline. It supports two and
 three Standard seats. Difficulty labels are relative; Advanced and automatic
 promotion remain outside this implementation.
 
+Informed v2 and ML v2 also recognize a mathematically fixed leading faction
+when Invasion is impossible. The last-region policy collects and denies that
+faction's support, spends otherwise unusable cards first, and avoids giving
+new support to the next player. In these proven endgames ML uses the
+faction-aware baseline evaluator rather than the raw learned value. The
+checkpoint and its 474-feature schema are unchanged.
+
 The original pilot stays in `public/models/pilot/` for reproducible research
 comparisons. Headless tools keep explicit model paths (and their original pilot
 default); supply `--model=public/models/linear-v2/manifest.json` to use the browser
@@ -31,13 +38,19 @@ Standard games, including human games, save accepted typed commands to
 with the existing engine and commits event/projection/checkpoint/result rows
 atomically. Set `KING_DB_PATH` before starting Vite to use another file.
 Pending saves survive reload in a per-request browser outbox when browser
-storage is available. The UI retries every ten seconds, on online/focus events,
+storage is available. Committed Standard positions persist separately in
+this browser and can be resumed from **Game history**, including after leaving
+or closing a tab. Refresh restores the active game automatically.
+The UI retries every ten seconds, on online/focus events,
 and through **Retry save**. A rejected game's commands stay queued in order
 without blocking other games, and only an acknowledged JSON event cursor
 removes a pending request. Restart the dev server after switching to a branch
 with different API/plugin configuration; `/api/storage` must return JSON rather
 than the frontend HTML. Public browser Game history still uses its
-existing local archive. Reloading does not restore the active game UI yet.
+existing local archive. Resume and refresh recovery replay every accepted move
+and reject inconsistent histories or checkpoints. There is no file upload.
+Legacy games without a browser position can be recovered using an
+[operator-issued expiring link](../README.md).
 
 The local `npm run build && npm run preview` flow builds and serves both the
 browser app and a Node API bundle (`dist-server/api.mjs`). Static-only hosting
@@ -95,6 +108,40 @@ games. Sources and seat counts remain queryable. The current builder does not
 enforce a global final-holdout registry or a chosen human sampling percentage:
 keep final evaluation data in a separate database and curate cohort/source mixes.
 A new dataset name is required after changing membership/configuration.
+
+### Generate alternatives from a recorded human game
+
+`ml:branch` reads a completed Standard game's authoritative events from a
+read-only source database. It validates the full source replay, preserves the
+prefix up to each requested turn, and branches into the recorded move, a pass,
+and alternative summons or teacher proposals. All seats then use fresh
+Informed v2 teachers, with fixed iteration budgets. Every continuation finishes
+and passes the same authoritative replay/materialization checks as ordinary
+training games. Its outcome labels apply to that completed continuation only.
+
+```sh
+npm run ml:branch -- --sourceDb=.data/king.sqlite --game=king-c0253275-1aef-4383-9733-69ad7dc93f47 --turns=27,33,36,45 --branches=4 --iterations=128 --db=.data/tactical.sqlite --cohort=tactical-v1 --out=artifacts/ml/tactical-branches.json
+npm run ml:generate -- --db=.data/tactical.sqlite --seeds=20 --seats=2,3 --iterations=128 --noise=0.1 --openings=2 --prefix=tactical-v1
+npm run ml:dataset -- --db=.data/tactical.sqlite --name=tactical-v1 --cohort=tactical-v1 --weighting=equal-family-v1
+npm run ml:export -- --db=.data/tactical.sqlite --name=tactical-v1 --out=artifacts/ml/tactical-v1.sqlite
+```
+
+Use a separate destination database and a new report path. Accepted branch IDs
+include the source-event digest, forced move, teacher version, parameters and
+budget. Interrupted branches resume by replaying prior searches as well as
+moves; completed branches are verified and reused. Source display names are
+retained in the private capture, while portable training exports omit them.
+Public version-1 display archives alone do not contain authoritative commands;
+the corresponding saved SQLite game is required.
+
+Branches retain the source's public setup family, so they cannot cross splits
+within a dataset. `equal-family-v1` gives each distinct setup family one total
+unit of weight, divided equally among its deduplicated trajectories and then
+their positions. This prevents many branches of one loss overwhelming fresh
+setups. The default remains `equal-game-v1` for existing dataset compatibility.
+Use multiple independent setups and varied opponents; branching one game does
+not provide an independent validation set. Keep development cases separate
+from final strength evaluation.
 
 To train on collected human games:
 

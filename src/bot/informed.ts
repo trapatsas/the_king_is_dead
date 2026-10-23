@@ -13,12 +13,13 @@ import { enumerateSummonChoices } from "../game/summons";
 import type { EffectPlan, SummonChoice, TurnPlan } from "../game/turnTypes";
 import { evaluate as cheapEvaluate, terminalUtility } from "./evaluation";
 import { passingResult } from "./patient";
+import { coronationHarvest, lockedCoronationFaction } from "./coronation";
 import { StandardBot } from "./search";
 import type { Candidate, RootChoice, SearchPolicy } from "./search";
 import { cardChoices, passPlan, simulate } from "./simulation";
 import type { Random } from "./simulation";
 
-export const INFORMED_BOT_VERSION = "informed-mcts-v1";
+export const INFORMED_BOT_VERSION = "informed-mcts-v2";
 
 /** Tunable preferences. Benchmarks may override them; the UI uses defaults. */
 export interface InformedParams {
@@ -194,7 +195,10 @@ function forecast(state: GameState): Forecast {
     .slice(state.instabilityDiscsInFrance)
     .reduce((a, b) => a + b, 0);
   const temperature = cards === 0 ? 0.03 : 0.22 + Math.min(0.4, cards * 0.03);
-  const first = softmax(power, temperature);
+  const locked = lockedCoronationFaction(state);
+  const first = locked
+    ? FACTIONS.map((faction) => Number(faction === locked))
+    : softmax(power, temperature);
   const second = FACTIONS.map((_, f) => {
     const others = FACTIONS.map((_, i) => i).filter((i) => i !== f);
     const weights = softmax(
@@ -564,26 +568,27 @@ export function createInformedPolicy(
     const seat = state.playerOrder.indexOf(state.activePlayerId);
     const pass = choices.find((choice) => choice.plan.kind === "pass");
     if (!pass) return undefined;
-    const cards = choices.filter((choice) => choice.plan.kind === "card");
-    if (!cards.length) return pass.plan;
+    const passUtility = pass.state.result
+      ? terminalUtility(pass.state.result, state.playerOrder)[seat]!
+      : null;
+    if (passUtility === 1) return pass.plan;
     if (opponentCards(state, state.activePlayerId) === 0) {
       const random = () => 0.5;
       const solved = solveAlone(state, seat, random, 3);
       return solved.plan ?? pass.plan;
     }
+    const winningIfAllPass = exact(state, seat) === 1;
+    const harvest = coronationHarvest(state, winningIfAllPass);
+    if (harvest) return harvest;
+    const cards = choices.filter((choice) => choice.plan.kind === "card");
+    if (!cards.length) return pass.plan;
     const score = (choice: RootChoice) =>
       (choice.mean[seat]! * choice.visits + choice.prior[seat]! * 2) /
       (choice.visits + 2);
     const best = [...cards].sort((a, b) => score(b) - score(a))[0]!;
-    if (pass.state.result) {
-      const utility = terminalUtility(pass.state.result, state.playerOrder)[
-        seat
-      ]!;
-      if (utility === 1) return pass.plan;
-      if (utility === 0) return best.plan;
-    }
+    if (passUtility === 0) return best.plan;
     // Already winning if everyone stops: keep parity and let opponents spend.
-    if (params.passWhenWinning && exact(state, seat) === 1) return pass.plan;
+    if (params.passWhenWinning && winningIfAllPass) return pass.plan;
     const unresolved = state.regionCards.filter((c) => c.faceUp).length;
     const hand = state.players[state.activePlayerId]!.hand.length;
     const deficit = Math.max(0, Math.min(3, unresolved * 0.4) - hand);

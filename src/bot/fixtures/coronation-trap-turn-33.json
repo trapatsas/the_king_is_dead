@@ -1,0 +1,317 @@
+{
+  "observation": {
+    "viewer": "ML2",
+    "mode": "standard",
+    "phase": "turn",
+    "ending": null,
+    "playerOrder": ["INF", "ML2", "TRAP"],
+    "startingPlayerId": "TRAP",
+    "activePlayerId": "ML2",
+    "turnSequence": 32,
+    "actionSequence": 5,
+    "consecutivePasses": 0,
+    "regions": {
+      "devon": {
+        "control": {
+          "kind": "faction",
+          "faction": "scottish",
+          "struggleIndex": 4
+        },
+        "followers": {
+          "scottish": 0,
+          "welsh": 0,
+          "english": 0
+        },
+        "id": "devon"
+      },
+      "essex": {
+        "control": {
+          "kind": "faction",
+          "faction": "english",
+          "struggleIndex": 5
+        },
+        "followers": {
+          "scottish": 0,
+          "welsh": 0,
+          "english": 0
+        },
+        "id": "essex"
+      },
+      "gwynedd": {
+        "control": {
+          "kind": "faction",
+          "faction": "welsh",
+          "struggleIndex": 3
+        },
+        "followers": {
+          "scottish": 0,
+          "welsh": 0,
+          "english": 0
+        },
+        "id": "gwynedd"
+      },
+      "lancaster": {
+        "control": {
+          "kind": "faction",
+          "faction": "scottish",
+          "struggleIndex": 6
+        },
+        "followers": {
+          "scottish": 0,
+          "welsh": 0,
+          "english": 0
+        },
+        "id": "lancaster"
+      },
+      "moray": {
+        "control": {
+          "kind": "faction",
+          "faction": "scottish",
+          "struggleIndex": 1
+        },
+        "followers": {
+          "scottish": 0,
+          "welsh": 0,
+          "english": 0
+        },
+        "id": "moray"
+      },
+      "northumbria": {
+        "control": {
+          "kind": "unresolved"
+        },
+        "followers": {
+          "english": 4,
+          "scottish": 1,
+          "welsh": 4
+        },
+        "id": "northumbria"
+      },
+      "strathclyde": {
+        "control": {
+          "kind": "faction",
+          "faction": "scottish",
+          "struggleIndex": 7
+        },
+        "followers": {
+          "scottish": 0,
+          "welsh": 0,
+          "english": 0
+        },
+        "id": "strathclyde"
+      },
+      "warwick": {
+        "control": {
+          "kind": "faction",
+          "faction": "welsh",
+          "struggleIndex": 2
+        },
+        "followers": {
+          "scottish": 0,
+          "welsh": 0,
+          "english": 0
+        },
+        "id": "warwick"
+      }
+    },
+    "regionCards": [
+      {
+        "faceUp": false,
+        "negotiationDiscOwner": null,
+        "regionId": "moray",
+        "slot": 1
+      },
+      {
+        "faceUp": false,
+        "negotiationDiscOwner": null,
+        "regionId": "warwick",
+        "slot": 2
+      },
+      {
+        "faceUp": false,
+        "negotiationDiscOwner": null,
+        "regionId": "gwynedd",
+        "slot": 3
+      },
+      {
+        "faceUp": false,
+        "negotiationDiscOwner": null,
+        "regionId": "devon",
+        "slot": 4
+      },
+      {
+        "faceUp": false,
+        "negotiationDiscOwner": null,
+        "regionId": "essex",
+        "slot": 5
+      },
+      {
+        "faceUp": false,
+        "negotiationDiscOwner": null,
+        "regionId": "lancaster",
+        "slot": 6
+      },
+      {
+        "faceUp": false,
+        "negotiationDiscOwner": null,
+        "regionId": "strathclyde",
+        "slot": 7
+      },
+      {
+        "faceUp": true,
+        "negotiationDiscOwner": null,
+        "regionId": "northumbria",
+        "slot": 8
+      }
+    ],
+    "supply": {
+      "english": 14,
+      "scottish": 9,
+      "welsh": 11
+    },
+    "controlDiscsInSupply": {
+      "english": 7,
+      "scottish": 4,
+      "welsh": 6
+    },
+    "instabilityDiscsInFrance": 3,
+    "players": [
+      {
+        "id": "INF",
+        "controller": "algorithmic",
+        "botStrategy": "informed",
+        "court": {
+          "english": 0,
+          "scottish": 4,
+          "welsh": 1
+        },
+        "handCount": 5,
+        "discardCount": 3,
+        "discardTop": {
+          "id": "standard:INF:scottish-support:1",
+          "type": "scottish-support"
+        },
+        "negotiationDiscLocation": null,
+        "lastActionSequence": 5
+      },
+      {
+        "id": "ML2",
+        "controller": "algorithmic",
+        "botStrategy": "ml",
+        "court": {
+          "english": 0,
+          "scottish": 1,
+          "welsh": 1
+        },
+        "handCount": 8,
+        "discardCount": 0,
+        "discardTop": null,
+        "negotiationDiscLocation": null,
+        "lastActionSequence": null
+      },
+      {
+        "id": "TRAP",
+        "controller": "human",
+        "court": {
+          "english": 0,
+          "scottish": 3,
+          "welsh": 1
+        },
+        "handCount": 6,
+        "discardCount": 2,
+        "discardTop": {
+          "id": "standard:TRAP:manoeuvre:1",
+          "type": "manoeuvre"
+        },
+        "negotiationDiscLocation": null,
+        "lastActionSequence": 2
+      }
+    ],
+    "lastSwap": null,
+    "plot": null,
+    "result": null,
+    "seed": null,
+    "own": {
+      "playerId": "ML2",
+      "hand": [
+        {
+          "id": "standard:ML2:scottish-support:1",
+          "type": "scottish-support"
+        },
+        {
+          "id": "standard:ML2:welsh-support:1",
+          "type": "welsh-support"
+        },
+        {
+          "id": "standard:ML2:english-support:1",
+          "type": "english-support"
+        },
+        {
+          "id": "standard:ML2:negotiate:1",
+          "type": "negotiate"
+        },
+        {
+          "id": "standard:ML2:manoeuvre:1",
+          "type": "manoeuvre"
+        },
+        {
+          "id": "standard:ML2:outmanoeuvre:1",
+          "type": "outmanoeuvre"
+        },
+        {
+          "id": "standard:ML2:assemble:1",
+          "type": "assemble"
+        },
+        {
+          "id": "standard:ML2:assemble:2",
+          "type": "assemble"
+        }
+      ],
+      "discards": []
+    }
+  },
+  "memory": {
+    "eventSequence": 39,
+    "plays": [
+      {
+        "playerId": "TRAP",
+        "card": {
+          "id": "standard:TRAP:scottish-support:1",
+          "type": "scottish-support"
+        }
+      },
+      {
+        "playerId": "TRAP",
+        "card": {
+          "id": "standard:TRAP:manoeuvre:1",
+          "type": "manoeuvre"
+        }
+      },
+      {
+        "playerId": "INF",
+        "card": {
+          "id": "standard:INF:assemble:1",
+          "type": "assemble"
+        }
+      },
+      {
+        "playerId": "INF",
+        "card": {
+          "id": "standard:INF:assemble:2",
+          "type": "assemble"
+        }
+      },
+      {
+        "playerId": "INF",
+        "card": {
+          "id": "standard:INF:scottish-support:1",
+          "type": "scottish-support"
+        }
+      }
+    ]
+  },
+  "budget": {
+    "iterations": 8,
+    "seed": 2026
+  }
+}

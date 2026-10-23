@@ -7,8 +7,8 @@ independent players.
 Standard games are playable for two or three humans or bots, with legal action
 choices, draft previews, automatic bot turns and full result explanations.
 Completed and in-progress Standard histories save to SQLite when the local Node
-API is available. Advanced gameplay and active-game resume are not implemented
-yet; refreshing returns to setup.
+API is available. Committed Standard games restore after a refresh in the
+same tab. Advanced gameplay is not implemented yet.
 
 ## Run locally
 
@@ -76,12 +76,35 @@ When everyone passes consecutively, the next struggle resolves.
 - **After the game:** the result explains every comparison. **View game log**
   shows the committed history, seed and starting player.
 
-**Game positions cannot be resumed yet:** refreshing returns to setup; saved
-public logs remain available. Starting another game asks before leaving the
-current one. If an unexpected error interrupts a
+**Resume play:** committed Standard positions are saved privately in this
+browser, separately from public logs. Open **Game history**, select an
+unfinished game, and choose **Resume game**. Leaving or closing a tab keeps
+its saved position; refreshing restores the active game automatically.
+Uncommitted draft choices are discarded. Switching from another unfinished
+game asks for confirmation and keeps both saved positions. Resume checks the
+entire accepted history against the rules before opening a position.
+Public log exports contain no playable snapshot, and there is no file-upload
+flow. Browser storage is required; another browser does not automatically have
+these positions.
+If an unexpected error interrupts a
 turn, **Restart this turn** resumes from the last committed turn. No provider is
 connected. The local development/preview server now saves accepted Standard
 games to SQLite through same-origin API calls; model assets are served locally.
+
+For a legacy interrupted game saved only in the server's SQLite history, a
+local operator can issue an expiring link:
+
+```sh
+npm run game:resume-link -- --game=king-4d2e0029-1b83-4ca6-b95b-1639200c25c8 --origin=http://localhost:5173
+```
+
+Opening the link adds the verified position to this browser's Game history;
+choose **Resume game** there. The link grants access to one live game for two
+hours. Only its hash is stored under `.data/resume-access/`, outside served
+assets. A game ID alone cannot retrieve a private position. This bridge does
+not create an account or cross-device history service. Keep the server's
+existing local/trusted deployment assumptions until account authorization is
+implemented for the rest of its API.
 
 ## SQLite storage and production preview
 

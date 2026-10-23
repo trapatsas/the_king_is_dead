@@ -25,6 +25,7 @@ const allowed = new Set([
   "splitSeed",
   "cohort",
   "out",
+  "weighting",
 ]);
 for (const key of Object.keys(args))
   if (!allowed.has(key)) throw new Error(`Unknown option --${key}`);
@@ -213,6 +214,7 @@ try {
       args.name ?? "ml-bootstrap-v1",
       args.splitSeed ?? "split-v1",
       args.cohort ?? null,
+      args.weighting ?? "equal-game-v1",
     );
     console.log(
       JSON.stringify({

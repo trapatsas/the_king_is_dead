@@ -4,6 +4,7 @@ import { join, resolve } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { GameRepository } from "./repository";
 import { passPlan } from "../bot/simulation";
+import { randomPlan, seededRandom } from "../bot/simulation";
 import { createGame } from "../game/setup";
 import type { GameSession } from "../game/events";
 
@@ -142,6 +143,52 @@ describe("SQLite authoritative capture and training projection", () => {
   });
   it("stores exactly the same initial game as the public engine", () => {
     expect(repo.create(id, config)).toEqual(createGame(config));
+  });
+  it("keeps alternate continuations in one split with equal total family weight", () => {
+    finish();
+    repo.materialize(id);
+    const second = "king-00000000-0000-0000-0000-000000000002";
+    const third = "king-00000000-0000-0000-0000-000000000003";
+    for (const [publicId, setup] of [
+      [second, config],
+      [third, { ...config, seed: "independent-weighting-family" }],
+    ] as const) {
+      let session = repo.create(publicId, setup);
+      const random = seededRandom(342);
+      session = repo.append(
+        publicId,
+        "turn-1",
+        session.state.eventSequence,
+        randomPlan(session.state, () => 0.8),
+      );
+      while (session.state.phase === "turn") {
+        const state = session.state;
+        session = repo.append(
+          publicId,
+          `turn-${state.turnSequence + 1}`,
+          state.eventSequence,
+          randomPlan(state, random),
+        );
+      }
+      repo.materialize(publicId);
+    }
+    const dataset = repo.buildDataset(
+      "family-weighted",
+      "split-v1",
+      null,
+      "equal-family-v1",
+    );
+    const families = repo.all(
+      "SELECT family_hash, count(DISTINCT game_id) AS games, count(DISTINCT split) AS splits, sum(sample_weight) AS weight FROM v_ml_training_samples WHERE dataset_id=? GROUP BY family_hash",
+      dataset,
+    );
+    expect(families).toHaveLength(2);
+    expect(families.map((f) => f.games).sort()).toEqual([1, 2]);
+    for (const family of families) {
+      expect(family.splits).toBe(1);
+      expect(Number(family.weight)).toBeCloseTo(1);
+    }
+    expect(() => repo.buildDataset("family-weighted")).toThrow(/conflict/);
   });
 });
 

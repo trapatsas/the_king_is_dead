@@ -18,6 +18,8 @@
     "ml:dataset": "node scripts/ml/run.mjs dataset",
     "ml:export": "node scripts/ml/run.mjs export",
     "ml:materialize": "node scripts/ml/run.mjs materialize",
+    "ml:branch": "node scripts/ml/branch.mjs",
+    "game:resume-link": "node scripts/resume-game.mjs",
     "ml:verify": "node scripts/ml/verify-model.mjs",
     "ml:match": "node scripts/ml/match.mjs",
     "ml:setup": "python3 ml/setup.py",

@@ -7,7 +7,10 @@ import { App, Game } from "./App";
 import { GameErrorBoundary } from "./ErrorBoundary";
 import { CARD_TEXT } from "./presentation";
 
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  sessionStorage.clear();
+});
 
 describe("keyboard focus and accessible names", () => {
   it("keeps focus on the board after a board pick disables the used control", async () => {

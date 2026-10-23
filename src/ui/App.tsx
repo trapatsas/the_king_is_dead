@@ -2,6 +2,14 @@ import { useEffect, useRef, useState } from "react";
 import type { RefObject } from "react";
 import type { SetupConfig } from "../game/domain";
 import type { GameSession } from "../game/events";
+import {
+  clearActiveGame,
+  loadActiveGame,
+  parseSavedGame,
+  saveGamePosition,
+  saveActiveGame,
+} from "../app/activeGame";
+import type { SavedGame } from "../app/activeGame";
 import { archiveSnapshot, newGameId, saveArchive } from "../app/gameArchive";
 import { StorageClient } from "../app/storageClient";
 import type { SaveState } from "../app/storageClient";
@@ -18,10 +26,12 @@ function LeaveDialog({
   onKeep,
   onLeave,
   returnFocus,
+  resuming = false,
 }: {
   onKeep: () => void;
   onLeave: () => void;
   returnFocus: RefObject<HTMLElement | null>;
+  resuming?: boolean;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
   const keepRef = useRef<HTMLButtonElement>(null);
@@ -40,59 +50,144 @@ function LeaveDialog({
     <dialog
       ref={ref}
       className="new-game-dialog"
-      aria-label="Start a new game"
+      aria-label={resuming ? "Resume saved game" : "Start a new game"}
       onCancel={(event) => {
         event.preventDefault();
         onKeep();
       }}
     >
-      <h2>Leave this kingdom?</h2>
+      <h2>{resuming ? "Switch to the saved game?" : "Leave this kingdom?"}</h2>
       <p>
-        This game cannot be resumed after leaving. Its saved public log remains
-        available in Game history.
+        Your current game is saved in Game history and can be resumed later.
+        Only uncommitted choices will be discarded.
       </p>
       <button ref={keepRef} onClick={onKeep}>
         Keep playing
       </button>
-      <button onClick={onLeave}>Leave game</button>
+      <button onClick={onLeave}>
+        {resuming ? "Resume saved game" : "Leave game"}
+      </button>
     </dialog>
   );
 }
 
-interface ActiveGame {
-  /** Unique per started game, so a repeated seed never reuses old Game state. */
-  readonly id: string;
-  readonly createdAt: string;
+interface ActiveGame extends SavedGame {
   /** Bumped by error recovery to remount from the latest committed session. */
   readonly attempt: number;
-  readonly session: GameSession;
 }
 
 export function App({ initialSession }: { initialSession?: GameSession }) {
+  const [recovery] = useState(() =>
+    initialSession ? { game: null, error: false } : loadActiveGame(),
+  );
   const [game, setGame] = useState<ActiveGame | null>(() =>
     initialSession
       ? {
+          version: 1,
           id: newGameId(),
           createdAt: new Date().toISOString(),
           attempt: 0,
           session: initialSession,
         }
-      : null,
+      : recovery.game
+        ? { ...recovery.game, attempt: 0 }
+        : null,
   );
+  const [recoveryError, setRecoveryError] = useState(recovery.error);
+  const [pendingResume, setPendingResume] = useState<SavedGame | null>(null);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [historyGameId, setHistoryGameId] = useState<string | null>(null);
+  const [resumeToken, setResumeToken] = useState(() =>
+    new URLSearchParams(window.location.hash.slice(1)).get("resume"),
+  );
+  const legacyRequests = useRef(new Map<string, Promise<SavedGame>>());
+  const [resumeNotice, setResumeNotice] = useState<string | null>(null);
   const capture = useRef<StorageClient | null>(null);
   const [sqliteState, setSqliteState] = useState<SaveState>("saved");
   const [storageError, setStorageError] = useState(false);
   useEffect(() => {
-    if (game)
+    if (game) {
+      setRecoveryError(
+        !saveActiveGame({ ...game, session: latest.current ?? game.session }),
+      );
       setStorageError(
         !saveArchive(archiveSnapshot(game.id, game.createdAt, game.session)),
       );
+    }
   }, [game]);
   // Latest committed session; read only for error recovery, so commits do not
   // re-render the App shell.
-  const latest = useRef<GameSession | null>(initialSession ?? null);
+  const latest = useRef<GameSession | null>(game?.session ?? null);
+  useEffect(() => {
+    const changed = () =>
+      setResumeToken(
+        new URLSearchParams(window.location.hash.slice(1)).get("resume"),
+      );
+    window.addEventListener("hashchange", changed);
+    return () => window.removeEventListener("hashchange", changed);
+  }, []);
+  useEffect(() => {
+    if (!resumeToken) return;
+    const fragment = new URLSearchParams(window.location.hash.slice(1));
+    fragment.delete("resume");
+    window.history.replaceState(
+      window.history.state,
+      "",
+      window.location.pathname +
+        window.location.search +
+        (fragment.size ? "#" + fragment.toString() : ""),
+    );
+    let active = true;
+    if (!/^[a-f0-9]{64}$/.test(resumeToken)) {
+      setResumeNotice("This recovery link is invalid or expired.");
+      return;
+    }
+    let request = legacyRequests.current.get(resumeToken);
+    if (!request) {
+      request = (async () => {
+        const response = await fetch("/api/resume", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token: resumeToken }),
+        });
+        if (!response.ok) throw new Error("Recovery link unavailable");
+        const saved = parseSavedGame(JSON.stringify(await response.json()));
+        if (
+          !saveGamePosition(saved) ||
+          !saveArchive(
+            archiveSnapshot(saved.id, saved.createdAt, saved.session),
+          )
+        )
+          throw new Error("Could not save the recovered position");
+        return saved;
+      })();
+      legacyRequests.current.set(resumeToken, request);
+    }
+    void request.then(
+      (saved) => {
+        if (!active) return;
+        legacyRequests.current.delete(resumeToken);
+        setResumeToken(null);
+        setHistoryGameId(saved.id);
+        setHistoryOpen(true);
+        setResumeNotice(
+          "Your recovered game is ready. Select Resume game in Game history.",
+        );
+      },
+      () => {
+        if (active) {
+          legacyRequests.current.delete(resumeToken);
+          setResumeToken(null);
+          setResumeNotice(
+            "This saved game could not be recovered. The link may have expired, or browser storage is unavailable. Your current game has not changed.",
+          );
+        }
+      },
+    );
+    return () => {
+      active = false;
+    };
+  }, [resumeToken]);
   useEffect(() => {
     let active = true;
     const client = new StorageClient((state) => {
@@ -124,6 +219,7 @@ export function App({ initialSession }: { initialSession?: GameSession }) {
       const session = createGame(config);
       latest.current = session;
       setGame({
+        version: 1,
         id: newGameId(),
         createdAt: new Date().toISOString(),
         attempt: 0,
@@ -135,9 +231,37 @@ export function App({ initialSession }: { initialSession?: GameSession }) {
     }
   }
   function leave() {
+    clearActiveGame();
     latest.current = null;
     setGame(null);
     setConfirmNew(false);
+  }
+  function activate(saved: SavedGame) {
+    latest.current = saved.session;
+    setGame({
+      ...saved,
+      attempt: game?.id === saved.id ? game.attempt + 1 : 0,
+    });
+    setRecoveryError(!saveActiveGame(saved));
+    setPendingResume(null);
+    setConfirmNew(false);
+    setHistoryOpen(false);
+    setResumeNotice(null);
+  }
+  function resume(saved: SavedGame) {
+    setHistoryOpen(false);
+    setResumeNotice(null);
+    if (game?.id === saved.id) {
+      if (
+        saved.session.state.eventSequence >
+        (latest.current?.state.eventSequence ?? -1)
+      )
+        activate(saved);
+      return;
+    }
+    if (game && latest.current?.state.phase !== "finished")
+      setPendingResume(saved);
+    else activate(saved);
   }
   return (
     <>
@@ -172,7 +296,13 @@ export function App({ initialSession }: { initialSession?: GameSession }) {
         <GameHistory
           initialGameId={historyGameId}
           onClose={() => setHistoryOpen(false)}
+          onResume={resume}
         />
+      )}
+      {resumeNotice && (
+        <p role="status" className="notice">
+          {resumeNotice}
+        </p>
       )}
       {sqliteState !== "saved" && (
         <p role="status" className="notice archive-warning">
@@ -195,11 +325,21 @@ export function App({ initialSession }: { initialSession?: GameSession }) {
           continue; check browser storage before leaving.
         </p>
       )}
-      {confirmNew && (
+      {recoveryError && (
+        <p role="status" className="notice archive-warning">
+          The playable position could not be saved or restored in this browser.
+          Game logs and SQLite saves are separate.
+        </p>
+      )}
+      {(confirmNew || pendingResume) && (
         <LeaveDialog
-          onKeep={() => setConfirmNew(false)}
-          onLeave={leave}
+          onKeep={() => {
+            setConfirmNew(false);
+            setPendingResume(null);
+          }}
+          onLeave={() => (pendingResume ? activate(pendingResume) : leave())}
           returnFocus={newGameRef}
+          resuming={pendingResume !== null}
         />
       )}
       {game ? (
@@ -223,6 +363,7 @@ export function App({ initialSession }: { initialSession?: GameSession }) {
             }}
             onCommit={(session) => {
               latest.current = session;
+              setRecoveryError(!saveActiveGame({ ...game, session }));
               capture.current?.capture(game.id, session);
               setStorageError(
                 !saveArchive(archiveSnapshot(game.id, game.createdAt, session)),

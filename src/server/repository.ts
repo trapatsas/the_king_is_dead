@@ -22,6 +22,7 @@ import { createGame } from "../game/setup";
 import { BOT_VERSION } from "../bot/search";
 import { PATIENT_BOT_VERSION } from "../bot/patient";
 import { INFORMED_BOT_VERSION } from "../bot/informed";
+import { ML_BOT_VERSION } from "../bot/ml/mlBot";
 
 export function canonical(value: unknown): string {
   if (Array.isArray(value)) return `[${value.map(canonical).join(",")}]`;
@@ -226,7 +227,7 @@ export class GameRepository {
             reference: BOT_VERSION,
             patient: PATIENT_BOT_VERSION,
             informed: INFORMED_BOT_VERSION,
-            ml: "ml-mcts-v1",
+            ml: ML_BOT_VERSION,
           };
           const version =
             options.bots?.[player.id]?.version ?? defaults[strategy]!;
@@ -709,13 +710,16 @@ export class GameRepository {
     name: string,
     splitSeed = "split-v1",
     cohort: string | null = null,
+    weighting: "equal-game-v1" | "equal-family-v1" = "equal-game-v1",
   ) {
+    if (weighting !== "equal-game-v1" && weighting !== "equal-family-v1")
+      throw new Error("Invalid dataset weighting");
     const config = canonical({
       splitSeed,
       cohort,
       featureVersion: FEATURE_VERSION,
       split: [0.8, 0.1, 0.1],
-      weighting: "equal-game-v1",
+      weighting,
     });
     const existing = this.get("SELECT * FROM ml_datasets WHERE name=?", name);
     if (existing) {
@@ -730,6 +734,14 @@ export class GameRepository {
       cohort,
     );
     if (!games.length) throw new Error("No validated games for dataset");
+    const trajectories = new Set<string>();
+    const familyGames = new Map<string, number>();
+    for (const game of games) {
+      if (trajectories.has(String(game.trajectory_hash))) continue;
+      trajectories.add(String(game.trajectory_hash));
+      const family = String(game.family_hash);
+      familyGames.set(family, (familyGames.get(family) ?? 0) + 1);
+    }
     return this.transaction(() => {
       const datasetId = Number(
         this.run(
@@ -788,7 +800,9 @@ export class GameRepository {
             gameId,
             family,
             FEATURE_VERSION,
-            1 / rows.length,
+            1 /
+              rows.length /
+              (weighting === "equal-family-v1" ? familyGames.get(family)! : 1),
           );
           members.push([split, ordinal, trajectory, position.features_hash]);
         }
