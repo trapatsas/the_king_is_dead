@@ -62,21 +62,32 @@ describe("keyboard focus and accessible names", () => {
     expect(description?.textContent).toBe(CARD_TEXT.negotiate);
   });
 
-  it("shows action rules on hover without selecting a card and dismisses them with Escape", async () => {
+  it("prints each card's rules on the card so hovering never selects or hides them", async () => {
     const user = userEvent.setup();
     render(<Game initialSession={setupSession()} />);
     const card = screen.getByRole("button", { name: "Play Negotiate" });
+    expect(card.textContent).toContain(CARD_TEXT.negotiate);
     await user.hover(card);
-    const tooltip = screen.getByRole("tooltip");
-    expect(tooltip.textContent).toContain(CARD_TEXT.negotiate);
-    expect(card.getAttribute("aria-pressed")).toBe("false");
-    expect(
-      screen
-        .getByRole("complementary", { name: "Turn planner" })
-        .contains(tooltip),
-    ).toBe(false);
-    await user.keyboard("{Escape}");
     expect(screen.queryByRole("tooltip")).toBeNull();
+    expect(card.getAttribute("aria-pressed")).toBe("false");
+  });
+
+  it("opens How to play with every Standard card and returns focus on close", async () => {
+    const user = userEvent.setup();
+    render(<App initialSession={setupSession()} />);
+    const help = screen.getByRole("button", { name: "How to play" });
+    await user.click(help);
+    const dialog = screen.getByRole("dialog", { name: "How to play" });
+    for (const text of Object.values(CARD_TEXT).filter(
+      (rule) => rule !== CARD_TEXT.plot,
+    ))
+      expect(dialog.textContent).toContain(text);
+    expect(document.activeElement).toBe(
+      within(dialog).getByRole("button", { name: "Close how to play" }),
+    );
+    await user.keyboard("{Enter}");
+    expect(screen.queryByRole("dialog")).toBeNull();
+    expect(document.activeElement).toBe(help);
   });
 
   it("uses no dead links and returns focus to New game when leaving is cancelled", async () => {

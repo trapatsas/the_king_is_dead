@@ -1,24 +1,28 @@
-import { useEffect, useRef } from "react";
+import {
+  useContext,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
+import { createPortal } from "react-dom";
 import type { RegionId } from "../game/domain";
 import type { GameSession } from "../game/events";
 import { Board, RegionTrack } from "./Board";
 import type { FollowerPick } from "./effectChoices";
 import { GameLogPanel } from "./GameLogPanel";
-import { BOT_AGENT_NAMES, BOT_STRATEGY_LABELS, title } from "./presentation";
+import { HeaderSlot } from "./headerSlot";
+import { title } from "./presentation";
 import { Result } from "./Result";
+import { CourtsPanel, StruggleNotice, SupplyPanel } from "./TablePanels";
 import {
-  CourtsPanel,
-  HowToPlay,
-  StruggleNotice,
-  SupplyPanel,
-} from "./TablePanels";
-import {
+  BotPanel,
   CommitBar,
   EffectChoicePanel,
-  FinishedPanel,
   HandPanel,
   PlotPanel,
   SummonPanel,
+  TurnSteps,
 } from "./TurnPanels";
 import { useHotseatTurn } from "./useHotseatTurn";
 
@@ -55,6 +59,7 @@ export function Game({
   onOpenLog?: () => void;
 }) {
   const turn = useHotseatTurn(initialSession, onCommit);
+  const headerSlot = useContext(HeaderSlot);
   const { table, visible, step, phase, targetPlayer, decision } = turn;
   const mainRef = useRef<HTMLElement>(null);
   const plannerRef = useRef<HTMLElement>(null);
@@ -120,6 +125,31 @@ export function Game({
     });
   }, [visible, step, decisionKey, phase]);
 
+  // Phones dock the planner over the page; the map sizes itself to the space
+  // left above it, so legal targets and End Turn are on screen together.
+  useLayoutEffect(() => {
+    const planner = plannerRef.current;
+    const main = mainRef.current;
+    if (!planner || !main || typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver(() =>
+      main.style.setProperty("--dock-h", `${planner.offsetHeight}px`),
+    );
+    observer.observe(planner);
+    return () => observer.disconnect();
+  }, []);
+
+  // Announce each new power struggle briefly wherever the report is out of
+  // view. Visual only: the report's own live region already speaks it.
+  const [toast, setToast] = useState<string | null>(null);
+  const seenNotices = useRef(turn.notices.length);
+  useEffect(() => {
+    if (turn.notices.length <= seenNotices.current) return;
+    seenNotices.current = turn.notices.length;
+    setToast(turn.notices.at(-1) ?? null);
+    const timer = setTimeout(() => setToast(null), 6000);
+    return () => clearTimeout(timer);
+  }, [turn.notices]);
+
   // Sidebar controls return keyboard focus to the planner flow.
   const actions = markOrigin(turn.actions, () => {
     choiceOrigin.current = "panel";
@@ -138,133 +168,124 @@ export function Game({
     ? null
     : step === "choose-summon"
       ? turn.followerOptions.length
-        ? "Preview · Summon one follower into your court"
-        : "Preview · No followers remain; confirm zero summon in the turn panel"
+        ? "Summon one follower into your court"
+        : "No followers remain · confirm zero summon in the turn panel"
       : (decision?.label ?? null);
+  const finished = phase === "finished";
+  const status = (
+    <div className="game-status">
+      <h1 title={phase === "turn" ? `${targetPlayer}’s turn` : undefined}>
+        {finished
+          ? "The kingdom has spoken"
+          : phase === "plot-choice"
+            ? "One final allegiance"
+            : `${targetPlayer}’s turn`}
+      </h1>
+      <p className="game-meta">
+        <span className="eyebrow">
+          {title(turn.mode)} kingdom
+          {table.seed !== null && ` · seed ${table.seed}`}
+        </span>
+        <span className="turn-indicator">TURN {table.turn}</span>
+        {!finished && (
+          <span
+            className="pass-meter"
+            title="When every player passes in a row, the next power struggle resolves."
+          >
+            <span className="pips" aria-hidden="true">
+              {Array.from({ length: turn.playerCount }, (_, index) => (
+                <span
+                  key={index}
+                  className={index < table.passes ? "on" : ""}
+                />
+              ))}
+            </span>
+            <span>
+              {table.passes}/{turn.playerCount}{" "}
+              <span className="pass-word">consecutive </span>passes
+            </span>
+          </span>
+        )}
+        {gameId && (
+          <button
+            className="game-id quiet"
+            onClick={onOpenLog}
+            aria-label={`Open log for game ${gameId}`}
+            title={gameId}
+          >
+            Log · <span>{gameId.slice(5, 13)}</span>
+          </button>
+        )}
+      </p>
+    </div>
+  );
   return (
     <main
-      className={`game-layout ${phase === "finished" ? "game-finished" : "game-playing"}`}
+      className={`game ${finished ? "is-finished" : "is-playing"} ${turn.bot.active ? "is-bot-turn" : ""}`}
       ref={mainRef}
     >
-      <div className="game-overview">
-        <section className="game-heading">
-          <div>
-            <span className="eyebrow">
-              {title(turn.mode)} kingdom
-              {table.seed !== null && ` · seed ${table.seed}`}
-            </span>
-            <h1 title={phase === "turn" ? `${targetPlayer}’s turn` : undefined}>
-              {phase === "finished"
-                ? "The kingdom has spoken"
-                : phase === "plot-choice"
-                  ? "One final allegiance"
-                  : `${targetPlayer}’s turn`}
-            </h1>
-            {gameId && (
-              <button
-                className="game-id quiet"
-                onClick={onOpenLog}
-                aria-label={`Open log for game ${gameId}`}
-                title={gameId}
-              >
-                Game log · <span>{gameId.slice(5, 13)}</span>
-              </button>
-            )}
-          </div>
-          <div className="turn-indicator">
-            TURN {table.turn}
-            <span>
-              {table.passes}/{turn.playerCount} consecutive passes
-            </span>
-          </div>
-          <HowToPlay />
-        </section>
+      {headerSlot ? createPortal(status, headerSlot) : status}
+      {toast && (
+        <div className="struggle-toast" aria-hidden="true">
+          <span className="eyebrow">Power struggle</span>
+          {toast}
+        </div>
+      )}
+      <div className="game-rail">
         <CourtsPanel
           table={table}
           activePlayer={targetPlayer}
           lastMoves={turn.lastMoves}
         />
+        <SupplyPanel table={table} />
+        <StruggleNotice notices={turn.notices} />
       </div>
-      {turn.result && <Result result={turn.result} />}
-      {phase === "finished" && turn.result && (
-        <GameLogPanel entries={turn.log} />
-      )}
-      <StruggleNotice notices={turn.notices} />
-      <RegionTrack
-        table={table}
-        choices={turn.regionOptions}
-        onRegion={turn.regionOptions.length ? selectRegion : null}
-        selectedRegions={turn.selectedRegions}
-      />
-      <div className="table-layout">
-        <div className="board-column">
-          <Board
-            table={table}
-            choices={turn.regionOptions}
-            onRegion={turn.regionOptions.length ? selectRegion : null}
-            followerChoices={turn.followerOptions}
-            onFollower={turn.followerOptions.length ? selectFollower : null}
-            selectedFollowers={turn.selectedFollowers}
-            instruction={boardInstruction}
-          />
-          <SupplyPanel table={table} />
-        </div>
-        <aside
-          ref={plannerRef}
-          className="turn-panel"
-          aria-label="Turn planner"
-        >
-          {turn.bot.active && (
-            <section aria-label="Bot turn" aria-busy={!turn.bot.error}>
-              <span className="eyebrow">
-                {BOT_STRATEGY_LABELS[turn.bot.strategy]} bot
-              </span>
-              <p className="hint">
-                Agent: {BOT_AGENT_NAMES[turn.bot.strategy]}
-              </p>
-              <h2>
-                {turn.bot.error
-                  ? "Bot turn paused"
-                  : turn.bot.loading
-                    ? "Loading learned model"
-                    : `${targetPlayer} is thinking`}
-              </h2>
-              {turn.bot.error ? (
-                <>
-                  <p role="alert" className="error">
-                    {turn.bot.error}
-                  </p>
-                  <button className="primary" onClick={turn.bot.retry}>
-                    Retry bot turn
-                  </button>
-                </>
-              ) : (
-                <p role="status">
-                  Considering the court, the next struggle, and possible
-                  replies…
-                </p>
-              )}
-            </section>
-          )}
+      <div className="game-board">
+        <RegionTrack
+          table={table}
+          choices={turn.regionOptions}
+          onRegion={turn.regionOptions.length ? selectRegion : null}
+          selectedRegions={turn.selectedRegions}
+        />
+        <Board
+          table={table}
+          choices={turn.regionOptions}
+          onRegion={turn.regionOptions.length ? selectRegion : null}
+          followerChoices={turn.followerOptions}
+          onFollower={turn.followerOptions.length ? selectFollower : null}
+          selectedFollowers={turn.selectedFollowers}
+          instruction={boardInstruction}
+        />
+      </div>
+      <aside
+        ref={plannerRef}
+        className="planner"
+        aria-label="Turn planner"
+        data-step={turn.planning ? step : phase}
+      >
+        <div className="planner-body">
+          {turn.bot.active && <BotPanel turn={turn} player={targetPlayer} />}
           {visible && phase === "plot-choice" && (
             <PlotPanel player={targetPlayer} onChoose={actions.choosePlot} />
           )}
           {turn.planning && (
             <>
-              <CommitBar turn={turn} actions={actions} />
+              <TurnSteps turn={turn} />
               <HandPanel turn={turn} actions={actions} />
               <EffectChoicePanel turn={turn} actions={actions} />
               <SummonPanel turn={turn} actions={actions} />
             </>
           )}
-          {phase === "finished" && <FinishedPanel />}
+          {turn.result && <Result result={turn.result} />}
+          {finished && turn.result && <GameLogPanel entries={turn.log} />}
           {turn.error && (
             <p role="alert" className="error">
               {turn.error}
             </p>
           )}
-        </aside>
-      </div>
+        </div>
+        {turn.planning && <CommitBar turn={turn} actions={actions} />}
+      </aside>
     </main>
   );
 }

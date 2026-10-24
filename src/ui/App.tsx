@@ -14,6 +14,10 @@ import { archiveSnapshot, newGameId, saveArchive } from "../app/gameArchive";
 import { StorageClient } from "../app/storageClient";
 import type { SaveState } from "../app/storageClient";
 import { GameHistory } from "./GameHistory";
+import { HeaderSlot } from "./headerSlot";
+import { HelpIcon, HistoryIcon, NewGameIcon } from "./icons";
+import { HelpDialog } from "./TablePanels";
+import { useModal } from "./useModal";
 import { createGame } from "../game/setup";
 import { GameErrorBoundary } from "./ErrorBoundary";
 import { Game } from "./Game";
@@ -35,17 +39,8 @@ function LeaveDialog({
 }) {
   const ref = useRef<HTMLDialogElement>(null);
   const keepRef = useRef<HTMLButtonElement>(null);
-  useEffect(() => {
-    const dialog = ref.current;
-    if (typeof dialog?.showModal === "function") dialog.showModal();
-    else dialog?.setAttribute("open", "");
-    keepRef.current?.focus();
-    return () => {
-      if (typeof dialog?.close === "function") dialog.close();
-      // Return focus to the opener ("New game") when it still exists.
-      if (returnFocus.current?.isConnected) returnFocus.current.focus();
-    };
-  }, [returnFocus]);
+  // Return focus to the opener ("New game") when it still exists.
+  useModal(ref, keepRef, returnFocus);
   return (
     <dialog
       ref={ref}
@@ -61,12 +56,14 @@ function LeaveDialog({
         Your current game is saved in Game history and can be resumed later.
         Only uncommitted choices will be discarded.
       </p>
-      <button ref={keepRef} onClick={onKeep}>
-        Keep playing
-      </button>
-      <button onClick={onLeave}>
-        {resuming ? "Resume saved game" : "Leave game"}
-      </button>
+      <div className="dialog-actions">
+        <button onClick={onLeave}>
+          {resuming ? "Resume saved game" : "Leave game"}
+        </button>
+        <button ref={keepRef} className="primary" onClick={onKeep}>
+          Keep playing
+        </button>
+      </div>
     </dialog>
   );
 }
@@ -96,6 +93,8 @@ export function App({ initialSession }: { initialSession?: GameSession }) {
   const [recoveryError, setRecoveryError] = useState(recovery.error);
   const [pendingResume, setPendingResume] = useState<SavedGame | null>(null);
   const [historyOpen, setHistoryOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
+  const [headerSlot, setHeaderSlot] = useState<HTMLElement | null>(null);
   const [historyGameId, setHistoryGameId] = useState<string | null>(null);
   const [resumeToken, setResumeToken] = useState(() =>
     new URLSearchParams(window.location.hash.slice(1)).get("resume"),
@@ -215,6 +214,7 @@ export function App({ initialSession }: { initialSession?: GameSession }) {
   const [confirmNew, setConfirmNew] = useState(false);
   const [setupError, setSetupError] = useState<string | null>(null);
   function start(config: SetupConfig) {
+    document.documentElement.scrollTop = 0;
     try {
       const session = createGame(config);
       latest.current = session;
@@ -237,6 +237,7 @@ export function App({ initialSession }: { initialSession?: GameSession }) {
     setConfirmNew(false);
   }
   function activate(saved: SavedGame) {
+    document.documentElement.scrollTop = 0;
     latest.current = saved.session;
     setGame({
       ...saved,
@@ -263,48 +264,66 @@ export function App({ initialSession }: { initialSession?: GameSession }) {
       setPendingResume(saved);
     else activate(saved);
   }
+  const saveLabel =
+    sqliteState === "saving"
+      ? "Saving…"
+      : sqliteState === "error"
+        ? "Save pending"
+        : "Saved";
   return (
-    <>
-      <header className={`app-header ${game ? "app-header-playing" : ""}`}>
-        <span className="wordmark">
-          <span aria-hidden="true">♜</span> THE KING IS DEAD
+    <div className={`app-shell ${game ? "is-playing" : "is-setup"}`}>
+      <header className="app-header">
+        <span className="wordmark" title="The King Is Dead">
+          <span aria-hidden="true">♜</span>
+          <span className="wordmark-text">The King Is Dead</span>
         </span>
+        <div className="header-game" ref={setHeaderSlot} />
         {game && (
           <span
             role="status"
             aria-label="Game save status"
-            className="save-status"
+            className={`save-status save-${sqliteState}`}
+            title={saveLabel}
           >
-            {sqliteState === "saving"
-              ? "Saving…"
-              : sqliteState === "error"
-                ? "Save pending"
-                : "Saved"}
+            <span className="save-dot" aria-hidden="true" />
+            <span className="save-text">{saveLabel}</span>
           </span>
         )}
-        <span className="edition">PROJECT RULESET · 2–3 PLAYERS</span>
-        <div className="header-actions">
-          <ThemeToggle />
+        <nav className="header-actions" aria-label="Game menu">
           <button
-            className="quiet history-button"
+            className="icon-button help-button"
+            onClick={() => setHelpOpen(true)}
+            title="How to play"
+          >
+            <HelpIcon />
+            <span className="button-label">How to play</span>
+          </button>
+          <button
+            className="icon-button history-button"
             onClick={() => {
               setHistoryGameId(null);
               setHistoryOpen(true);
             }}
+            title="Game history"
           >
-            Game history
+            <HistoryIcon />
+            <span className="button-label">Game history</span>
           </button>
           {game && (
             <button
               ref={newGameRef}
-              className="quiet"
+              className="icon-button"
               onClick={() => setConfirmNew(true)}
+              title="New game"
             >
-              New game
+              <NewGameIcon />
+              <span className="button-label">New game</span>
             </button>
           )}
-        </div>
+          <ThemeToggle />
+        </nav>
       </header>
+      {helpOpen && <HelpDialog onClose={() => setHelpOpen(false)} />}
       {historyOpen && (
         <GameHistory
           initialGameId={historyGameId}
@@ -312,31 +331,33 @@ export function App({ initialSession }: { initialSession?: GameSession }) {
           onResume={resume}
         />
       )}
-      {resumeNotice && (
-        <p role="status" className="notice">
-          {resumeNotice}
-        </p>
-      )}
-      {sqliteState === "error" && (
-        <p role="status" className="notice archive-warning">
-          Some game saves are pending. Retrying automatically.{" "}
-          <button onClick={() => void capture.current?.flush()}>
-            Retry save
-          </button>
-        </p>
-      )}
-      {storageError && (
-        <p role="status" className="notice archive-warning">
-          The latest game log could not be saved in this browser. Playing can
-          continue; check browser storage before leaving.
-        </p>
-      )}
-      {recoveryError && (
-        <p role="status" className="notice archive-warning">
-          The playable position could not be saved or restored in this browser.
-          Game logs and SQLite saves are separate.
-        </p>
-      )}
+      <div className="app-notices">
+        {resumeNotice && (
+          <p role="status" className="notice">
+            {resumeNotice}
+          </p>
+        )}
+        {sqliteState === "error" && (
+          <p role="status" className="notice archive-warning">
+            Some game saves are pending. Retrying automatically.{" "}
+            <button onClick={() => void capture.current?.flush()}>
+              Retry save
+            </button>
+          </p>
+        )}
+        {storageError && (
+          <p role="status" className="notice archive-warning">
+            The latest game log could not be saved in this browser. Playing can
+            continue; check browser storage before leaving.
+          </p>
+        )}
+        {recoveryError && (
+          <p role="status" className="notice archive-warning">
+            The playable position could not be saved or restored in this
+            browser. Game logs and SQLite saves are separate.
+          </p>
+        )}
+      </div>
       {(confirmNew || pendingResume) && (
         <LeaveDialog
           onKeep={() => {
@@ -348,48 +369,52 @@ export function App({ initialSession }: { initialSession?: GameSession }) {
           resuming={pendingResume !== null}
         />
       )}
-      {game ? (
-        <GameErrorBoundary
-          key={`${game.id}:${game.attempt}`}
-          onRetry={() =>
-            setGame({
-              ...game,
-              attempt: game.attempt + 1,
-              session: latest.current ?? game.session,
-            })
-          }
-          onLeave={leave}
-        >
-          <Game
-            initialSession={game.session}
-            gameId={game.id}
-            onOpenLog={() => {
-              setHistoryGameId(game.id);
-              setHistoryOpen(true);
-            }}
-            onCommit={(session) => {
-              latest.current = session;
-              setRecoveryError(!saveActiveGame({ ...game, session }));
-              capture.current?.capture(game.id, session);
-              setStorageError(
-                !saveArchive(archiveSnapshot(game.id, game.createdAt, session)),
-              );
-            }}
-          />
-        </GameErrorBoundary>
-      ) : (
-        <>
-          {setupError && (
-            <p role="alert" className="error">
-              {setupError}
-            </p>
-          )}
-          <Setup onStart={start} />
-        </>
-      )}
-      <footer className={`app-footer ${game ? "app-footer-playing" : ""}`}>
-        An empty throne. A divided kingdom. An uncertain alliance.
-      </footer>
-    </>
+      <HeaderSlot.Provider value={headerSlot}>
+        {game ? (
+          <GameErrorBoundary
+            key={`${game.id}:${game.attempt}`}
+            onRetry={() =>
+              setGame({
+                ...game,
+                attempt: game.attempt + 1,
+                session: latest.current ?? game.session,
+              })
+            }
+            onLeave={leave}
+          >
+            <Game
+              initialSession={game.session}
+              gameId={game.id}
+              onOpenLog={() => {
+                setHistoryGameId(game.id);
+                setHistoryOpen(true);
+              }}
+              onCommit={(session) => {
+                latest.current = session;
+                setRecoveryError(!saveActiveGame({ ...game, session }));
+                capture.current?.capture(game.id, session);
+                setStorageError(
+                  !saveArchive(
+                    archiveSnapshot(game.id, game.createdAt, session),
+                  ),
+                );
+              }}
+            />
+          </GameErrorBoundary>
+        ) : (
+          <>
+            {setupError && (
+              <p role="alert" className="error">
+                {setupError}
+              </p>
+            )}
+            <Setup onStart={start} />
+            <footer className="app-footer">
+              An empty throne. A divided kingdom. An uncertain alliance.
+            </footer>
+          </>
+        )}
+      </HeaderSlot.Provider>
+    </div>
   );
 }

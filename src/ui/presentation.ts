@@ -1,5 +1,12 @@
 import { FACTIONS } from "../game/domain";
-import type { CardType, GameState, PlayerId, RegionId } from "../game/domain";
+import type {
+  CardType,
+  Faction,
+  FactionCounts,
+  GameState,
+  PlayerId,
+  RegionId,
+} from "../game/domain";
 import type { AcceptedEvent } from "../game/events";
 import type { EffectOperation, EffectPlan } from "../game/turnTypes";
 import { getObservation } from "../game/visibility";
@@ -101,3 +108,39 @@ export const BOT_AGENT_NAMES = {
 export const FACTION_MARKS = Object.fromEntries(
   FACTIONS.map((faction) => [faction, title(faction).charAt(0)]),
 ) as Record<(typeof FACTIONS)[number], string>;
+
+export type RegionLeader =
+  | { readonly kind: "faction"; readonly faction: Faction }
+  | { readonly kind: "tie" }
+  | { readonly kind: "empty" };
+
+/** Who would take a region if its power struggle resolved right now. */
+export function regionLeader(counts: FactionCounts): RegionLeader {
+  const most = Math.max(...FACTIONS.map((faction) => counts[faction]));
+  if (most === 0) return { kind: "empty" };
+  const top = FACTIONS.filter((faction) => counts[faction] === most);
+  return top.length === 1
+    ? { kind: "faction", faction: top[0]! }
+    : { kind: "tie" };
+}
+
+export function leaderClass(leader: RegionLeader): string {
+  return leader.kind === "faction" ? leader.faction : leader.kind;
+}
+
+/** Plain-language outcome of resolving a region now. */
+export function forecast(leader: RegionLeader): string {
+  return leader.kind === "faction"
+    ? `${title(leader.faction)} would take control`
+    : leader.kind === "tie"
+      ? "Tied — would become unstable"
+      : "Empty — would become unstable";
+}
+
+/** Regions won by each faction so far (faction power for Coronation). */
+export function regionsWon(table: TableView): FactionCounts {
+  const won = { scottish: 0, welsh: 0, english: 0 };
+  for (const region of Object.values(table.regions))
+    if (region.control.kind === "faction") won[region.control.faction] += 1;
+  return won;
+}

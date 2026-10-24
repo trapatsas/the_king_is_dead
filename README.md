@@ -57,17 +57,30 @@ See the [implementation and measured results](docs/BOT_IMPLEMENTATION.md) and
 
 When everyone passes consecutively, the next struggle resolves.
 
+- **Layout:** on laptops (tuned for a 13-inch MacBook) the whole table fits the
+  window: courts and kingdom totals on the left, the struggle track and map in
+  the middle, and the turn planner on the right with **Reset Turn**,
+  **Pass**/**End Turn** always visible. On phones the planner docks to the
+  bottom of the screen and shows only the current step, and the map sizes
+  itself to stay visible above it.
 - **Board or panel:** click highlighted regions, region cards or follower
-  tokens on the map, or use the same choices in the side panel. Each token
-  click selects one follower; click a faction twice to choose two.
+  tokens on the map, or use **Choose from a list** in the planner. Each token
+  click selects one follower; click a faction twice to choose two. Other
+  regions are dimmed while you choose. Click another hand card at any point
+  to switch cards.
+- **Reading the board:** card rules are printed on the cards. Numbers on
+  regions give the struggle order, the gold outline marks the next struggle,
+  and the map caption forecasts its result. Factions use shapes as well as
+  colours (● Scottish, ■ Welsh, ◆ English). **How to play** in the header
+  summarises the rules and every card.
 - **Keyboard:** focus follows each step through effect, summon, summary and
   the next turn, including after choices made on the board.
-- **Appearance:** **Dark mode**/**Light mode** in the header (moon/sun on narrow
-  screens). The choice is remembered on this browser and never resets a game.
+- **Appearance:** the moon/sun button in the header switches dark and light
+  mode. The choice is remembered on this browser and never resets a game.
 - **Last moves:** each player court shows the latest accepted card or pass and
-  its turn number. **Move details** lists the effect and summon. Draft choices
-  enter the log only after they are committed.
-- **Game history:** every new game has a unique ID beside its heading. Select it
+  its turn number; select a played card to see its effect and summon. Draft
+  choices enter the log only after they are committed.
+- **Game history:** every new game has a unique ID in the header. Select it
   or use **Game history** to reopen a saved public log by ID or player name.
   Logs include setup followers, moves and struggles; finished logs also include
   the seed and final result. Logs stay in this browser after reloading. Use

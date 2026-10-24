@@ -20,7 +20,7 @@ export class GameErrorBoundary extends Component<
   override render() {
     if (!this.state.failed) return this.props.children;
     return (
-      <main className="game-layout">
+      <main className="error-layout">
         <section className="privacy-panel error-panel" role="alert">
           <span className="privacy-symbol" aria-hidden="true">
             ♜

@@ -1,10 +1,95 @@
-import { useState } from "react";
 import { FACTIONS } from "../game/domain";
-import { CARD_TEXT, describeEffect, title } from "./presentation";
+import {
+  BOT_AGENT_NAMES,
+  BOT_STRATEGY_LABELS,
+  CARD_TEXT,
+  describeEffect,
+  forecast,
+  regionLeader,
+  title,
+} from "./presentation";
 import type { HotseatTurn } from "./useHotseatTurn";
 import { ActionCard } from "./ActionCard";
 
 type Actions = HotseatTurn["actions"];
+
+const STEPS = [
+  { key: "choose-turn", label: "Card" },
+  { key: "choose-effect", label: "Effect" },
+  { key: "choose-summon", label: "Summon" },
+  { key: "ready", label: "End turn" },
+] as const;
+
+/** Where the player is in the play → effect → summon → commit sequence. */
+export function TurnSteps({ turn }: { turn: HotseatTurn }) {
+  const passing = turn.selection?.kind === "pass";
+  const current = STEPS.findIndex((step) => step.key === turn.step);
+  return (
+    <ol className="turn-steps" aria-label="Turn progress">
+      {STEPS.map((step, index) => {
+        const skipped = passing && index > 0 && index < 3;
+        return (
+          <li
+            key={step.key}
+            className={
+              index === current
+                ? "current"
+                : index < current && !skipped
+                  ? "done"
+                  : skipped
+                    ? "skipped"
+                    : ""
+            }
+            aria-current={index === current ? "step" : undefined}
+          >
+            <span aria-hidden="true">{index + 1}</span>
+            {index === 0 && passing ? "Pass" : step.label}
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
+
+export function BotPanel({
+  turn,
+  player,
+}: {
+  turn: HotseatTurn;
+  player: string;
+}) {
+  const { bot } = turn;
+  return (
+    <section className="bot-panel" aria-label="Bot turn" aria-busy={!bot.error}>
+      {!bot.error && <span className="spinner" aria-hidden="true" />}
+      <div>
+        <span className="eyebrow">{BOT_STRATEGY_LABELS[bot.strategy]} bot</span>
+        <p className="hint bot-agent">Agent: {BOT_AGENT_NAMES[bot.strategy]}</p>
+        <h2>
+          {bot.error
+            ? "Bot turn paused"
+            : bot.loading
+              ? "Loading learned model"
+              : `${player} is thinking`}
+        </h2>
+        {bot.error ? (
+          <>
+            <p role="alert" className="error">
+              {bot.error}
+            </p>
+            <button className="primary" onClick={bot.retry}>
+              Retry bot turn
+            </button>
+          </>
+        ) : (
+          <p role="status" className="hint">
+            Considering the court, the next struggle, and possible replies…
+          </p>
+        )}
+      </div>
+    </section>
+  );
+}
 
 export function PlotPanel({
   player,
@@ -14,22 +99,25 @@ export function PlotPanel({
   onChoose: Actions["choosePlot"];
 }) {
   return (
-    <section>
+    <section className="step-panel plot-panel" aria-label="Plot">
       <span className="eyebrow">Plot revealed</span>
       <h2>Choose your allegiance</h2>
-      <p>
+      <p className="hint">
         {player}, choose one virtual follower for final scoring. The court and
         supply stay unchanged.
       </p>
-      {FACTIONS.map((faction) => (
-        <button
-          className="plot-choice-button"
-          key={faction}
-          onClick={() => onChoose(faction)}
-        >
-          Support {title(faction)}
-        </button>
-      ))}
+      <div className="plot-choices">
+        {FACTIONS.map((faction) => (
+          <button
+            className={`plot-choice-button ${faction}`}
+            key={faction}
+            onClick={() => onChoose(faction)}
+          >
+            <span className={`mark ${faction}`} aria-hidden="true" />
+            Support {title(faction)}
+          </button>
+        ))}
+      </div>
     </section>
   );
 }
@@ -42,12 +130,14 @@ export function HandPanel({
   actions: Actions;
 }) {
   const { table, selectedCard } = turn;
-  const [helpCard, setHelpCard] = useState<string | null>(null);
   return (
-    <>
-      <div className="section-title">
+    <section className="hand-panel" aria-label="Your hand">
+      <div className="panel-title">
         <h2>Your hand</h2>
-        <span>{table.hand.length} cards remaining</span>
+        <span>
+          {table.hand.length} {table.hand.length === 1 ? "card" : "cards"} left
+          {selectedCard && " · click another card to switch"}
+        </span>
       </div>
       <div className="hand">
         {table.hand.map((card, index) => {
@@ -63,16 +153,11 @@ export function HandPanel({
               disabled={!turn.availableCardIds.includes(card.id)}
               label={`Play ${title(card.type)}${copy}`}
               onPlay={() => actions.startCard(card.id)}
-              open={helpCard === card.id}
-              onShow={() => setHelpCard(card.id)}
-              onHide={() =>
-                setHelpCard((current) => (current === card.id ? null : current))
-              }
             />
           );
         })}
       </div>
-    </>
+    </section>
   );
 }
 
@@ -85,13 +170,15 @@ export function EffectChoicePanel({
 }) {
   const { selectedCard, selection, decision, picks } = turn;
   if (!selectedCard) return null;
+  const deciding =
+    selection?.kind === "card" && selection.effect === null && decision;
   return (
-    <section className="choice-panel" aria-label="Card effect">
-      <details className="card-help">
-        <summary>{title(selectedCard.type)} · rules</summary>
-        <p className="selected-card-rule">{CARD_TEXT[selectedCard.type]}</p>
-      </details>
-      {selection?.kind === "card" && selection.effect === null && decision && (
+    <section className="step-panel" aria-label="Card effect">
+      <div className="step-card">
+        <span className="eyebrow">{title(selectedCard.type)}</span>
+        <p className="step-rule">{CARD_TEXT[selectedCard.type]}</p>
+      </div>
+      {deciding && (
         <>
           <h3>{decision.label}</h3>
           {picks.length > 0 && (
@@ -111,6 +198,12 @@ export function EffectChoicePanel({
                     key={option.key}
                     onClick={() => actions.pick(option.key)}
                   >
+                    {option.kind === "follower" && (
+                      <span
+                        className={`mark ${option.faction}`}
+                        aria-hidden="true"
+                      />
+                    )}
                     {option.label}
                   </button>
                 ))}
@@ -125,10 +218,12 @@ export function EffectChoicePanel({
         </>
       )}
       {selection?.kind === "card" && selection.effect && (
-        <details className="effect-summary">
-          <summary>Effect applied · view details</summary>
-          <p>{describeEffect(selection.effect)}</p>
-        </details>
+        <p className="effect-done">
+          <span className="check" aria-hidden="true">
+            ✓
+          </span>
+          <span>{describeEffect(selection.effect)}</span>
+        </p>
       )}
     </section>
   );
@@ -142,32 +237,45 @@ export function SummonPanel({
   actions: Actions;
 }) {
   if (turn.step !== "choose-summon") return null;
+  const zero = turn.summonChoices[0]?.kind === "zero";
   return (
-    <section className="choice-panel" aria-label="Summon a follower">
-      <h3>Summon one highlighted follower</h3>
-      <details
-        className="summon-alternatives"
-        open={turn.summonChoices[0]?.kind === "zero"}
-      >
-        <summary>Choose from a list</summary>
+    <section className="step-panel" aria-label="Summon a follower">
+      <h3>Summon one follower to your court</h3>
+      <p className="step-hint" role="status">
+        {zero
+          ? "No followers remain; confirm zero summon."
+          : "Select a highlighted follower on the map."}
+      </p>
+      {zero ? (
         <div className="summon-choices">
           {turn.summonChoices.map((summon, index) => (
-            <button key={index} onClick={() => actions.summon(summon)}>
-              {summon.kind === "zero" ? (
-                "Confirm zero summon — no eligible followers"
-              ) : (
-                <>
-                  <span
-                    className={`cube ${summon.faction}`}
-                    aria-hidden="true"
-                  />
-                  {title(summon.faction)} · {title(summon.regionId)}
-                </>
-              )}
+            <button
+              key={index}
+              className="primary"
+              onClick={() => actions.summon(summon)}
+            >
+              Confirm zero summon — no eligible followers
             </button>
           ))}
         </div>
-      </details>
+      ) : (
+        <details className="summon-alternatives">
+          <summary>Choose from a list</summary>
+          <div className="summon-choices choices">
+            {turn.summonChoices.map((summon, index) =>
+              summon.kind === "zero" ? null : (
+                <button key={index} onClick={() => actions.summon(summon)}>
+                  <span
+                    className={`mark ${summon.faction}`}
+                    aria-hidden="true"
+                  />
+                  {title(summon.faction)} · {title(summon.regionId)}
+                </button>
+              ),
+            )}
+          </div>
+        </details>
+      )}
     </section>
   );
 }
@@ -179,12 +287,13 @@ export function CommitBar({
   turn: HotseatTurn;
   actions: Actions;
 }) {
-  const { selection, plan } = turn;
+  const { selection, plan, table } = turn;
   const selected = selection !== null && selection.kind !== "unselected";
+  const pending = table.regionCards.find((card) => card.faceUp)?.regionId;
   const status =
     plan?.kind === "pass"
       ? turn.passCompletesRound
-        ? "Pass selected · resolves the next power struggle."
+        ? `Pass selected · resolves the next power struggle${pending ? `: ${title(pending)} — ${forecast(regionLeader(table.regions[pending].followers))}` : ""}.`
         : "Pass selected · no follower is summoned."
       : plan?.kind === "card"
         ? plan.summon.kind === "zero"
@@ -195,19 +304,6 @@ export function CommitBar({
           : "Choose a card, or pass.";
   return (
     <div className="turn-controls">
-      <div className="commit-bar">
-        <button
-          className="primary turn-primary"
-          disabled={selected && plan === null}
-          onClick={selected ? actions.endTurn : actions.pass}
-          aria-describedby="turn-status"
-        >
-          {selected ? "End Turn" : "Pass"}
-        </button>
-        <button disabled={!selected} onClick={actions.reset}>
-          Reset Turn
-        </button>
-      </div>
       <p
         id="turn-status"
         className={`turn-status ${plan ? "turn-ready" : ""}`}
@@ -216,20 +312,23 @@ export function CommitBar({
       >
         {status}
       </p>
+      <div className="commit-bar">
+        <button
+          className="secondary"
+          disabled={!selected}
+          onClick={actions.reset}
+        >
+          Reset Turn
+        </button>
+        <button
+          className={`primary turn-primary ${plan ? "is-ready" : ""}`}
+          disabled={selected && plan === null}
+          onClick={selected ? actions.endTurn : actions.pass}
+          aria-describedby="turn-status"
+        >
+          {selected ? "End Turn" : "Pass"}
+        </button>
+      </div>
     </div>
-  );
-}
-
-export function FinishedPanel() {
-  return (
-    <section className="privacy-panel">
-      <span aria-hidden="true" className="privacy-symbol">
-        ♜
-      </span>
-      <h2>Game complete</h2>
-      <p>
-        Open the result explanation to see the court comparisons and tiebreaks.
-      </p>
-    </section>
   );
 }

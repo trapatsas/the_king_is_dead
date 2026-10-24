@@ -79,26 +79,28 @@ export function Setup({ onStart }: { onStart: (config: SetupConfig) => void }) {
       >
         <span className="eyebrow">Gather the court</span>
         <h2>A new kingdom</h2>
-        <label>
-          Rules
-          <select
-            value={mode}
-            onChange={(event) => setMode(event.target.value as GameMode)}
-          >
-            <option value="standard">Standard</option>
-            <option value="advanced">Advanced — coming soon</option>
-          </select>
-        </label>
-        <label>
-          Players
-          <select
-            value={count}
-            onChange={(event) => setCount(Number(event.target.value))}
-          >
-            <option value={2}>2 players</option>
-            <option value={3}>3 players</option>
-          </select>
-        </label>
+        <div className="setup-row">
+          <label>
+            Rules
+            <select
+              value={mode}
+              onChange={(event) => setMode(event.target.value as GameMode)}
+            >
+              <option value="standard">Standard</option>
+              <option value="advanced">Advanced — coming soon</option>
+            </select>
+          </label>
+          <label>
+            Players
+            <select
+              value={count}
+              onChange={(event) => setCount(Number(event.target.value))}
+            >
+              <option value={2}>2 players</option>
+              <option value={3}>3 players</option>
+            </select>
+          </label>
+        </div>
         <fieldset>
           <legend>Seats · clockwise order</legend>
           {seats.slice(0, count).map((seat, index) => (
@@ -187,9 +189,8 @@ export function Setup({ onStart }: { onStart: (config: SetupConfig) => void }) {
         >
           Begin game <span aria-hidden="true">→</span>
         </button>
-        <p className="hint">
-          Local play · public game logs are saved in this browser. Reloading
-          returns to setup.
+        <p className="hint setup-footnote">
+          Local play · games and public logs are saved in this browser.
         </p>
       </form>
     </main>

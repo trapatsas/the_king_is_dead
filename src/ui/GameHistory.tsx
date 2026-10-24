@@ -1,9 +1,10 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { readArchives, serializeArchive } from "../app/gameArchive";
 import type { ArchivedGame } from "../app/gameArchive";
 import { hasGamePosition, loadGamePosition } from "../app/activeGame";
 import type { SavedGame } from "../app/activeGame";
 import { GameLogPanel } from "./GameLogPanel";
+import { useModal } from "./useModal";
 
 export function GameHistory({
   onClose,
@@ -76,144 +77,144 @@ export function GameHistory({
       }
     }
   }
-  useEffect(() => {
-    const node = dialog.current;
-    const opener = document.activeElement;
-    if (typeof node?.showModal === "function") node.showModal();
-    else node?.setAttribute("open", "");
-    close.current?.focus();
-    return () => {
-      node?.close?.();
-      if (opener instanceof HTMLElement && opener.isConnected) opener.focus();
-    };
-  }, []);
+  useModal(dialog, close);
   return (
     <dialog
       ref={dialog}
-      className="history-dialog"
+      className="sheet-dialog history-dialog"
       aria-label="Saved game logs"
       onCancel={(event) => {
         event.preventDefault();
         onClose();
       }}
     >
-      <div className="section-title">
+      <div className="dialog-head">
         <h2>Saved game logs</h2>
         <button ref={close} onClick={onClose}>
           Close history
         </button>
       </div>
-      <p className="hint">
-        Public logs are saved in this browser, including unfinished games. Find
-        a game by its ID or a player’s name. Resume unfinished games saved in
-        this browser from their last committed turn.
-      </p>
-      {archive.unavailable && (
-        <p role="status">
-          Saved logs are unavailable because browser storage could not be read.
+      <div className="dialog-body">
+        <p className="hint">
+          Public logs are saved in this browser, including unfinished games.
+          Find a game by its ID or a player’s name. Resume unfinished games
+          saved in this browser from their last committed turn.
         </p>
-      )}
-      {archive.invalid > 0 && (
-        <p role="status">
-          Some saved logs could not be read. Other games are still available.
-        </p>
-      )}
-      <label>
-        Find a game
-        <input
-          value={query}
-          onChange={(event) => setQuery(event.target.value)}
-          placeholder="Game ID or player name"
-        />
-      </label>
-      <button className="quiet" onClick={() => setArchive(readArchives())}>
-        Refresh saved logs
-      </button>
-      <div className="history-layout">
-        <nav aria-label="Saved games">
-          <ul className="saved-games">
-            {games.map((game) => (
-              <li key={game.id}>
-                <button
-                  aria-pressed={selectedId === game.id}
-                  onClick={() => {
-                    setSelectedId(game.id);
-                    setResumeError(null);
-                  }}
-                >
-                  <strong>{game.players.map((p) => p.name).join(" · ")}</strong>
-                  <span>
-                    {game.status === "finished"
-                      ? "Finished"
-                      : hasGamePosition(game.id)
-                        ? "In progress"
-                        : "Partial log"}{" "}
-                    · {game.turns} turns
-                  </span>
-                  <time dateTime={game.createdAt}>
-                    {new Date(game.createdAt).toLocaleString()}
-                  </time>
-                  <span className="saved-game-id">{game.id}</span>
-                </button>
-              </li>
-            ))}
-          </ul>
-          {games.length === 0 && (
-            <p>
-              {archive.games.length
-                ? "No games match this search."
-                : "No saved games yet."}
-            </p>
-          )}
-        </nav>
-        <div>
-          {selected ? (
-            <section aria-label="Selected game log">
-              <p className="saved-game-id">Game ID: {selected.id}</p>
-              <div className="log-export-actions">
+        {archive.unavailable && (
+          <p role="status">
+            Saved logs are unavailable because browser storage could not be
+            read.
+          </p>
+        )}
+        {archive.invalid > 0 && (
+          <p role="status">
+            Some saved logs could not be read. Other games are still available.
+          </p>
+        )}
+        <div className="history-search">
+          <label>
+            Find a game
+            <input
+              type="search"
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="Game ID or player name"
+            />
+          </label>
+          <button className="quiet" onClick={() => setArchive(readArchives())}>
+            Refresh saved logs
+          </button>
+        </div>
+        <div className="history-layout">
+          <nav aria-label="Saved games">
+            <ul className="saved-games">
+              {games.map((game) => (
+                <li key={game.id}>
+                  <button
+                    aria-pressed={selectedId === game.id}
+                    onClick={() => {
+                      setSelectedId(game.id);
+                      setResumeError(null);
+                    }}
+                  >
+                    <strong>
+                      {game.players.map((p) => p.name).join(" · ")}
+                    </strong>
+                    <span>
+                      {game.status === "finished"
+                        ? "Finished"
+                        : hasGamePosition(game.id)
+                          ? "In progress"
+                          : "Partial log"}{" "}
+                      · {game.turns} turns
+                    </span>
+                    <time dateTime={game.createdAt}>
+                      {new Date(game.createdAt).toLocaleString()}
+                    </time>
+                    <span className="saved-game-id">{game.id}</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+            {games.length === 0 && (
+              <p>
+                {archive.games.length
+                  ? "No games match this search."
+                  : "No saved games yet."}
+              </p>
+            )}
+          </nav>
+          <div>
+            {selected ? (
+              <section aria-label="Selected game log">
+                <p className="saved-game-id">Game ID: {selected.id}</p>
+                <div className="log-export-actions">
+                  {selected.status === "partial" &&
+                    hasGamePosition(selected.id) && (
+                      <button
+                        className="primary"
+                        onClick={() => {
+                          const saved = loadGamePosition(selected.id);
+                          if (!saved.game || saved.error) {
+                            setResumeError(
+                              "This saved position could not be resumed. Your current game has not changed.",
+                            );
+                            return;
+                          }
+                          onResume(saved.game);
+                        }}
+                      >
+                        Resume game
+                      </button>
+                    )}
+                  <button onClick={() => void copyLog(selected)}>
+                    Copy log
+                  </button>
+                  <button onClick={() => downloadLog(selected)}>
+                    Download log
+                  </button>
+                </div>
                 {selected.status === "partial" &&
-                  hasGamePosition(selected.id) && (
-                    <button
-                      className="primary"
-                      onClick={() => {
-                        const saved = loadGamePosition(selected.id);
-                        if (!saved.game || saved.error) {
-                          setResumeError(
-                            "This saved position could not be resumed. Your current game has not changed.",
-                          );
-                          return;
-                        }
-                        onResume(saved.game);
-                      }}
-                    >
-                      Resume game
-                    </button>
+                  !hasGamePosition(selected.id) && (
+                    <p className="hint">
+                      Only the log is available. No playable position is saved
+                      in this browser.
+                    </p>
                   )}
-                <button onClick={() => void copyLog(selected)}>Copy log</button>
-                <button onClick={() => downloadLog(selected)}>
-                  Download log
-                </button>
-              </div>
-              {selected.status === "partial" &&
-                !hasGamePosition(selected.id) && (
-                  <p className="hint">
-                    Only the log is available. No playable position is saved in
-                    this browser.
-                  </p>
+                {resumeError && <p role="alert">{resumeError}</p>}
+                {exportStatus?.id === selected.id && (
+                  <p role="status">{exportStatus.message}</p>
                 )}
-              {resumeError && <p role="alert">{resumeError}</p>}
-              {exportStatus?.id === selected.id && (
-                <p role="status">{exportStatus.message}</p>
-              )}
-              <GameLogPanel
-                key={selected.id}
-                entries={selected.entries}
-                initiallyOpen
-              />
-            </section>
-          ) : (
-            <p>Choose a game to read its log.</p>
-          )}
+                <GameLogPanel
+                  key={selected.id}
+                  entries={selected.entries}
+                  initiallyOpen
+                />
+              </section>
+            ) : (
+              <p>Choose a game to read its log.</p>
+            )}
+          </div>
         </div>
       </div>
     </dialog>
