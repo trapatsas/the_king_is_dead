@@ -72,14 +72,14 @@ describe("appearance preference", () => {
     render(<App initialSession={setupSession()} />);
 
     await user.click(screen.getByRole("button", { name: "Pass" }));
-    const summary = screen.getByRole("region", {
-      name: "Final turn summary",
+    const summary = screen.getByRole("status", {
+      name: "Turn preview",
     }).textContent;
     await user.click(
       screen.getByRole("button", { name: "Switch to dark mode" }),
     );
     expect(
-      screen.getByRole("region", { name: "Final turn summary" }).textContent,
+      screen.getByRole("status", { name: "Turn preview" }).textContent,
     ).toBe(summary);
     expect(screen.getAllByRole("button", { name: /^Play / })).toHaveLength(8);
     await user.click(screen.getByRole("button", { name: "End Turn" }));

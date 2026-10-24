@@ -265,10 +265,23 @@ export function App({ initialSession }: { initialSession?: GameSession }) {
   }
   return (
     <>
-      <header className="app-header">
+      <header className={`app-header ${game ? "app-header-playing" : ""}`}>
         <span className="wordmark">
           <span aria-hidden="true">♜</span> THE KING IS DEAD
         </span>
+        {game && (
+          <span
+            role="status"
+            aria-label="Game save status"
+            className="save-status"
+          >
+            {sqliteState === "saving"
+              ? "Saving…"
+              : sqliteState === "error"
+                ? "Save pending"
+                : "Saved"}
+          </span>
+        )}
         <span className="edition">PROJECT RULESET · 2–3 PLAYERS</span>
         <div className="header-actions">
           <ThemeToggle />
@@ -304,19 +317,12 @@ export function App({ initialSession }: { initialSession?: GameSession }) {
           {resumeNotice}
         </p>
       )}
-      {sqliteState !== "saved" && (
+      {sqliteState === "error" && (
         <p role="status" className="notice archive-warning">
-          {sqliteState === "saving"
-            ? "Saving game…"
-            : "Some game saves are pending. Retrying automatically."}
-          {sqliteState === "error" && (
-            <>
-              {" "}
-              <button onClick={() => void capture.current?.flush()}>
-                Retry save
-              </button>
-            </>
-          )}
+          Some game saves are pending. Retrying automatically.{" "}
+          <button onClick={() => void capture.current?.flush()}>
+            Retry save
+          </button>
         </p>
       )}
       {storageError && (
@@ -381,7 +387,7 @@ export function App({ initialSession }: { initialSession?: GameSession }) {
           <Setup onStart={start} />
         </>
       )}
-      <footer className="app-footer">
+      <footer className={`app-footer ${game ? "app-footer-playing" : ""}`}>
         An empty throne. A divided kingdom. An uncertain alliance.
       </footer>
     </>

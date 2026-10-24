@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { act, cleanup, render, screen } from "@testing-library/react";
+import { act, cleanup, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { SearchRequest, SearchResult } from "../bot/search";
@@ -68,7 +68,11 @@ describe("bot orchestration", () => {
     expect(
       screen.getByRole("region", { name: "Bot turn" }).textContent,
     ).toContain("Hard bot");
-    expect(screen.getByText("Agent: ML v2 · linear value model")).toBeDefined();
+    expect(
+      within(screen.getByRole("region", { name: "Bot turn" })).getByText(
+        "Agent: ML v2 · linear value model",
+      ),
+    ).toBeDefined();
     expect(mocks.search).not.toHaveBeenCalled();
     await act(() => ready("ml-pilot-69f477be34b9"));
     expect(mocks.search).toHaveBeenCalledOnce();

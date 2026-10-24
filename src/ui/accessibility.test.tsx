@@ -62,6 +62,23 @@ describe("keyboard focus and accessible names", () => {
     expect(description?.textContent).toBe(CARD_TEXT.negotiate);
   });
 
+  it("shows action rules on hover without selecting a card and dismisses them with Escape", async () => {
+    const user = userEvent.setup();
+    render(<Game initialSession={setupSession()} />);
+    const card = screen.getByRole("button", { name: "Play Negotiate" });
+    await user.hover(card);
+    const tooltip = screen.getByRole("tooltip");
+    expect(tooltip.textContent).toContain(CARD_TEXT.negotiate);
+    expect(card.getAttribute("aria-pressed")).toBe("false");
+    expect(
+      screen
+        .getByRole("complementary", { name: "Turn planner" })
+        .contains(tooltip),
+    ).toBe(false);
+    await user.keyboard("{Escape}");
+    expect(screen.queryByRole("tooltip")).toBeNull();
+  });
+
   it("uses no dead links and returns focus to New game when leaving is cancelled", async () => {
     const user = userEvent.setup();
     render(<App initialSession={setupSession()} />);

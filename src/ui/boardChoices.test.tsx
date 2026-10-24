@@ -110,7 +110,7 @@ describe("direct board choices", () => {
       expect(container.querySelectorAll("button button")).toHaveLength(0);
       await user.click(token("strathclyde", "english"));
       expect(
-        screen.getByRole("region", { name: "Final turn summary" }).textContent,
+        screen.getByRole("status", { name: "Turn preview" }).textContent,
       ).toContain("Summon 1 English from Strathclyde");
       await user.click(screen.getByRole("button", { name: "End Turn" }));
       expect(screen.getAllByRole("button", { name: /^Play / })).toHaveLength(8);
@@ -210,7 +210,7 @@ describe("direct board choices", () => {
     }
     await user.click(token("moray", "welsh"));
     expect(
-      screen.getByRole("region", { name: "Final turn summary" }).textContent,
+      screen.getByRole("status", { name: "Turn preview" }).textContent,
     ).toContain("Summon 1 Welsh from Moray");
     expect(
       screen.queryByRole("button", { name: "Use this effect" }),

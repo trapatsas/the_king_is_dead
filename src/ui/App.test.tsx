@@ -27,9 +27,12 @@ async function completeEffect(user: ReturnType<typeof userEvent.setup>) {
   for (let guard = 0; guard < 20; guard += 1) {
     if (screen.queryByRole("region", { name: "Summon a follower" })) return;
     const panel = screen.getByRole("region", { name: "Card effect" });
-    const button = within(panel)
-      .getAllByRole("button")
-      .find((item) => item.textContent !== "Restart effect choices");
+    const alternatives = within(panel)
+      .getByText("Choose from a list")
+      .closest("details")!;
+    if (!alternatives.open)
+      await user.click(within(panel).getByText("Choose from a list"));
+    const button = within(panel).getAllByRole("button")[0];
     if (!button) throw new Error("No effect choice");
     await user.click(button);
   }
@@ -45,22 +48,15 @@ describe("hotseat game UI", () => {
     );
     await user.keyboard("{Enter}");
     expect(document.activeElement).toBe(
-      screen.getByRole("button", { name: "Strathclyde" }),
+      document.querySelector(
+        ".region-track button:not(:disabled), .map button:not(:disabled)",
+      ),
     );
     await user.keyboard("{Enter}");
-    const summons = within(
-      screen.getByRole("region", { name: "Summon a follower" }),
-    ).getAllByRole("button");
-    expect(document.activeElement).toBe(summons[0]);
+    expect(document.activeElement).toBe(
+      document.querySelector(".map .follower-eligible"),
+    );
     await user.keyboard("{Enter}");
-    expect(document.activeElement).toBe(
-      screen.getByRole("region", { name: "Final turn summary" }),
-    );
-    await user.tab();
-    expect(document.activeElement).toBe(
-      screen.getByRole("button", { name: "Reset Turn" }),
-    );
-    await user.tab();
     expect(document.activeElement).toBe(
       screen.getByRole("button", { name: "End Turn" }),
     );
@@ -83,9 +79,7 @@ describe("hotseat game UI", () => {
     await user.click(screen.getByRole("button", { name: "Play Assemble 1" }));
     await completeEffect(user);
     await user.click(
-      within(
-        screen.getByRole("region", { name: "Summon a follower" }),
-      ).getAllByRole("button")[0]!,
+      document.querySelector<HTMLButtonElement>(".map .follower-eligible")!,
     );
     expect(screen.getByLabelText(courtName).textContent).not.toBe(
       committedCourt,
@@ -169,18 +163,20 @@ describe("hotseat game UI", () => {
     const oldCard =
       session.state.players[session.state.activePlayerId]!.hand[0]!;
 
-    await user.click(screen.getByRole("button", { name: "Pass" }));
+    const turnButton = screen.getByRole("button", { name: "Pass" });
+    await user.click(turnButton);
+    expect(screen.getByRole("button", { name: "End Turn" })).toBe(turnButton);
+    expect(screen.queryByRole("button", { name: "Pass" })).toBeNull();
+    expect(screen.queryByText("Ready to commit")).toBeNull();
     expect(
-      screen.getByRole("region", { name: "Final turn summary" }).textContent,
-    ).toContain("Pass this turn");
+      screen.getByRole("status", { name: "Turn preview" }).textContent,
+    ).toContain("Pass selected");
     await user.click(screen.getByRole("button", { name: "End Turn" }));
     expect(screen.getAllByRole("button", { name: /^Play / })).toHaveLength(8);
     expect(document.getElementById(`card-text-${oldCard.id}`)).toBeNull();
     expect(screen.queryByRole("button", { name: /^Reveal / })).toBeNull();
-    expect(
-      (screen.getByRole("button", { name: "End Turn" }) as HTMLButtonElement)
-        .disabled,
-    ).toBe(true);
+    expect(screen.queryByRole("button", { name: "End Turn" })).toBeNull();
+    expect(screen.getByRole("button", { name: "Pass" })).toBeDefined();
   });
 
   it("resets a selected card and a pass without consuming cards or changing the table", async () => {
@@ -193,10 +189,8 @@ describe("hotseat game UI", () => {
     expect(screen.getByRole("region", { name: "Card effect" })).toBeDefined();
     await user.click(screen.getByRole("button", { name: "Reset Turn" }));
     expect(screen.queryByRole("region", { name: "Card effect" })).toBeNull();
-    expect(
-      (screen.getByRole("button", { name: "End Turn" }) as HTMLButtonElement)
-        .disabled,
-    ).toBe(true);
+    expect(screen.queryByRole("button", { name: "End Turn" })).toBeNull();
+    expect(screen.getByRole("button", { name: "Pass" })).toBeDefined();
     await user.click(screen.getByRole("button", { name: "Pass" }));
     await user.click(screen.getByRole("button", { name: "Reset Turn" }));
     expect(
@@ -224,18 +218,16 @@ describe("hotseat game UI", () => {
       (screen.getByRole("button", { name: "End Turn" }) as HTMLButtonElement)
         .disabled,
     ).toBe(true);
-    const summon = within(
-      screen.getByRole("region", { name: "Summon a follower" }),
-    ).getAllByRole("button")[0]!;
+    const summon = document.querySelector<HTMLButtonElement>(
+      ".map .follower-eligible",
+    )!;
     await user.click(summon);
     expect(
-      screen.getByRole("region", { name: "Final turn summary" }).textContent,
+      screen.getByRole("status", { name: "Turn preview" }).textContent,
     ).toContain("Summon 1");
     expect(
-      screen
-        .getAllByRole("status")
-        .some((status) => status.textContent?.includes("not committed")),
-    ).toBe(true);
+      screen.getByRole("button", { name: "End Turn" }).hasAttribute("disabled"),
+    ).toBe(false);
     expect(JSON.stringify(session)).toBe(before);
     await user.click(screen.getByRole("button", { name: "End Turn" }));
     const court = screen
@@ -272,8 +264,8 @@ describe("hotseat game UI", () => {
       }),
     );
     expect(
-      screen.getByRole("region", { name: "Final turn summary" }).textContent,
-    ).toContain("Summon zero");
+      screen.getByRole("status", { name: "Turn preview" }).textContent,
+    ).toContain("No followers available to summon");
     await user.click(screen.getByRole("button", { name: "End Turn" }));
     expect(screen.getByText(/TURN 2/)).toBeDefined();
   });

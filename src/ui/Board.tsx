@@ -65,18 +65,20 @@ export function Board({
           <span className="eyebrow">A kingdom divided</span>
           <h2>Britain</h2>
         </div>
-        <span className="map-key">Lines show the 13 borders</span>
+        {!instruction && (
+          <span className="map-key">Lines show the 13 borders</span>
+        )}
+        {instruction && (
+          <p className="board-instruction" role="status">
+            {instruction}.
+            {followerChoices.length
+              ? " Click the highlighted followers."
+              : choices.length
+                ? " Click the highlighted regions."
+                : ""}
+          </p>
+        )}
       </div>
-      {instruction && (
-        <p className="board-instruction" role="status">
-          {instruction}.
-          {followerChoices.length
-            ? " Click the highlighted followers."
-            : choices.length
-              ? " Click the highlighted regions."
-              : ""}
-        </p>
-      )}
       <div className="map">
         <svg
           className="borders"

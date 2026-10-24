@@ -17,7 +17,6 @@ import {
   EffectChoicePanel,
   FinishedPanel,
   HandPanel,
-  PlanSummary,
   PlotPanel,
   SummonPanel,
 } from "./TurnPanels";
@@ -85,17 +84,40 @@ export function Game({
       (next ?? fallback)?.focus({ preventScroll: true });
       return;
     }
+    if (step === "choose-summon") {
+      const follower = mainRef.current?.querySelector<HTMLElement>(
+        ".map .follower-eligible",
+      );
+      const zero = plannerRef.current?.querySelector<HTMLElement>(
+        ".summon-choices button",
+      );
+      (follower ?? zero)?.focus({ preventScroll: true });
+      return;
+    }
+    if (step === "choose-effect") {
+      const listedChoice = plannerRef.current?.querySelector<HTMLElement>(
+        ".effect-alternatives[open] .choices button",
+      );
+      const boardChoice =
+        mainRef.current?.querySelector<HTMLElement>(BOARD_CHOICES);
+      (listedChoice ?? boardChoice)?.focus({
+        preventScroll: true,
+      });
+      return;
+    }
     const selector =
       phase === "plot-choice"
         ? ".plot-choice-button"
-        : step === "choose-effect"
-          ? ".choices button"
-          : step === "choose-summon"
-            ? ".summon-choices button"
-            : step === "ready"
-              ? ".plan-summary"
-              : ".action-card:not(:disabled), .pass-button";
-    plannerRef.current?.querySelector<HTMLElement>(selector)?.focus();
+        : step === "ready"
+          ? ".turn-primary"
+          : ".action-card:not(:disabled), .turn-primary";
+    const target = plannerRef.current?.querySelector<HTMLElement>(selector);
+    const firstCard = plannerRef.current?.querySelector<HTMLElement>(
+      ".action-card:not(:disabled)",
+    );
+    (step === "choose-turn" ? (firstCard ?? target) : target)?.focus({
+      preventScroll: true,
+    });
   }, [visible, step, decisionKey, phase]);
 
   // Sidebar controls return keyboard focus to the planner flow.
@@ -120,38 +142,49 @@ export function Game({
         : "Preview · No followers remain; confirm zero summon in the turn panel"
       : (decision?.label ?? null);
   return (
-    <main className="game-layout" ref={mainRef}>
-      <section className="game-heading">
-        <div>
-          <span className="eyebrow">
-            {title(turn.mode)} kingdom
-            {table.seed !== null && ` · seed ${table.seed}`}
-          </span>
-          <h1>
-            {phase === "finished"
-              ? "The kingdom has spoken"
-              : phase === "plot-choice"
-                ? "One final allegiance"
-                : `${targetPlayer}’s turn`}
-          </h1>
-          {gameId && (
-            <button
-              className="game-id quiet"
-              onClick={onOpenLog}
-              aria-label={`Open log for game ${gameId}`}
-            >
-              Game ID: <span>{gameId}</span>
-            </button>
-          )}
-        </div>
-        <div className="turn-indicator">
-          TURN {table.turn}
-          <span>
-            {table.passes}/{turn.playerCount} consecutive passes
-          </span>
-        </div>
-      </section>
-      <HowToPlay />
+    <main
+      className={`game-layout ${phase === "finished" ? "game-finished" : "game-playing"}`}
+      ref={mainRef}
+    >
+      <div className="game-overview">
+        <section className="game-heading">
+          <div>
+            <span className="eyebrow">
+              {title(turn.mode)} kingdom
+              {table.seed !== null && ` · seed ${table.seed}`}
+            </span>
+            <h1 title={phase === "turn" ? `${targetPlayer}’s turn` : undefined}>
+              {phase === "finished"
+                ? "The kingdom has spoken"
+                : phase === "plot-choice"
+                  ? "One final allegiance"
+                  : `${targetPlayer}’s turn`}
+            </h1>
+            {gameId && (
+              <button
+                className="game-id quiet"
+                onClick={onOpenLog}
+                aria-label={`Open log for game ${gameId}`}
+                title={gameId}
+              >
+                Game log · <span>{gameId.slice(5, 13)}</span>
+              </button>
+            )}
+          </div>
+          <div className="turn-indicator">
+            TURN {table.turn}
+            <span>
+              {table.passes}/{turn.playerCount} consecutive passes
+            </span>
+          </div>
+          <HowToPlay />
+        </section>
+        <CourtsPanel
+          table={table}
+          activePlayer={targetPlayer}
+          lastMoves={turn.lastMoves}
+        />
+      </div>
       {turn.result && <Result result={turn.result} />}
       {phase === "finished" && turn.result && (
         <GameLogPanel entries={turn.log} />
@@ -164,7 +197,7 @@ export function Game({
         selectedRegions={turn.selectedRegions}
       />
       <div className="table-layout">
-        <div>
+        <div className="board-column">
           <Board
             table={table}
             choices={turn.regionOptions}
@@ -175,11 +208,6 @@ export function Game({
             instruction={boardInstruction}
           />
           <SupplyPanel table={table} />
-          <CourtsPanel
-            table={table}
-            activePlayer={targetPlayer}
-            lastMoves={turn.lastMoves}
-          />
         </div>
         <aside
           ref={plannerRef}
@@ -223,11 +251,10 @@ export function Game({
           )}
           {turn.planning && (
             <>
+              <CommitBar turn={turn} actions={actions} />
               <HandPanel turn={turn} actions={actions} />
               <EffectChoicePanel turn={turn} actions={actions} />
               <SummonPanel turn={turn} actions={actions} />
-              <PlanSummary turn={turn} />
-              <CommitBar turn={turn} actions={actions} />
             </>
           )}
           {phase === "finished" && <FinishedPanel />}

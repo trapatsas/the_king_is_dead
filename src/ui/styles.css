@@ -53,10 +53,6 @@ select:focus-visible {
   outline: 3px solid var(--focus);
   outline-offset: 3px;
 }
-.plan-summary:focus-visible {
-  outline: 3px solid var(--focus);
-  outline-offset: 3px;
-}
 .primary {
   background: var(--primary-bg);
   border-color: var(--primary-bg);
@@ -686,10 +682,6 @@ details p {
   border: 2px solid var(--selected-line);
   box-shadow: 0 0 0 2px var(--selected-ring);
 }
-.pass-button {
-  width: 100%;
-  margin: 1rem 0 0.2rem;
-}
 .choice-panel {
   border-top: 1px solid var(--line);
   padding-top: 1rem;
@@ -730,27 +722,6 @@ details p {
   background: currentColor;
   margin-right: 0.3rem;
 }
-.plan-summary {
-  padding: 1rem;
-  background: var(--summary);
-  border: 1px solid var(--summary-line);
-  border-radius: 4px;
-  margin: 1rem 0;
-}
-.plan-summary h3 {
-  margin: 0.5rem 0;
-}
-.plan-summary p {
-  font-size: 0.76rem;
-  margin-bottom: 0.5rem;
-}
-.preview-badge {
-  font-size: 0.67rem;
-  color: var(--preview-text);
-  background: var(--preview-bg);
-  border: 1px dashed var(--preview-line);
-  padding: 0.6rem;
-}
 .commit-bar {
   display: flex;
   gap: 0.5rem;
@@ -759,12 +730,6 @@ details p {
 .commit-bar button {
   flex: 1;
   font-size: 0.8rem;
-}
-.committed-info {
-  margin-top: 1rem;
-}
-.committed-info p {
-  font-size: 0.7rem;
 }
 .struggle-notice {
   font-size: 0.8rem;
@@ -1309,4 +1274,565 @@ details p {
 .seat-agent {
   grid-column: 1 / -1;
   margin: 0.4rem 0 0.7rem;
+}
+
+/* Compact play surface: keep the kingdom, courts and primary action together. */
+.app-header-playing {
+  height: 48px;
+  padding-inline: max(20px, calc((100% - 1200px) / 2));
+}
+.save-status {
+  flex: 0 0 76px;
+  font-size: 0.65rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.app-footer-playing {
+  display: none;
+}
+.game-overview {
+  display: grid;
+  grid-template-columns: minmax(190px, 0.75fr) minmax(0, 3fr);
+  gap: 16px;
+  align-items: center;
+}
+.game-heading {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 6px;
+  margin: 0;
+}
+.game-heading > div:first-child {
+  grid-column: 1 / -1;
+  min-width: 0;
+}
+.game-heading h1 {
+  font-size: 1.6rem;
+  margin: 4px 0;
+}
+.game-heading .eyebrow {
+  font-size: 0.55rem;
+}
+.turn-indicator {
+  text-align: left;
+  font-size: 0.65rem;
+  letter-spacing: 0.03em;
+}
+.turn-indicator span {
+  font-size: 0.57rem;
+  margin-top: 0;
+}
+.game-heading .how-to {
+  margin: 0;
+  position: relative;
+}
+.how-to summary {
+  font-size: 0.66rem;
+  white-space: nowrap;
+}
+.help-content,
+.court-expanded,
+.struggle-history-content {
+  position: absolute;
+  z-index: 12;
+  width: min(420px, 88vw);
+  max-height: 65dvh;
+  overflow: auto;
+  padding: 14px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  box-shadow: 0 8px 24px #182a2a22;
+}
+.help-content {
+  top: calc(100% + 8px);
+  left: 0;
+}
+.court-expanded {
+  top: calc(100% + 6px);
+  right: 0;
+}
+.courts {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.courts:has(> :nth-child(2):last-child) {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.court {
+  position: relative;
+  padding: 8px 10px;
+  min-width: 0;
+}
+.court-heading {
+  padding-right: 68px;
+}
+.court h3 {
+  margin: 0;
+  font-size: 0.8rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.court-heading > span {
+  font-size: 0.59rem;
+  white-space: nowrap;
+}
+.court-overview {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 5px;
+  margin-top: 5px;
+}
+.court-controller {
+  font-size: 0.58rem;
+  margin: 0;
+}
+.court .last-move {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  border: 0;
+  margin: 5px 0 0;
+  padding: 0;
+  min-width: 0;
+}
+.court .last-move p {
+  margin: 0;
+  font-size: 0.56rem;
+  white-space: nowrap;
+}
+.court .last-move > strong {
+  font-size: 0.62rem;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.court .last-move details {
+  margin: 0 0 0 auto;
+  flex-shrink: 0;
+}
+.court details summary {
+  font-size: 0.56rem;
+}
+.court-details {
+  position: static;
+}
+.court-details > summary {
+  position: absolute;
+  right: 8px;
+  top: 9px;
+}
+.court-expanded p,
+.court .last-move .court-expanded p {
+  margin: 0 0 6px;
+  white-space: normal;
+  font-size: 0.76rem;
+}
+.turn-controls {
+  margin-bottom: 6px;
+}
+.commit-bar {
+  margin: 0;
+  gap: 8px;
+}
+.commit-bar button {
+  min-height: 40px;
+}
+.commit-bar .turn-primary {
+  flex: 1;
+}
+.commit-bar button:last-child {
+  flex: 0 0 auto;
+}
+.turn-status {
+  min-height: 20px;
+  margin: 6px 0 0;
+  font-size: 0.69rem;
+  line-height: 1.4;
+  color: var(--muted);
+}
+.turn-status.turn-ready {
+  color: var(--ink);
+}
+.turn-panel .section-title {
+  margin-bottom: 8px;
+}
+.turn-panel .section-title h2 {
+  font-size: 1.2rem;
+}
+.turn-panel .section-title > span {
+  font-size: 0.6rem;
+}
+.hand {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+.action-card {
+  position: relative;
+  min-height: 42px;
+  padding: 6px 8px;
+  justify-content: center;
+}
+.action-card > span {
+  font-size: 0.81rem;
+  line-height: 1.2;
+}
+.action-card small {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+.action-tooltip {
+  position: fixed;
+  z-index: 50;
+  width: min(280px, calc(100vw - 24px));
+  padding: 12px 14px;
+  border: 1px solid var(--hover-line);
+  border-radius: 8px;
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: 0 8px 24px #0003;
+  text-align: left;
+}
+.action-tooltip strong {
+  font:
+    1rem Georgia,
+    serif;
+}
+.action-tooltip p {
+  margin: 6px 0 0;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: var(--muted);
+}
+.selected-card-rule {
+  margin: 5px 0 8px;
+  font-size: 0.7rem;
+  color: var(--muted);
+  line-height: 1.4;
+}
+.choice-panel {
+  padding-top: 6px;
+  margin-top: 6px;
+}
+.choice-panel .eyebrow {
+  margin-bottom: 4px;
+}
+.choice-panel h3 {
+  font-size: 0.85rem;
+  margin-bottom: 8px;
+}
+.choices {
+  gap: 5px;
+  margin-bottom: 5px;
+}
+.choices button {
+  padding: 5px 8px;
+  font-size: 0.7rem;
+  min-height: 30px;
+}
+.summon-alternatives > summary,
+.effect-summary > summary {
+  font-size: 0.68rem;
+}
+.summon-choices {
+  margin-top: 6px;
+  max-height: 180px;
+}
+.struggle-notice {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 5px 10px;
+  margin: 0;
+}
+.struggle-notice p {
+  margin: 0;
+  font-size: 0.67rem;
+}
+.struggle-notice summary {
+  font-size: 0.63rem;
+  white-space: nowrap;
+}
+.struggle-history-content {
+  right: 0;
+  top: 100%;
+}
+.struggle-history-content ol {
+  margin: 0;
+  padding-left: 16px;
+}
+
+.card-help {
+  position: relative;
+  margin-bottom: 8px;
+}
+.card-help > summary {
+  font-size: 0.7rem;
+}
+.card-help .selected-card-rule {
+  padding: 10px;
+  border: 1px solid var(--line);
+  background: var(--paper);
+  border-radius: 4px;
+}
+.effect-alternatives > summary {
+  font-size: 0.68rem;
+}
+.effect-alternatives .choices {
+  margin-top: 8px;
+}
+.effect-tools {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+.effect-alternatives {
+  min-width: 0;
+  flex: 1;
+}
+.effect-tools > .quiet {
+  flex-shrink: 0;
+  align-self: flex-start;
+  padding: 0;
+  font-size: 0.65rem;
+}
+.choice-panel .picked-targets {
+  font-size: 0.65rem;
+  margin: 0 0 6px;
+}
+.map-panel > .section-title {
+  flex-wrap: wrap;
+}
+@media (min-width: 1000px) {
+  .game-playing {
+    width: 100%;
+    max-width: 1240px;
+    margin-inline: auto;
+    height: min(calc(100dvh - 48px), 900px);
+    min-height: 550px;
+    padding: 10px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .game-playing > :not(.table-layout) {
+    flex-shrink: 0;
+  }
+  .game-playing .track-panel {
+    margin: 0;
+  }
+  .game-playing .track-panel .section-title {
+    margin-bottom: 5px;
+  }
+  .game-playing .track-panel h2 {
+    font-size: 1rem;
+  }
+  .game-playing .track-card {
+    min-height: 59px;
+    padding: 5px 9px;
+    position: relative;
+  }
+  .game-playing .track-card strong {
+    margin: 1px 0;
+    font-size: 0.77rem;
+  }
+  .game-playing .track-card small {
+    font-size: 0.55rem;
+  }
+  .game-playing .slot-number {
+    font-size: 0.56rem;
+  }
+  .game-playing .table-layout {
+    flex: 1;
+    min-height: 0;
+    grid-template-columns: minmax(0, 1fr) 350px;
+    gap: 12px;
+  }
+  .board-column {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+  .game-playing .map-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 270px;
+  }
+  .game-playing .game-heading h1 {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .game-playing .map-panel .section-title {
+    padding: 7px 12px 0;
+    flex-wrap: nowrap;
+    gap: 12px;
+  }
+  .game-playing .map-panel .eyebrow {
+    display: none;
+  }
+  .game-playing .map-panel h2 {
+    font-size: 1.3rem;
+    margin: 0;
+  }
+  .game-playing .map {
+    align-self: center;
+    width: calc(100% - 36px);
+    max-width: 700px;
+    flex: 1;
+    min-height: 210px;
+    height: auto;
+    margin: 8px 18px 12px;
+  }
+  .game-playing .map-caption {
+    padding: 5px 12px;
+    font-size: 0.62rem;
+  }
+  .game-playing .board-instruction {
+    flex: 1;
+    margin: 0;
+    padding: 4px 8px;
+    font-size: 0.66rem;
+  }
+  .game-playing .region {
+    flex-direction: row;
+    gap: 6px;
+    min-width: 0;
+    padding: 4px 5px;
+  }
+  .game-playing .region-target {
+    margin: 0;
+  }
+  .game-playing .region strong {
+    font-size: 0.78rem;
+    white-space: nowrap;
+  }
+  .game-playing .card-help .selected-card-rule {
+    position: absolute;
+    z-index: 3;
+    width: 100%;
+    box-shadow: 0 4px 12px #182a2a22;
+  }
+  .game-playing .picked-targets {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .game-playing .supply-panel {
+    flex: 0 0 auto;
+    padding: 8px 2px 0;
+    margin: 0;
+  }
+  .game-playing .supply-panel h3 {
+    font-size: 0.58rem;
+    margin: 0 0 3px;
+  }
+  .game-playing .instability span {
+    width: 22px;
+    height: 22px;
+    font-size: 0.72rem;
+  }
+  .game-playing .turn-panel {
+    align-self: start;
+    max-height: 100%;
+    overflow: auto;
+    padding: 10px;
+    scrollbar-gutter: stable;
+  }
+  .game-finished {
+    padding-top: 12px;
+  }
+}
+@media (max-width: 999px) {
+  .game-overview {
+    grid-template-columns: 1fr;
+    margin-bottom: 14px;
+  }
+  .game-heading {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: 12px;
+  }
+  .game-heading > div:first-child {
+    grid-column: auto;
+  }
+  .hand {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .action-card {
+    min-height: 48px;
+  }
+  .table-layout {
+    gap: 12px;
+  }
+}
+@media (max-width: 600px) {
+  .app-header-playing {
+    min-height: 48px;
+    height: auto;
+    padding-inline: 12px;
+  }
+  .game-heading {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .game-heading .how-to {
+    grid-column: 1 / -1;
+  }
+  .game-heading h1 {
+    font-size: 1.6rem;
+  }
+  .courts,
+  .courts:has(> :nth-child(2):last-child) {
+    grid-template-columns: 1fr;
+  }
+  .court-overview {
+    justify-content: flex-start;
+    gap: 12px;
+  }
+  .court-details {
+    margin-left: auto;
+  }
+  .hand {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .help-content {
+    max-width: calc(100vw - 40px);
+  }
+}
+
+@media (min-width: 1200px) {
+  .game-playing .table-layout {
+    grid-template-columns: minmax(0, 1fr) 380px;
+  }
+  .game-playing .hand {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .game-playing .action-card {
+    padding-inline: 6px;
+  }
+  .game-playing .action-card > span {
+    font-size: 0.74rem;
+  }
+}
+
+/* Taller windows have room for the more balanced, stacked region labels. */
+@media (min-width: 1000px) and (min-height: 780px) {
+  .game-playing .region {
+    flex-direction: column;
+    gap: 3px;
+    min-width: 110px;
+    padding: 6px 8px;
+  }
+  .game-playing .region strong {
+    font-size: 0.85rem;
+  }
 }
