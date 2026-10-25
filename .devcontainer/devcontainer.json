@@ -21,7 +21,9 @@
         "editor.fontFamily": "Hack, Source Code Pro, Consolas, monospace", // https://github.com/source-foundry/Hack, https://github.com/adobe-fonts/source-code-pro
         "editor.fontSize": 16,
         "editor.minimap.enabled": false,
-        "editor.rulers": [120],
+        "editor.rulers": [
+          120
+        ],
         "editor.wordWrap": "on",
         "editor.quickSuggestions": {
           "strings": true
@@ -55,11 +57,13 @@
     }
   },
   // Ports to forward from the container to the host machine
-  "forwardPorts": [5173],
+  "appPort": [
+    "5173:5173"
+  ],
   "portsAttributes": {
     "5173": {
       "label": "Vite board-game app",
-      "onAutoForward": "openBrowserOnce",
+      "onAutoForward": "ignore",
       "requireLocalPort": true
     }
   },
